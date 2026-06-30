@@ -17,10 +17,10 @@
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="sidebar__brand">
-        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+        <a href="dashboard.html"><img src="assets/logo.png" onerror="this.onerror=null;this.src='assets/logo.svg'" alt="Dial360 — go to Overview" /></a>
       </div>
       <nav class="sidebar__nav" aria-label="Primary">
-        <a class="nav-item" data-nav="overview" href="index.html">
+        <a class="nav-item" data-nav="overview" href="dashboard.html">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
           <span class="nav-item__label">Overview</span>
         </a>
@@ -66,6 +66,10 @@
       </div>
       <div class="topbar__spacer"></div>
       <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="btn btn--primary launch-hub" data-open-modal="hub-modal" title="Launch the live agent calling workstation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.79-.78.78-2.06-.04-2.83a1.98 1.98 0 0 0-2.92-.17z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        Launch Hub
+      </button>
       <button class="icon-btn" aria-label="Notifications" title="Notifications">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="dot">3</span>
@@ -83,7 +87,7 @@
           <a href="settings.html" role="menuitem">Account settings</a>
           <a href="billing.html" role="menuitem">Billing &amp; plan</a>
           <hr />
-          <a href="login.html" role="menuitem">Sign out</a>
+          <a href="index.html" role="menuitem">Sign out</a>
         </div>
       </div>
     </header>
@@ -430,6 +434,23 @@
 
     </main>
   </div>
+      <!-- Launch Hub modal (visual): the live agent workstation opens as a separate app -->
+    <div class="modal-overlay" id="hub-modal">
+      <div class="modal">
+        <div class="modal__head">
+          <h3>Launch Dial360 Hub</h3>
+          <button class="icon-btn" data-close-modal aria-label="Close">✕</button>
+        </div>
+        <div class="modal__body">
+          <p>The <strong>Hub</strong> is the live agent workstation — where calls, live chats and emails are handled in real time.</p>
+          <p class="muted">It runs as a separate application and isn’t part of this prototype. This is where an agent would launch it.</p>
+        </div>
+        <div class="modal__foot">
+          <button class="btn" data-close-modal>Close</button>
+          <a class="btn btn--primary" href="#" onclick="return false;">Open Hub ↗</a>
+        </div>
+      </div>
+    </div>
   <script src="js/app.js"></script>
 </body>
 </html>

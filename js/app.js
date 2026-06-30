@@ -25,7 +25,7 @@
     if (!form) return;
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      window.location.href = "index.html";
+      window.location.href = "dashboard.html";
     });
   }
 
