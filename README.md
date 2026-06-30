@@ -20,12 +20,21 @@ Every page is independently deep-linkable.
 - Only optional external resource: the Inter web font from Google Fonts.
 - Single shared stylesheet (`css/styles.css`) and one shared script (`js/app.js`) drive every page.
 
+## Flow
+
+`index.html` (marketing homepage) → **Login / Get started** → `sso.html` (mocked SSO) →
+`dashboard.html` (admin console). `login.html` offers an email/password alternative that
+also lands on the dashboard. The dashboard top bar carries a **Launch Hub** button — where an
+agent would open the live calling workstation (a separate app, deliberately not mocked).
+
 ## Pages / routes
 
 | File | Screen |
 |---|---|
-| `index.html` | Overview (landing after login) |
-| `login.html` | Facade login — "Sign in" always lands on Overview |
+| `index.html` | Spoofed dial360.ai marketing homepage (Login + Get started) |
+| `sso.html` | Mocked single sign-on (email → identity provider → dashboard) |
+| `login.html` | Facade email/password login — also lands on the dashboard |
+| `dashboard.html` | Admin Overview (landing after sign-in) |
 | `interactions.html` | Unified interaction log (call / email / chat) |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
@@ -40,16 +49,20 @@ Every page is independently deep-linkable.
 
 ```
 /
-├── *.html                 → one file per primary route (11 pages)
-├── assets/                → logo.svg, favicon.svg
+├── index.html             → marketing homepage   ├── dashboard.html  → admin Overview
+├── sso.html · login.html  → sign-in              ├── *.html           → other admin routes
+├── assets/                → logo.png (real Dial360 wordmark), logo.svg fallback, favicon.svg
 ├── css/styles.css         → single shared stylesheet (brand tokens + components)
 └── js/app.js              → nav active-state, login redirect, tabs, modals, drawers, row links
 ```
 
+The real Dial360 wordmark is self-hosted at `assets/logo.png` (referenced with an `onerror`
+fallback to `assets/logo.svg`).
+
 ## What `js/app.js` does (visual only)
 
 - Sets the active sidebar item from `<body data-page="…">`.
-- Redirects the login form to `index.html` on submit (the only required JS interaction there).
+- Redirects the login form to `dashboard.html` on submit; `sso.html` runs its own small step flow.
 - Toggles the account menu, tabbed panels, modals, drawers, and clickable table rows
   (`tr[data-href]` / `[data-open-modal]` / `[data-open-drawer]`).
 
