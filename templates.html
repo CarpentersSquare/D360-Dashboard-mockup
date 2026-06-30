@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Templates · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — AI-suggested response template library (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="templates">
+  <div class="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+      </div>
+      <nav class="sidebar__nav" aria-label="Primary">
+        <a class="nav-item" data-nav="overview" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-item__label">Overview</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
+        </a>
+        <a class="nav-item" data-nav="qa" href="qa.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="analytics" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+          <span class="nav-item__label">Analytics</span>
+        </a>
+        <a class="nav-item" data-nav="agents" href="agents.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-item__label">Agents</span>
+        </a>
+        <a class="nav-item" data-nav="templates" href="templates.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          <span class="nav-item__label">Templates</span>
+        </a>
+        <a class="nav-item" data-nav="billing" href="billing.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-item__label">Billing</span>
+        </a>
+        <a class="nav-item" data-nav="settings" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-item__label">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        Dial360 Console<br />Prototype build · v0.1
+      </div>
+    </aside>
+
+    <!-- ===== Top bar ===== -->
+    <header class="topbar">
+      <div class="topbar__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="icon-btn" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot">3</span>
+      </button>
+      <div class="account">
+        <button class="account__btn" aria-haspopup="true">
+          <span class="avatar">RA</span>
+          <span>
+            <span class="account__name">Rob Ashton</span><br />
+            <span class="account__role">Admin</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="account__menu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="billing.html" role="menuitem">Billing &amp; plan</a>
+          <hr />
+          <a href="login.html" role="menuitem">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <h1>Templates</h1>
+          <div class="sub">Response templates the AI suggests to agents during interactions</div>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--primary" data-open-modal="template-modal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New template
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter bar (decorative) -->
+      <form class="filterbar" onsubmit="return false">
+        <div class="field" style="flex:1;min-width:200px;">
+          <label for="tpl-search">Search</label>
+          <input type="text" id="tpl-search" placeholder="Search templates…" />
+        </div>
+        <div class="field">
+          <label for="tpl-channel">Channel</label>
+          <select id="tpl-channel">
+            <option>All</option>
+            <option>Email</option>
+            <option>Chat</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tpl-category">Category</label>
+          <select id="tpl-category">
+            <option>All</option>
+            <option>Billing</option>
+            <option>Onboarding</option>
+            <option>Support</option>
+            <option>Complaints</option>
+            <option>Sales</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div class="row" style="gap:8px;">
+            <button type="submit" class="btn btn--primary btn--sm">Apply</button>
+            <button type="reset" class="btn btn--ghost btn--sm">Clear</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- ===== Billing ===== -->
+      <h2 class="section-title">Billing</h2>
+      <div class="grid grid--3 mb-24">
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Refund confirmation</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Billing</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, I've processed your refund of {{amount}} to the card ending {{card_last4}}. It should appear within 3–5 working days…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 18 Jun · Used 412 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Invoice copy</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Billing</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, please find attached a copy of invoice {{invoice_no}} dated {{invoice_date}} for {{amount}}. Let me know if anything looks off…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 24 Jun · Used 286 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Subscription renewal</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Billing</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, your {{plan_name}} subscription renews on {{renewal_date}} at {{amount}}. No action is needed to continue…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 27 Jun · Used 198 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== Onboarding ===== -->
+      <h2 class="section-title">Onboarding</h2>
+      <div class="grid grid--3 mb-24">
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Welcome / onboarding</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Onboarding</span>
+            </div>
+            <p class="muted" style="margin:0;">Welcome aboard, {{first_name}}! Your {{plan_name}} account is live. Here's a quick checklist to get you set up in the next five minutes…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 29 Jun · Used 174 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>First-login walkthrough</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Onboarding</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, ready to make your first call? Sign in at {{portal_url}} and we'll guide you through importing your contacts…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 21 Jun · Used 93 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== Support ===== -->
+      <h2 class="section-title">Support</h2>
+      <div class="grid grid--3 mb-24">
+
+        <div class="card">
+          <div class="card__head">
+            <h3>DPA verification</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Chat</span><span class="tag">Support</span>
+            </div>
+            <p class="muted" style="margin:0;">Before I can discuss the account, I just need to confirm a few details — could you tell me your full name, postcode and the first line of your address?</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 30 Jun · Used 538 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Callback booked</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Chat</span><span class="tag">Support</span>
+            </div>
+            <p class="muted" style="margin:0;">All booked, {{first_name}} — one of our team will call you on {{phone}} at {{callback_time}}. You'll get a text reminder beforehand…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 28 Jun · Used 321 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Out of hours</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Chat</span><span class="tag">Support</span>
+            </div>
+            <p class="muted" style="margin:0;">Thanks for getting in touch, {{first_name}}. Our team is offline right now — we're open {{opening_hours}}. Leave a message and we'll reply first thing…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 19 Jun · Used 247 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Appointment reminder</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Chat</span><span class="tag">Support</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, just a reminder about your appointment on {{appt_date}} at {{appt_time}}. Reply RESCHEDULE if the time no longer suits…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 26 Jun · Used 162 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Thanks / CSAT request</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Chat</span><span class="tag">Support</span>
+            </div>
+            <p class="muted" style="margin:0;">Glad I could help today, {{first_name}}! Before you go, would you mind rating this chat from 1 to 5? It only takes a second and really helps us…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 30 Jun · Used 489 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== Complaints ===== -->
+      <h2 class="section-title">Complaints</h2>
+      <div class="grid grid--2 mb-24">
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Complaint acknowledgement</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Complaints</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, I'm sorry to hear about your experience with {{issue_summary}}. I've logged this as complaint {{case_ref}} and will personally look into it…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 25 Jun · Used 137 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Escalation handover</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Complaints</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, I've escalated case {{case_ref}} to our team lead {{manager_name}}, who'll be in touch within {{sla_hours}} hours with an update…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 23 Jun · Used 64 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== Sales ===== -->
+      <h2 class="section-title">Sales</h2>
+      <div class="grid grid--2 mb-24">
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Upgrade offer</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Sales</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, based on your usage you'd save {{saving_amount}} a month on our {{plan_name}} plan. Want me to apply the upgrade and back-date it to today?</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 27 Jun · Used 211 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Quote follow-up</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Email</span><span class="tag">Sales</span>
+            </div>
+            <p class="muted" style="margin:0;">Hi {{first_name}}, just following up on the quote of {{amount}} I sent on {{quote_date}}. It's valid until {{expiry_date}} — happy to walk you through it…</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 22 Jun · Used 118 times</span>
+            <button class="btn btn--ghost btn--sm">Edit</button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== New template modal ===== -->
+  <div class="modal-overlay" id="template-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="template-modal-title">
+      <div class="modal__head">
+        <h3 id="template-modal-title">New template</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <form class="modal__body" onsubmit="return false">
+        <div class="form-row">
+          <label for="tpl-title">Title</label>
+          <input type="text" id="tpl-title" placeholder="e.g. Refund confirmation" />
+        </div>
+        <div class="form-row">
+          <label for="tpl-form-channel">Channel</label>
+          <select id="tpl-form-channel">
+            <option>Email</option>
+            <option>Chat</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="tpl-form-category">Category</label>
+          <select id="tpl-form-category">
+            <option>Billing</option>
+            <option>Onboarding</option>
+            <option>Support</option>
+            <option>Complaints</option>
+            <option>Sales</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="tpl-body">Body</label>
+          <textarea id="tpl-body" rows="4" placeholder="Hi {{first_name}}, … use {{merge_fields}} such as {{amount}}, {{case_ref}} or {{plan_name}}."></textarea>
+        </div>
+      </form>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" data-close-modal>Cancel</button>
+        <button class="btn btn--primary">Save template</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

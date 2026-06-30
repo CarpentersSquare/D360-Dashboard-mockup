@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — reporting across volume, channels, QA and agent performance (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="analytics">
+  <div class="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+      </div>
+      <nav class="sidebar__nav" aria-label="Primary">
+        <a class="nav-item" data-nav="overview" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-item__label">Overview</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
+        </a>
+        <a class="nav-item" data-nav="qa" href="qa.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="analytics" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+          <span class="nav-item__label">Analytics</span>
+        </a>
+        <a class="nav-item" data-nav="agents" href="agents.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-item__label">Agents</span>
+        </a>
+        <a class="nav-item" data-nav="templates" href="templates.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          <span class="nav-item__label">Templates</span>
+        </a>
+        <a class="nav-item" data-nav="billing" href="billing.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-item__label">Billing</span>
+        </a>
+        <a class="nav-item" data-nav="settings" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-item__label">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        Dial360 Console<br />Prototype build · v0.1
+      </div>
+    </aside>
+
+    <!-- ===== Top bar ===== -->
+    <header class="topbar">
+      <div class="topbar__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="icon-btn" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot">3</span>
+      </button>
+      <div class="account">
+        <button class="account__btn" aria-haspopup="true">
+          <span class="avatar">RA</span>
+          <span>
+            <span class="account__name">Rob Ashton</span><br />
+            <span class="account__role">Admin</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="account__menu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="billing.html" role="menuitem">Billing &amp; plan</a>
+          <hr />
+          <a href="login.html" role="menuitem">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <h1>Analytics</h1>
+          <div class="sub">Reporting across volume, channels, QA and agent performance</div>
+        </div>
+        <div class="page-head__actions">
+          <div class="field">
+            <label for="date-range">Date range</label>
+            <select id="date-range" aria-label="Date range">
+              <option>Last 7 days</option>
+              <option selected>Last 30 days</option>
+              <option>This quarter</option>
+            </select>
+          </div>
+          <a class="btn btn--ghost" href="#" style="align-self:flex-end;">Schedule report</a>
+          <a class="btn btn--primary" href="#" style="align-self:flex-end;">Export</a>
+        </div>
+      </div>
+
+      <!-- 1. Interaction volume over time (full width) -->
+      <div class="card mb-18">
+        <div class="card__head">
+          <h3>Interaction volume over time</h3>
+          <span class="tag">Daily total · last 30 days</span>
+        </div>
+        <div class="card__body">
+          <svg viewBox="0 0 940 280" class="chart-svg" role="img" aria-label="Interaction volume over the last 30 days, rising from about 250 per day to 342 per day with normal day-to-day variation.">
+            <defs>
+              <linearGradient id="volArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#7976F3" stop-opacity="0.28"/>
+                <stop offset="1" stop-color="#7976F3" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- gridlines -->
+            <g stroke="#EBEBEB" stroke-width="1">
+              <line x1="44" y1="30" x2="916" y2="30"/>
+              <line x1="44" y1="90" x2="916" y2="90"/>
+              <line x1="44" y1="150" x2="916" y2="150"/>
+              <line x1="44" y1="210" x2="916" y2="210"/>
+            </g>
+            <!-- y axis labels -->
+            <g fill="#90A4AE" font-size="10" text-anchor="end">
+              <text x="38" y="34">400</text>
+              <text x="38" y="94">300</text>
+              <text x="38" y="154">200</text>
+              <text x="38" y="214">100</text>
+            </g>
+            <!-- area fill (30 points across x=44..916, baseline y=210) -->
+            <path d="M44,168 L74,160 L104,172 L134,150 L164,178 L194,156 L224,164 L254,142 L284,150 L314,158 L344,132 L374,146 L404,124 L434,136 L464,118 L494,128 L524,110 L554,122 L584,104 L614,114 L644,98 L674,112 L704,92 L734,102 L764,86 L794,96 L824,80 L854,90 L884,74 L916,67 L916,210 L44,210 Z" fill="url(#volArea)"/>
+            <!-- line -->
+            <polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+              points="44,168 74,160 104,172 134,150 164,178 194,156 224,164 254,142 284,150 314,158 344,132 374,146 404,124 434,136 464,118 494,128 524,110 554,122 584,104 614,114 644,98 674,112 704,92 734,102 764,86 794,96 824,80 854,90 884,74 916,67"/>
+            <circle cx="916" cy="67" r="4" fill="#7976F3"/>
+            <!-- x axis labels -->
+            <g fill="#90A4AE" font-size="10" text-anchor="middle">
+              <text x="44" y="232">1 Jun</text>
+              <text x="284" y="232">8 Jun</text>
+              <text x="524" y="232">15 Jun</text>
+              <text x="734" y="232">22 Jun</text>
+              <text x="916" y="232">30 Jun</text>
+            </g>
+            <text x="916" y="56" text-anchor="end" font-size="11" font-weight="700" fill="#263238">342</text>
+          </svg>
+          <div class="legend" style="margin-top:14px;">
+            <span><i style="background:#7976F3"></i> Interactions per day</span>
+            <span class="muted">Peak 342 · avg 291 · +14.8% over the period</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid--2 mb-18">
+        <!-- 2. Channel mix donut -->
+        <div class="card">
+          <div class="card__head"><h3>Channel mix</h3></div>
+          <div class="card__body">
+            <div class="donut-wrap">
+              <svg width="160" height="160" viewBox="0 0 150 150" class="chart-svg" style="width:160px;flex:none;" role="img" aria-label="Channel mix donut chart: calls 58 percent, email 27 percent, live chat 15 percent.">
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
+                <!-- circumference = 2*pi*55 ≈ 345.6 -->
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="200.4 345.6" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="93.3 345.6" stroke-dashoffset="-200.4" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="51.8 345.6" stroke-dashoffset="-293.7" transform="rotate(-90 75 75)"/>
+                <text x="75" y="71" text-anchor="middle" font-size="22" font-weight="800" fill="#263238">8,742</text>
+                <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">interactions</text>
+              </svg>
+              <div class="legend" style="flex-direction:column;gap:10px;">
+                <span><i style="background:#7976F3"></i> Calls — 5,070 (58%)</span>
+                <span><i style="background:#A177DA"></i> Email — 2,360 (27%)</span>
+                <span><i style="background:#F481F1"></i> Live chat — 1,312 (15%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Avg wrap-up time vs baseline -->
+        <div class="card">
+          <div class="card__head">
+            <h3>Avg wrap-up time vs baseline</h3>
+            <span class="tag">After-call work</span>
+          </div>
+          <div class="card__body">
+            <svg viewBox="0 0 460 260" class="chart-svg" role="img" aria-label="Average wrap-up time against a 2.5 minute manual baseline. The dashed baseline sits at 150 seconds while the AI-assisted actual line hovers between 10 and 14 seconds, a saving of roughly 2.3 minutes per interaction.">
+              <defs>
+                <linearGradient id="wrapArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#7976F3" stop-opacity="0.22"/>
+                  <stop offset="1" stop-color="#7976F3" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- gridlines -->
+              <g stroke="#EBEBEB" stroke-width="1">
+                <line x1="44" y1="30" x2="440" y2="30"/>
+                <line x1="44" y1="78" x2="440" y2="78"/>
+                <line x1="44" y1="126" x2="440" y2="126"/>
+                <line x1="44" y1="174" x2="440" y2="174"/>
+                <line x1="44" y1="222" x2="440" y2="222"/>
+              </g>
+              <!-- y axis labels (seconds) -->
+              <g fill="#90A4AE" font-size="10" text-anchor="end">
+                <text x="38" y="34">200s</text>
+                <text x="38" y="82">150s</text>
+                <text x="38" y="130">100s</text>
+                <text x="38" y="178">50s</text>
+                <text x="38" y="226">0s</text>
+              </g>
+              <!-- baseline at 150s -> y=78, dashed -->
+              <line x1="44" y1="78" x2="440" y2="78" stroke="#C62828" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="440" y="72" text-anchor="end" font-size="10" font-weight="700" fill="#C62828">Manual baseline · 2.5 min</text>
+              <!-- actual line ~10-14s. 0s=y222, 50s=y174 => 1s = 0.96px. 12s ≈ y210 -->
+              <path d="M44,212 L93,210 L142,213 L191,209 L240,211 L289,208 L338,210 L391,207 L440,209 L440,222 L44,222 Z" fill="url(#wrapArea)"/>
+              <polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="44,212 93,210 142,213 191,209 240,211 289,208 338,210 391,207 440,209"/>
+              <circle cx="440" cy="209" r="4" fill="#7976F3"/>
+              <text x="44" y="205" font-size="10" font-weight="700" fill="#7976F3">AI-assisted actual · ~12s</text>
+              <!-- saving gap annotation -->
+              <line x1="240" y1="80" x2="240" y2="209" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3 3"/>
+              <text x="248" y="148" font-size="11" font-weight="700" fill="#2E7D32">Saving ≈ 2.3 min</text>
+              <text x="248" y="164" font-size="10" fill="#455A64">per interaction</text>
+              <!-- x axis labels -->
+              <g fill="#90A4AE" font-size="10" text-anchor="middle">
+                <text x="44" y="244">1 Jun</text>
+                <text x="240" y="244">15 Jun</text>
+                <text x="440" y="244">30 Jun</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid--2 mb-18">
+        <!-- 4. QA pass-rate trend -->
+        <div class="card">
+          <div class="card__head">
+            <h3>QA pass-rate trend</h3>
+            <span class="tag">Target 90%</span>
+          </div>
+          <div class="card__body">
+            <svg viewBox="0 0 460 260" class="chart-svg" role="img" aria-label="QA pass-rate trend rising from about 84 percent to about 89 percent over the period, just below the 90 percent target line.">
+              <defs>
+                <linearGradient id="qaArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#A177DA" stop-opacity="0.26"/>
+                  <stop offset="1" stop-color="#A177DA" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- gridlines for 80,85,90,95 -->
+              <g stroke="#EBEBEB" stroke-width="1">
+                <line x1="44" y1="40" x2="440" y2="40"/>
+                <line x1="44" y1="100" x2="440" y2="100"/>
+                <line x1="44" y1="160" x2="440" y2="160"/>
+                <line x1="44" y1="220" x2="440" y2="220"/>
+              </g>
+              <!-- y axis labels. y=40->95%, y=100->90%, y=160->85%, y=220->80% (1% = 12px) -->
+              <g fill="#90A4AE" font-size="10" text-anchor="end">
+                <text x="38" y="44">95%</text>
+                <text x="38" y="104">90%</text>
+                <text x="38" y="164">85%</text>
+                <text x="38" y="224">80%</text>
+              </g>
+              <!-- target line at 90% -> y=100 -->
+              <line x1="44" y1="100" x2="440" y2="100" stroke="#2E7D32" stroke-width="2" stroke-dasharray="6 5"/>
+              <text x="440" y="94" text-anchor="end" font-size="10" font-weight="700" fill="#2E7D32">Target · 90%</text>
+              <!-- pass rate 84% (y=208) up to 89% (y=112). 1% = 12px, base 80%=y220 -->
+              <path d="M44,208 L93,202 L142,196 L191,184 L240,178 L289,166 L338,154 L391,142 L440,112 L440,220 L44,220 Z" fill="url(#qaArea)"/>
+              <polyline fill="none" stroke="#A177DA" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="44,208 93,202 142,196 191,184 240,178 289,166 338,154 391,142 440,112"/>
+              <circle cx="440" cy="112" r="4" fill="#A177DA"/>
+              <text x="440" y="106" text-anchor="end" font-size="11" font-weight="700" fill="#263238">88.6%</text>
+              <!-- x axis labels -->
+              <g fill="#90A4AE" font-size="10" text-anchor="middle">
+                <text x="44" y="244">1 Jun</text>
+                <text x="240" y="244">15 Jun</text>
+                <text x="440" y="244">30 Jun</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 6. CSAT trend (illustrative) -->
+        <div class="card">
+          <div class="card__head">
+            <h3>CSAT trend</h3>
+            <span class="tag">Illustrative</span>
+          </div>
+          <div class="card__body">
+            <svg viewBox="0 0 460 260" class="chart-svg" role="img" aria-label="Customer satisfaction trend, illustrative, holding around 4.4 to 4.6 out of 5 across the period.">
+              <defs>
+                <linearGradient id="csatArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#F481F1" stop-opacity="0.24"/>
+                  <stop offset="1" stop-color="#F481F1" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <g stroke="#EBEBEB" stroke-width="1">
+                <line x1="44" y1="40" x2="440" y2="40"/>
+                <line x1="44" y1="100" x2="440" y2="100"/>
+                <line x1="44" y1="160" x2="440" y2="160"/>
+                <line x1="44" y1="220" x2="440" y2="220"/>
+              </g>
+              <!-- y labels: 5.0, 4.5, 4.0, 3.5 (0.5 = 60px) -->
+              <g fill="#90A4AE" font-size="10" text-anchor="end">
+                <text x="38" y="44">5.0</text>
+                <text x="38" y="104">4.5</text>
+                <text x="38" y="164">4.0</text>
+                <text x="38" y="224">3.5</text>
+              </g>
+              <!-- 4.4=y112, 4.6=y88 hovering -->
+              <path d="M44,112 L93,106 L142,114 L191,100 L240,108 L289,96 L338,104 L391,92 L440,98 L440,220 L44,220 Z" fill="url(#csatArea)"/>
+              <polyline fill="none" stroke="#F481F1" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="44,112 93,106 142,114 191,100 240,108 289,96 338,104 391,92 440,98"/>
+              <circle cx="440" cy="98" r="4" fill="#F481F1"/>
+              <text x="440" y="92" text-anchor="end" font-size="11" font-weight="700" fill="#263238">4.5 / 5</text>
+              <g fill="#90A4AE" font-size="10" text-anchor="middle">
+                <text x="44" y="244">1 Jun</text>
+                <text x="240" y="244">15 Jun</text>
+                <text x="440" y="244">30 Jun</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Agent performance comparison -->
+      <div class="card">
+        <div class="card__head">
+          <h3>Agent performance comparison</h3>
+          <span class="tag">Interactions handled · last 30 days</span>
+        </div>
+        <div class="card__body">
+          <svg viewBox="0 0 940 320" class="chart-svg" role="img" aria-label="Bar chart comparing interactions handled by eight agents over the last 30 days. Priya Nair leads on about 1,420, followed by Daniel Okafor, Grace Thompson, Olivia Hughes, Charlotte Reid, James Whitmore, Marcus Bennett and Hannah Price. Bar colour encodes average QA score, darker indigo for higher scores.">
+            <defs>
+              <linearGradient id="barHi" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#7976F3"/>
+                <stop offset="1" stop-color="#A177DA"/>
+              </linearGradient>
+              <linearGradient id="barMid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#A177DA"/>
+                <stop offset="1" stop-color="#C9A6E6"/>
+              </linearGradient>
+              <linearGradient id="barLo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#F481F1"/>
+                <stop offset="1" stop-color="#F8B0F6"/>
+              </linearGradient>
+            </defs>
+            <!-- gridlines + y labels. Plot area y=30 (1500) .. y=250 (0). 1500 units = 220px -->
+            <g stroke="#EBEBEB" stroke-width="1">
+              <line x1="56" y1="30" x2="916" y2="30"/>
+              <line x1="56" y1="74" x2="916" y2="74"/>
+              <line x1="56" y1="118" x2="916" y2="118"/>
+              <line x1="56" y1="162" x2="916" y2="162"/>
+              <line x1="56" y1="206" x2="916" y2="206"/>
+              <line x1="56" y1="250" x2="916" y2="250" stroke="#C7C7C7"/>
+            </g>
+            <g fill="#90A4AE" font-size="10" text-anchor="end">
+              <text x="50" y="34">1500</text>
+              <text x="50" y="78">1200</text>
+              <text x="50" y="122">900</text>
+              <text x="50" y="166">600</text>
+              <text x="50" y="210">300</text>
+              <text x="50" y="254">0</text>
+            </g>
+            <!-- bars: width 70, gap. baseline y=250. 1 unit = 220/1500 = 0.14667px -->
+            <!-- Priya 1420 -> h=208.3, y=41.7 -->
+            <rect x="92"  y="42"  width="70" height="208" rx="5" fill="url(#barHi)"/>
+            <!-- Daniel 1210 -> h=177.5, y=72.5 -->
+            <rect x="196" y="73"  width="70" height="177" rx="5" fill="url(#barHi)"/>
+            <!-- Grace 1135 -> h=166.5, y=83.5 -->
+            <rect x="300" y="84"  width="70" height="166" rx="5" fill="url(#barMid)"/>
+            <!-- Olivia 1060 -> h=155.5, y=94.5 -->
+            <rect x="404" y="95"  width="70" height="155" rx="5" fill="url(#barHi)"/>
+            <!-- Charlotte 985 -> h=144.5, y=105.5 -->
+            <rect x="508" y="106" width="70" height="144" rx="5" fill="url(#barMid)"/>
+            <!-- James 905 -> h=132.8, y=117.2 -->
+            <rect x="612" y="117" width="70" height="133" rx="5" fill="url(#barMid)"/>
+            <!-- Marcus 720 -> h=105.6, y=144.4 -->
+            <rect x="716" y="144" width="70" height="106" rx="5" fill="url(#barLo)"/>
+            <!-- Hannah 640 -> h=93.9, y=156.1 -->
+            <rect x="820" y="156" width="70" height="94"  rx="5" fill="url(#barLo)"/>
+            <!-- value labels above bars -->
+            <g fill="#263238" font-size="11" font-weight="700" text-anchor="middle">
+              <text x="127" y="35">1,420</text>
+              <text x="231" y="66">1,210</text>
+              <text x="335" y="77">1,135</text>
+              <text x="439" y="88">1,060</text>
+              <text x="543" y="99">985</text>
+              <text x="647" y="110">905</text>
+              <text x="751" y="137">720</text>
+              <text x="855" y="149">640</text>
+            </g>
+            <!-- agent initials + names under bars -->
+            <g fill="#455A64" font-size="11" font-weight="700" text-anchor="middle">
+              <text x="127" y="270">PN</text>
+              <text x="231" y="270">DO</text>
+              <text x="335" y="270">GT</text>
+              <text x="439" y="270">OH</text>
+              <text x="543" y="270">CR</text>
+              <text x="647" y="270">JW</text>
+              <text x="751" y="270">MB</text>
+              <text x="855" y="270">HP</text>
+            </g>
+            <g fill="#90A4AE" font-size="9.5" text-anchor="middle">
+              <text x="127" y="284">Priya N.</text>
+              <text x="231" y="284">Daniel O.</text>
+              <text x="335" y="284">Grace T.</text>
+              <text x="439" y="284">Olivia H.</text>
+              <text x="543" y="284">Charlotte R.</text>
+              <text x="647" y="284">James W.</text>
+              <text x="751" y="284">Marcus B.</text>
+              <text x="855" y="284">Hannah P.</text>
+            </g>
+            <!-- y axis title -->
+            <text x="56" y="306" font-size="10" fill="#90A4AE">Interactions handled</text>
+          </svg>
+          <div class="legend" style="margin-top:8px;">
+            <span><i style="background:#7976F3"></i> Avg QA ≥ 90%</span>
+            <span><i style="background:#A177DA"></i> Avg QA 85–90%</span>
+            <span><i style="background:#F481F1"></i> Avg QA &lt; 85%</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

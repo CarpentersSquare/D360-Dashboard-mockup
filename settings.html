@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — account, integrations, telephony, branding and security settings (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="settings">
+  <div class="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+      </div>
+      <nav class="sidebar__nav" aria-label="Primary">
+        <a class="nav-item" data-nav="overview" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-item__label">Overview</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
+        </a>
+        <a class="nav-item" data-nav="qa" href="qa.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="analytics" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+          <span class="nav-item__label">Analytics</span>
+        </a>
+        <a class="nav-item" data-nav="agents" href="agents.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-item__label">Agents</span>
+        </a>
+        <a class="nav-item" data-nav="templates" href="templates.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          <span class="nav-item__label">Templates</span>
+        </a>
+        <a class="nav-item" data-nav="billing" href="billing.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-item__label">Billing</span>
+        </a>
+        <a class="nav-item" data-nav="settings" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-item__label">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        Dial360 Console<br />Prototype build · v0.1
+      </div>
+    </aside>
+
+    <!-- ===== Top bar ===== -->
+    <header class="topbar">
+      <div class="topbar__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="icon-btn" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot">3</span>
+      </button>
+      <div class="account">
+        <button class="account__btn" aria-haspopup="true">
+          <span class="avatar">RA</span>
+          <span>
+            <span class="account__name">Rob Ashton</span><br />
+            <span class="account__role">Admin</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="account__menu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="billing.html" role="menuitem">Billing &amp; plan</a>
+          <hr />
+          <a href="login.html" role="menuitem">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <h1>Settings</h1>
+          <div class="sub">Manage your account, integrations, telephony and security</div>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-bottom:22px;background:var(--info-bg);color:var(--ink);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--indigo)" stroke-width="2" style="flex:none;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div>
+          <p style="color:var(--ink);margin:0;font-size:13px;"><strong>Prototype notice:</strong> all toggles, role permissions and save actions on this page are visual only — there is no real RBAC, authentication or persistence behind them.</p>
+        </div>
+      </div>
+
+      <div data-tabs>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="account">Account</button>
+          <button class="tab" data-tab="integrations">Integrations</button>
+          <button class="tab" data-tab="telephony">Telephony / Numbers</button>
+          <button class="tab" data-tab="branding">Branding</button>
+          <button class="tab" data-tab="security">Security</button>
+          <button class="tab" data-tab="roles">Team roles</button>
+        </div>
+
+        <!-- ===== Panel: Account ===== -->
+        <div class="tab-panel active" data-panel="account">
+          <div class="card" style="max-width:680px;">
+            <div class="card__head"><h3>Account details</h3></div>
+            <div class="card__body">
+              <div class="stack">
+                <div class="form-row">
+                  <label for="acct-company">Company name</label>
+                  <input type="text" id="acct-company" value="Dial360 Demo Ltd" />
+                </div>
+                <div class="form-row">
+                  <label for="acct-address">Registered address</label>
+                  <textarea id="acct-address" rows="2">14 Wellington Street, Leeds, LS1 4DL</textarea>
+                </div>
+                <div class="form-row">
+                  <label for="acct-name">Admin contact name</label>
+                  <input type="text" id="acct-name" value="Rob Ashton" />
+                </div>
+                <div class="form-row">
+                  <label for="acct-email">Admin email</label>
+                  <input type="email" id="acct-email" value="rob.ashton@dial360-demo.co.uk" />
+                </div>
+                <div class="form-row">
+                  <label for="acct-phone">Phone</label>
+                  <input type="text" id="acct-phone" value="+44 113 496 0360" />
+                </div>
+                <div class="form-row">
+                  <label for="acct-tz">Timezone</label>
+                  <select id="acct-tz">
+                    <option selected>Europe/London (GMT+01:00)</option>
+                    <option>Europe/Dublin (GMT+01:00)</option>
+                    <option>Europe/Paris (GMT+02:00)</option>
+                    <option>UTC</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="card__foot" style="display:flex;justify-content:flex-end;gap:10px;">
+              <button class="btn">Cancel</button>
+              <button class="btn btn--primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Panel: Integrations ===== -->
+        <div class="tab-panel" data-panel="integrations">
+          <div class="card">
+            <div class="card__head"><h3>Connected services</h3></div>
+            <div class="card__body">
+              <div class="grid grid--2">
+
+                <div class="int-card">
+                  <div class="int-card__logo" aria-hidden="true">AI</div>
+                  <div class="int-card__main">
+                    <div class="int-card__name">OpenAI</div>
+                    <div class="int-card__desc">Powers AI wrap-up, template suggestions and automated QA scoring.</div>
+                  </div>
+                  <div class="stack" style="gap:8px;align-items:flex-end;">
+                    <span class="pill pill--pass">Connected</span>
+                    <button class="btn btn--ghost btn--sm">Manage</button>
+                  </div>
+                </div>
+
+                <div class="int-card">
+                  <div class="int-card__logo" aria-hidden="true">Tw</div>
+                  <div class="int-card__main">
+                    <div class="int-card__name">Twilio</div>
+                    <div class="int-card__desc">Telephony, numbers and call recording.</div>
+                  </div>
+                  <div class="stack" style="gap:8px;align-items:flex-end;">
+                    <span class="pill pill--pass">Connected</span>
+                    <button class="btn btn--ghost btn--sm">Manage</button>
+                  </div>
+                </div>
+
+                <div class="int-card">
+                  <div class="int-card__logo" aria-hidden="true">Hs</div>
+                  <div class="int-card__main">
+                    <div class="int-card__name">HubSpot CRM</div>
+                    <div class="int-card__desc">Sync contacts and interaction history.</div>
+                  </div>
+                  <div class="stack" style="gap:8px;align-items:flex-end;">
+                    <span class="pill pill--pass">Connected</span>
+                    <button class="btn btn--ghost btn--sm">Manage</button>
+                  </div>
+                </div>
+
+                <div class="int-card">
+                  <div class="int-card__logo" aria-hidden="true">MT</div>
+                  <div class="int-card__main">
+                    <div class="int-card__name">Microsoft Teams</div>
+                    <div class="int-card__desc">Notifications and presence.</div>
+                  </div>
+                  <div class="stack" style="gap:8px;align-items:flex-end;">
+                    <span class="pill pill--muted">Not connected</span>
+                    <button class="btn btn--ghost btn--sm">Connect</button>
+                  </div>
+                </div>
+
+                <div class="int-card">
+                  <div class="int-card__logo" aria-hidden="true">Za</div>
+                  <div class="int-card__main">
+                    <div class="int-card__name">Zapier</div>
+                    <div class="int-card__desc">Automate workflows.</div>
+                  </div>
+                  <div class="stack" style="gap:8px;align-items:flex-end;">
+                    <span class="pill pill--muted">Not connected</span>
+                    <button class="btn btn--ghost btn--sm">Connect</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Panel: Telephony / Numbers ===== -->
+        <div class="tab-panel" data-panel="telephony">
+          <div class="grid grid--2-1">
+            <div class="card">
+              <div class="card__head">
+                <h3>Numbers</h3>
+                <button class="btn btn--sm">Add number</button>
+              </div>
+              <div class="table-wrap">
+                <table class="data">
+                  <thead>
+                    <tr><th>Number</th><th>Label</th><th>Routing</th><th>Recording</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-mono">+44 113 496 0360</td>
+                      <td class="cell-strong">Main line</td>
+                      <td>Round robin → Support team</td>
+                      <td><span class="pill pill--pass">On</span></td>
+                      <td><span class="pill pill--info">Active</span></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-mono">+44 20 7946 0218</td>
+                      <td class="cell-strong">Sales</td>
+                      <td>Round robin → Sales team</td>
+                      <td><span class="pill pill--pass">On</span></td>
+                      <td><span class="pill pill--info">Active</span></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-mono">+44 161 850 0144</td>
+                      <td class="cell-strong">Support</td>
+                      <td>Priya Nair</td>
+                      <td><span class="pill pill--pass">On</span></td>
+                      <td><span class="pill pill--info">Active</span></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-mono">+44 113 496 0399</td>
+                      <td class="cell-strong">Out-of-hours</td>
+                      <td>Voicemail → callback queue</td>
+                      <td><span class="pill pill--muted">Off</span></td>
+                      <td><span class="pill pill--info">Active</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__head"><h3>Telephony settings</h3></div>
+              <div class="card__body">
+                <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:nowrap;">
+                  <div style="flex:1;">
+                    <div class="cell-strong">Require DPA verification before account access</div>
+                    <div class="small muted">Agents must complete DPA before viewing account details.</div>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" checked aria-label="Require DPA verification before account access" />
+                    <span class="track"></span>
+                  </label>
+                </div>
+
+                <hr class="divider" />
+
+                <div class="section-title">Business hours</div>
+                <dl class="dl">
+                  <dt>Mon–Fri</dt><dd>08:00 – 18:00</dd>
+                  <dt>Saturday</dt><dd>09:00 – 13:00</dd>
+                  <dt>Sunday</dt><dd>Closed</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Panel: Branding ===== -->
+        <div class="tab-panel" data-panel="branding">
+          <div class="card" style="max-width:680px;">
+            <div class="card__head"><h3>Branding</h3></div>
+            <div class="card__body">
+              <div class="stack">
+                <div class="form-row">
+                  <label>Company logo</label>
+                  <div style="border:2px dashed var(--border);border-radius:var(--radius);padding:24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;cursor:pointer;background:var(--bg);">
+                    <img src="assets/logo.svg" alt="Current Dial360 logo" style="height:32px;" />
+                    <div>
+                      <div class="cell-strong">Drag a logo or click to upload</div>
+                      <div class="small muted">SVG or PNG, up to 2&nbsp;MB. Current: logo.svg</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <label>Accent colour</label>
+                  <div class="row" style="align-items:center;gap:12px;">
+                    <button type="button" aria-label="Accent colour #7976F3 (selected)" aria-pressed="true" style="width:34px;height:34px;border-radius:8px;background:#7976F3;border:2px solid var(--ink);cursor:pointer;"></button>
+                    <button type="button" aria-label="Accent colour #A177DA" aria-pressed="false" style="width:34px;height:34px;border-radius:8px;background:#A177DA;border:2px solid transparent;cursor:pointer;"></button>
+                    <button type="button" aria-label="Accent colour #F481F1" aria-pressed="false" style="width:34px;height:34px;border-radius:8px;background:#F481F1;border:2px solid transparent;cursor:pointer;"></button>
+                    <input type="text" value="#7976F3" aria-label="Accent colour hex value" style="width:110px;font-variant-numeric:tabular-nums;" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card__foot" style="display:flex;justify-content:flex-end;gap:10px;">
+              <button class="btn">Cancel</button>
+              <button class="btn btn--primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Panel: Security ===== -->
+        <div class="tab-panel" data-panel="security">
+          <div class="grid grid--2">
+            <div class="card">
+              <div class="card__head"><h3>Authentication</h3></div>
+              <div class="card__body">
+                <div class="stack">
+                  <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:nowrap;">
+                    <div style="flex:1;">
+                      <div class="cell-strong">Single sign-on (SSO)</div>
+                      <div class="small muted">SAML / OIDC for all users.</div>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" aria-label="Single sign-on (SSO)" />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <hr class="divider" style="margin:6px 0;" />
+                  <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:nowrap;">
+                    <div style="flex:1;">
+                      <div class="cell-strong">Two-factor authentication (2FA)</div>
+                      <div class="small muted">Required for admin accounts.</div>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" checked aria-label="Two-factor authentication (2FA)" />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                  <hr class="divider" style="margin:6px 0;" />
+                  <div class="row" style="align-items:center;justify-content:space-between;flex-wrap:nowrap;">
+                    <div style="flex:1;">
+                      <div class="cell-strong">Enforce 2FA for all agents</div>
+                      <div class="small muted">Applies to every team member.</div>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" aria-label="Enforce 2FA for all agents" />
+                      <span class="track"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card__head"><h3>Session &amp; password policy</h3></div>
+              <div class="card__body">
+                <div class="stack">
+                  <div class="form-row">
+                    <label for="sec-session">Auto-logout after inactivity</label>
+                    <select id="sec-session">
+                      <option>30 minutes</option>
+                      <option selected>1 hour</option>
+                      <option>8 hours</option>
+                    </select>
+                  </div>
+                  <hr class="divider" style="margin:6px 0;" />
+                  <div>
+                    <div class="section-title">Password policy</div>
+                    <p class="small muted" style="margin:0;">Minimum 12 characters, mixed case, one number and one symbol. Passwords expire every 90 days and the last 5 cannot be reused.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Panel: Team roles ===== -->
+        <div class="tab-panel" data-panel="roles">
+          <div class="card">
+            <div class="card__head"><h3>Role definitions</h3></div>
+            <div class="card__body">
+              <p class="small muted" style="margin-top:0;">Permissions shown for reference; not enforced in this prototype.</p>
+              <div class="table-wrap">
+                <table class="data">
+                  <thead>
+                    <tr><th>Role</th><th>Summary</th><th>Example permissions</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-strong">Admin</td>
+                      <td class="muted">Full access — billing, settings, all interactions</td>
+                      <td>
+                        <span class="tag">Billing</span>
+                        <span class="tag">Settings</span>
+                        <span class="tag">All interactions</span>
+                        <span class="tag">Manage team</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="cell-strong">Team lead</td>
+                      <td class="muted">QA review, agents, analytics, all interactions</td>
+                      <td>
+                        <span class="tag">QA review</span>
+                        <span class="tag">Agents</span>
+                        <span class="tag">Analytics</span>
+                        <span class="tag">All interactions</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="cell-strong">Agent</td>
+                      <td class="muted">Own interactions, templates</td>
+                      <td>
+                        <span class="tag">Own interactions</span>
+                        <span class="tag">Templates</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

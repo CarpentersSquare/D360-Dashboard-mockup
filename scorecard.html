@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Scorecard · INT-10477 · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — QA scorecard detail for a flagged call (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="qa">
+  <div class="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+      </div>
+      <nav class="sidebar__nav" aria-label="Primary">
+        <a class="nav-item" data-nav="overview" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-item__label">Overview</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
+        </a>
+        <a class="nav-item" data-nav="qa" href="qa.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="analytics" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+          <span class="nav-item__label">Analytics</span>
+        </a>
+        <a class="nav-item" data-nav="agents" href="agents.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-item__label">Agents</span>
+        </a>
+        <a class="nav-item" data-nav="templates" href="templates.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          <span class="nav-item__label">Templates</span>
+        </a>
+        <a class="nav-item" data-nav="billing" href="billing.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-item__label">Billing</span>
+        </a>
+        <a class="nav-item" data-nav="settings" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-item__label">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        Dial360 Console<br />Prototype build · v0.1
+      </div>
+    </aside>
+
+    <!-- ===== Top bar ===== -->
+    <header class="topbar">
+      <div class="topbar__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="icon-btn" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot">3</span>
+      </button>
+      <div class="account">
+        <button class="account__btn" aria-haspopup="true">
+          <span class="avatar">RA</span>
+          <span>
+            <span class="account__name">Rob Ashton</span><br />
+            <span class="account__role">Admin</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="account__menu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="billing.html" role="menuitem">Billing &amp; plan</a>
+          <hr />
+          <a href="login.html" role="menuitem">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <div class="breadcrumb">
+        <a href="qa.html">QA Review</a> / INT-10477 scorecard
+      </div>
+
+      <div class="page-head">
+        <div>
+          <h1>QA Scorecard — INT-10477</h1>
+          <div class="sub">Call · Tom Beresford · handled by Daniel Okafor · Today 09:38</div>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+            Listen to call
+          </button>
+          <a class="btn btn--primary" href="interaction.html">Open interaction</a>
+        </div>
+      </div>
+
+      <!-- Flagged banner -->
+      <div class="banner banner--fail mb-18">
+        <span class="banner__score">64/100</span>
+        <div>
+          <div style="font-size:15px;">Flagged for review — DPA not completed</div>
+          <div class="small" style="font-weight:500;margin-top:2px;">Identity was not verified before account details were discussed. Mandatory criterion failed.</div>
+        </div>
+      </div>
+
+      <div class="grid grid--2-1">
+        <!-- ===== MAIN COLUMN ===== -->
+        <div class="stack">
+
+          <!-- Scored criteria -->
+          <div class="card">
+            <div class="card__head">
+              <h3>Scored criteria</h3>
+              <span class="tag">6 criteria · weighted</span>
+            </div>
+            <div class="card__body">
+              <ul class="checklist">
+                <li>
+                  <span class="pill pill--pass">Pass</span>
+                  <div class="checklist__main">
+                    <div class="checklist__title">Greeting &amp; branding</div>
+                    <div class="checklist__desc">Opened with approved Dial360 greeting and company name.</div>
+                    <div class="bar mb-18" style="margin:8px 0 0;max-width:220px;"><span style="width:10%;"></span></div>
+                  </div>
+                  <span class="tag nowrap">10%</span>
+                </li>
+                <li style="background:var(--danger-bg);border-radius:var(--radius-sm);padding:13px 12px;border-bottom:none;">
+                  <span class="pill pill--fail">Fail</span>
+                  <div class="checklist__main">
+                    <div class="checklist__title">Identity / DPA completed <span class="pill pill--flag" style="margin-left:6px;">Mandatory</span></div>
+                    <div class="checklist__desc">Customer asked to verify identity; agent shared account balance without completing data-protection checks.</div>
+                    <div class="bar bar--danger" style="margin:8px 0 0;max-width:220px;"><span style="width:25%;"></span></div>
+                  </div>
+                  <span class="tag nowrap" style="border-color:var(--danger);color:var(--danger);">25%</span>
+                </li>
+                <li>
+                  <span class="pill pill--pass">Pass</span>
+                  <div class="checklist__main">
+                    <div class="checklist__title">Compliance phrasing</div>
+                    <div class="checklist__desc">Used required regulatory wording when discussing the callback.</div>
+                    <div class="bar" style="margin:8px 0 0;max-width:220px;"><span style="width:15%;"></span></div>
+                  </div>
+                  <span class="tag nowrap">15%</span>
+                </li>
+                <li>
+                  <span class="pill pill--pass">Pass</span>
+                  <div class="checklist__main">
+                    <div class="checklist__title">Needs identified</div>
+                    <div class="checklist__desc">Correctly captured the reason for contact and confirmed it back.</div>
+                    <div class="bar" style="margin:8px 0 0;max-width:220px;"><span style="width:15%;"></span></div>
+                  </div>
+                  <span class="tag nowrap">15%</span>
+                </li>
+                <li>
+                  <span class="pill pill--pass">Pass</span>
+                  <div class="checklist__main">
+                    <div class="checklist__title">Resolution / next steps</div>
+                    <div class="checklist__desc">Booked a callback and set clear expectations on timing.</div>
+                    <div class="bar" style="margin:8px 0 0;max-width:220px;"><span style="width:20%;"></span></div>
+                  </div>
+                  <span class="tag nowrap">20%</span>
+                </li>
+                <li>
+                  <span class="pill pill--pass">Pass</span>
+                  <div class="checklist__main">
+                    <div class="checklist__title">Tone &amp; empathy</div>
+                    <div class="checklist__desc">Warm, professional manner throughout; acknowledged frustration.</div>
+                    <div class="bar" style="margin:8px 0 0;max-width:220px;"><span style="width:15%;"></span></div>
+                  </div>
+                  <span class="tag nowrap">15%</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Flagged moment -->
+          <div class="card">
+            <div class="card__head">
+              <h3>Flagged moment</h3>
+              <span class="pill pill--flag">02:14 – 02:41</span>
+            </div>
+            <div class="card__body">
+              <div class="transcript">
+                <div class="turn turn--agent">
+                  <span class="avatar avatar--sm">DO</span>
+                  <div>
+                    <div class="turn__meta">Daniel Okafor · 02:14</div>
+                    <div class="turn__bubble">Thanks for holding, Tom. I can see your account here — what can I help you with today?</div>
+                  </div>
+                </div>
+                <div class="turn">
+                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
+                  <div>
+                    <div class="turn__meta">Tom Beresford · 02:21</div>
+                    <div class="turn__bubble">I just wanted to check the balance on my account before the renewal goes out.</div>
+                  </div>
+                </div>
+                <div class="turn turn--agent">
+                  <span class="avatar avatar--sm">DO</span>
+                  <div>
+                    <div class="turn__meta">Daniel Okafor · 02:29</div>
+                    <div class="turn__bubble" style="background:var(--danger-bg);border:1px solid var(--danger);">
+                      Of course — your current balance is £148.50, due on the 14th.
+                      <div class="small" style="color:var(--danger);font-weight:700;margin-top:8px;">⚠ Identity not verified before account details shared — DPA security questions skipped.</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="turn">
+                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
+                  <div>
+                    <div class="turn__meta">Tom Beresford · 02:38</div>
+                    <div class="turn__bubble">Great, thanks. Could someone call me back about the renewal options?</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card__foot">
+              <span class="muted small">Auto-flagged by Dial360 QA · rule “DPA must be completed before disclosing account data”.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===== SIDEBAR COLUMN ===== -->
+        <div class="stack">
+
+          <!-- Reviewer actions -->
+          <div class="card">
+            <div class="card__head"><h3>Reviewer actions</h3></div>
+            <div class="card__body">
+              <div class="stack" style="gap:10px;">
+                <button class="btn btn--primary" type="button" style="justify-content:center;">Agree with flag</button>
+                <div class="row" style="gap:10px;">
+                  <button class="btn btn--ghost" type="button" style="flex:1;justify-content:center;">Dispute</button>
+                  <button class="btn btn--ghost" type="button" style="flex:1;justify-content:center;">Add note</button>
+                </div>
+                <button class="btn btn--ghost" type="button" style="justify-content:center;">Assign coaching</button>
+              </div>
+              <div class="form-row" style="margin-top:16px;">
+                <label for="reviewer-note">Reviewer note</label>
+                <textarea id="reviewer-note" rows="3" placeholder="Add a note for Daniel about the DPA step…"></textarea>
+              </div>
+              <hr class="divider" style="margin:16px 0;" />
+              <div class="cell-user">
+                <span class="avatar avatar--sm">RA</span>
+                <div>
+                  <div class="small muted">Assigned reviewer</div>
+                  <div class="cell-strong">Rob Ashton</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Score breakdown -->
+          <div class="card">
+            <div class="card__head"><h3>Score breakdown</h3></div>
+            <div class="card__body">
+              <dl class="dl" style="grid-template-columns:1fr auto;gap:10px 16px;">
+                <dt>Greeting &amp; branding</dt><dd>10 / 10</dd>
+                <dt style="color:var(--danger);">Identity / DPA</dt><dd style="color:var(--danger);">0 / 25</dd>
+                <dt>Compliance phrasing</dt><dd>15 / 15</dd>
+                <dt>Needs identified</dt><dd>15 / 15</dd>
+                <dt>Resolution / next steps</dt><dd>20 / 20</dd>
+                <dt>Tone &amp; empathy</dt><dd>15 / 15</dd>
+              </dl>
+              <hr class="divider" style="margin:16px 0;" />
+              <div class="row" style="justify-content:space-between;align-items:baseline;">
+                <span class="cell-strong">Total score</span>
+                <span class="kpi__value" style="font-size:24px;margin:0;color:var(--warning);">64/100</span>
+              </div>
+              <div class="bar bar--warn" style="margin-top:10px;"><span style="width:64%;"></span></div>
+              <div class="small muted" style="margin-top:8px;">25 points lost on a mandatory criterion — auto-flagged regardless of total.</div>
+            </div>
+          </div>
+
+          <!-- Agent context -->
+          <div class="card">
+            <div class="card__head"><h3>Agent context</h3></div>
+            <div class="card__body">
+              <div class="cell-user" style="margin-bottom:16px;">
+                <span class="avatar avatar--lg">DO</span>
+                <div>
+                  <div class="cell-strong" style="font-size:15px;">Daniel Okafor</div>
+                  <div class="muted small">Agent</div>
+                  <div class="status-dot online" style="margin-top:4px;">Online</div>
+                </div>
+              </div>
+              <dl class="dl" style="grid-template-columns:1fr auto;gap:10px 16px;">
+                <dt>Avg score · this week</dt><dd>81</dd>
+                <dt>Calls handled · this week</dt><dd>47</dd>
+                <dt>Open flags</dt><dd>2</dd>
+              </dl>
+              <hr class="divider" style="margin:16px 0;" />
+              <a class="btn btn--sm" href="agents.html">View agent profile</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

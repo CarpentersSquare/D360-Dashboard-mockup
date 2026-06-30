@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing &amp; plan · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — subscription, usage and invoices (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="billing">
+  <div class="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+      </div>
+      <nav class="sidebar__nav" aria-label="Primary">
+        <a class="nav-item" data-nav="overview" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-item__label">Overview</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
+        </a>
+        <a class="nav-item" data-nav="qa" href="qa.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="analytics" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+          <span class="nav-item__label">Analytics</span>
+        </a>
+        <a class="nav-item" data-nav="agents" href="agents.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-item__label">Agents</span>
+        </a>
+        <a class="nav-item" data-nav="templates" href="templates.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          <span class="nav-item__label">Templates</span>
+        </a>
+        <a class="nav-item" data-nav="billing" href="billing.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-item__label">Billing</span>
+        </a>
+        <a class="nav-item" data-nav="settings" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-item__label">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        Dial360 Console<br />Prototype build · v0.1
+      </div>
+    </aside>
+
+    <!-- ===== Top bar ===== -->
+    <header class="topbar">
+      <div class="topbar__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="icon-btn" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot">3</span>
+      </button>
+      <div class="account">
+        <button class="account__btn" aria-haspopup="true">
+          <span class="avatar">RA</span>
+          <span>
+            <span class="account__name">Rob Ashton</span><br />
+            <span class="account__role">Admin</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="account__menu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="billing.html" role="menuitem">Billing &amp; plan</a>
+          <hr />
+          <a href="login.html" role="menuitem">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <h1>Billing &amp; plan</h1>
+          <div class="sub">Manage your subscription, usage and invoices</div>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">Manage payment</button>
+          <button class="btn btn--primary">Upgrade plan</button>
+        </div>
+      </div>
+
+      <!-- Current plan + Payment method -->
+      <div class="grid grid--2-1 mb-18">
+        <div class="card">
+          <div class="card__head">
+            <h3>Current plan</h3>
+            <button class="btn btn--ghost btn--sm">Change plan</button>
+          </div>
+          <div class="card__body">
+            <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
+              <span class="pill pill--info" style="font-size:13px;padding:5px 14px;">Business</span>
+              <span style="font-size:24px;font-weight:800;letter-spacing:-.02em;">£499</span>
+              <span class="muted">/ month</span>
+            </div>
+            <div style="margin-bottom:18px;">
+              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
+                <span class="kpi__label" style="margin:0;">Agent seats</span>
+                <span class="small muted">9 of 12 used</span>
+              </div>
+              <div class="bar" aria-label="9 of 12 seats used"><span style="width:75%;"></span></div>
+            </div>
+            <dl class="dl">
+              <dt>Renewal date</dt>
+              <dd>Renews 14 Jul 2026</dd>
+              <dt>Billing cycle</dt>
+              <dd>Monthly</dd>
+              <dt>Account</dt>
+              <dd>Dial360 Ltd</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Payment method</h3>
+            <button class="btn btn--ghost btn--sm">Update</button>
+          </div>
+          <div class="card__body">
+            <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
+              <span class="int-card__logo" style="width:48px;height:32px;font-size:13px;letter-spacing:.04em;">VISA</span>
+              <div>
+                <div class="cell-strong">Visa •••• 4471</div>
+                <div class="small muted">Expires 09/27</div>
+              </div>
+            </div>
+            <dl class="dl">
+              <dt>Name on card</dt>
+              <dd>Dial360 Ltd</dd>
+              <dt>Billing email</dt>
+              <dd>accounts@dial360-demo.co.uk</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Usage this period -->
+      <div class="card mb-18">
+        <div class="card__head">
+          <h3>Usage this period</h3>
+          <span class="tag">1 Jun – 30 Jun 2026</span>
+        </div>
+        <div class="card__body">
+          <div class="grid grid--2">
+            <div>
+              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
+                <span class="kpi__label" style="margin:0;">Agent seats</span>
+                <span class="small muted">9 / 12</span>
+              </div>
+              <div class="bar" aria-label="9 of 12 agent seats used"><span style="width:75%;"></span></div>
+            </div>
+            <div>
+              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
+                <span class="kpi__label" style="margin:0;">Call minutes</span>
+                <span class="small muted">18,420 / 25,000</span>
+              </div>
+              <div class="bar bar--warn" aria-label="18,420 of 25,000 call minutes used"><span style="width:74%;"></span></div>
+            </div>
+            <div>
+              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
+                <span class="kpi__label" style="margin:0;">AI wrap-ups generated</span>
+                <span class="small muted">9,860 / unlimited</span>
+              </div>
+              <div class="bar" aria-label="9,860 AI wrap-ups generated, unlimited allowance"><span style="width:18%;opacity:.45;"></span></div>
+            </div>
+            <div>
+              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
+                <span class="kpi__label" style="margin:0;">QA reviews</span>
+                <span class="small muted">1,284 / 2,000</span>
+              </div>
+              <div class="bar" aria-label="1,284 of 2,000 QA reviews used"><span style="width:64%;"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoice history -->
+      <div class="card">
+        <div class="card__head">
+          <h3>Invoice history</h3>
+          <span class="tag">GBP (£)</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Invoice #</th><th>Date</th><th>Amount</th><th>Status</th><th>Download</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="cell-mono">INV-2026-0712</td>
+                <td>1 Jul 2026</td>
+                <td class="cell-strong">£541.20</td>
+                <td><span class="pill pill--flag">Due</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2026-0611</td>
+                <td>1 Jun 2026</td>
+                <td class="cell-strong">£499.00</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2026-0510</td>
+                <td>1 May 2026</td>
+                <td class="cell-strong">£541.20</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2026-0409</td>
+                <td>1 Apr 2026</td>
+                <td class="cell-strong">£499.00</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2026-0308</td>
+                <td>1 Mar 2026</td>
+                <td class="cell-strong">£499.00</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2026-0207</td>
+                <td>1 Feb 2026</td>
+                <td class="cell-strong">£517.80</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2026-0106</td>
+                <td>1 Jan 2026</td>
+                <td class="cell-strong">£499.00</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">INV-2025-1205</td>
+                <td>1 Dec 2025</td>
+                <td class="cell-strong">£499.00</td>
+                <td><span class="pill pill--pass">Paid</span></td>
+                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

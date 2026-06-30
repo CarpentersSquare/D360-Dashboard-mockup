@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — operational overview (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<!--
+  DUMMY DATA CONVENTION (shared across all pages):
+  - Agents: ~9 UK names (Rob Ashton/Admin, Priya Nair/Team lead, etc.)
+  - Customers: plausible UK names + companies
+  - Channels: call / email / chat
+  - Outcomes: Resolved, Callback booked, Escalated, Sale, No answer
+  - QA: pass-rate ~88%; flags: "DPA not completed", "Compliance phrase missing", "Tone"
+  - Phone: +44 format · Dates: relative to "today"
+  All content is hard-coded and illustrative. No backend.
+-->
+<body data-page="overview">
+  <div class="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar__brand">
+        <a href="index.html"><img src="assets/logo.svg" alt="Dial360 — go to Overview" /></a>
+      </div>
+      <nav class="sidebar__nav" aria-label="Primary">
+        <a class="nav-item" data-nav="overview" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-item__label">Overview</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
+        </a>
+        <a class="nav-item" data-nav="qa" href="qa.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="analytics" href="analytics.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
+          <span class="nav-item__label">Analytics</span>
+        </a>
+        <a class="nav-item" data-nav="agents" href="agents.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-item__label">Agents</span>
+        </a>
+        <a class="nav-item" data-nav="templates" href="templates.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+          <span class="nav-item__label">Templates</span>
+        </a>
+        <a class="nav-item" data-nav="billing" href="billing.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span class="nav-item__label">Billing</span>
+        </a>
+        <a class="nav-item" data-nav="settings" href="settings.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span class="nav-item__label">Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__footer">
+        Dial360 Console<br />Prototype build · v0.1
+      </div>
+    </aside>
+
+    <!-- ===== Top bar ===== -->
+    <header class="topbar">
+      <div class="topbar__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="icon-btn" aria-label="Notifications" title="Notifications">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="dot">3</span>
+      </button>
+      <div class="account">
+        <button class="account__btn" aria-haspopup="true">
+          <span class="avatar">RA</span>
+          <span>
+            <span class="account__name">Rob Ashton</span><br />
+            <span class="account__role">Admin</span>
+          </span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="account__menu" role="menu">
+          <a href="settings.html" role="menuitem">Account settings</a>
+          <a href="billing.html" role="menuitem">Billing &amp; plan</a>
+          <hr />
+          <a href="login.html" role="menuitem">Sign out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Main ===== -->
+    <main class="main">
+      <div class="page-head">
+        <div>
+          <h1>Good morning, Rob</h1>
+          <div class="sub">Here's how the operation is performing today · Tuesday 30 June 2026</div>
+        </div>
+        <div class="page-head__actions">
+          <a class="btn" href="analytics.html">View analytics</a>
+          <a class="btn btn--primary" href="qa.html">Review QA queue</a>
+        </div>
+      </div>
+
+      <!-- KPI tiles -->
+      <div class="grid grid--kpi mb-18">
+        <div class="kpi">
+          <div class="kpi__label">Interactions today</div>
+          <div class="kpi__value">342</div>
+          <div class="kpi__delta up">▲ 8.4% vs yesterday</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Avg wrap-up time</div>
+          <div class="kpi__value">11s</div>
+          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">QA pass rate</div>
+          <div class="kpi__value">88.6%</div>
+          <div class="kpi__delta up">▲ 1.2 pts this week</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">SLA — answered in target</div>
+          <div class="kpi__value">94.1%</div>
+          <div class="kpi__delta warn">target 95%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Agents online</div>
+          <div class="kpi__value">7<span class="muted" style="font-size:18px;">/9</span></div>
+          <div class="kpi__sub">2 away · 0 offline</div>
+        </div>
+      </div>
+
+      <!-- Channel split + Volume trend -->
+      <div class="grid grid--1-2 mb-18">
+        <div class="card">
+          <div class="card__head"><h3>Channel split — today</h3></div>
+          <div class="card__body">
+            <div class="donut-wrap">
+              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="Channel split donut: calls 58%, email 27%, chat 15%">
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
+                <!-- circ = 2*pi*55 ≈ 345.6 -->
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="200.4 345.6" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="93.3 345.6" stroke-dashoffset="-200.4" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="51.8 345.6" stroke-dashoffset="-293.7" transform="rotate(-90 75 75)"/>
+                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">342</text>
+                <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">interactions</text>
+              </svg>
+              <div class="legend" style="flex-direction:column;gap:10px;">
+                <span><i style="background:#7976F3"></i> Calls — 198 (58%)</span>
+                <span><i style="background:#A177DA"></i> Email — 92 (27%)</span>
+                <span><i style="background:#F481F1"></i> Live chat — 52 (15%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Interaction volume — last 14 days</h3>
+            <span class="tag">Daily total</span>
+          </div>
+          <div class="card__body">
+            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="Interaction volume over the last 14 days, trending upward from about 250 to 342">
+              <defs>
+                <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#7976F3" stop-opacity="0.28"/>
+                  <stop offset="1" stop-color="#7976F3" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- gridlines -->
+              <g stroke="#EBEBEB" stroke-width="1">
+                <line x1="40" y1="30" x2="620" y2="30"/>
+                <line x1="40" y1="80" x2="620" y2="80"/>
+                <line x1="40" y1="130" x2="620" y2="130"/>
+                <line x1="40" y1="180" x2="620" y2="180"/>
+              </g>
+              <g fill="#90A4AE" font-size="10" text-anchor="end">
+                <text x="34" y="34">400</text><text x="34" y="84">300</text><text x="34" y="134">200</text><text x="34" y="184">100</text>
+              </g>
+              <path d="M40,150 L84,140 L128,158 L172,128 L216,135 L260,110 L304,120 L348,96 L392,104 L436,82 L480,90 L524,70 L568,76 L620,52 L620,180 L40,180 Z" fill="url(#area)"/>
+              <polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="40,150 84,140 128,158 172,128 216,135 260,110 304,120 348,96 392,104 436,82 480,90 524,70 568,76 620,52"/>
+              <circle cx="620" cy="52" r="4" fill="#7976F3"/>
+              <g fill="#90A4AE" font-size="10" text-anchor="middle">
+                <text x="40" y="200">17 Jun</text><text x="216" y="200">21 Jun</text><text x="392" y="200">25 Jun</text><text x="568" y="200">29 Jun</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- QA snapshot + Wrap-up callout -->
+      <div class="grid grid--2-1 mb-18">
+        <div class="card">
+          <div class="card__head">
+            <h3>QA snapshot — this week</h3>
+            <a class="btn btn--sm" href="qa.html">Open QA Review</a>
+          </div>
+          <div class="card__body">
+            <div class="row">
+              <div class="kpi" style="flex:1;box-shadow:none;border-color:var(--border-soft);">
+                <div class="kpi__label">Auto-QA'd</div>
+                <div class="kpi__value" style="font-size:24px;">1,284</div>
+                <div class="kpi__sub">calls scored automatically</div>
+              </div>
+              <div class="kpi" style="flex:1;box-shadow:none;border-color:var(--border-soft);">
+                <div class="kpi__label">Flagged for review</div>
+                <div class="kpi__value" style="font-size:24px;color:var(--warning);">23</div>
+                <div class="kpi__sub">awaiting a manager</div>
+              </div>
+              <div class="kpi" style="flex:1;box-shadow:none;border-color:var(--border-soft);">
+                <div class="kpi__label">Top failure reason</div>
+                <div class="kpi__value" style="font-size:18px;margin-top:14px;">DPA not completed</div>
+                <div class="kpi__sub">9 of 23 flags</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout__big">~10s</div>
+          <div>
+            <h3>AI wrap-up is saving your team time</h3>
+            <p>Average after-call work is down from a 2.5&nbsp;min baseline — roughly <strong>43 hours</strong> saved across the team this week.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent interactions -->
+      <div class="card">
+        <div class="card__head">
+          <h3>Recent interactions</h3>
+          <a class="btn btn--sm" href="interactions.html">View all</a>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Time</th><th>Channel</th><th>Customer</th><th>Agent</th><th>Outcome</th><th>QA</th><th>AI summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="clickable" data-href="interaction.html">
+                <td class="cell-mono">09:41</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td class="cell-strong">Margaret Whitfield</td>
+                <td>Priya Nair</td>
+                <td><span class="pill pill--info">Resolved</span></td>
+                <td><span class="pill pill--pass">Pass</span></td>
+                <td class="cell-snippet">Billing query on April invoice resolved; refund of £42 issued.</td>
+              </tr>
+              <tr class="clickable" data-href="interaction.html">
+                <td class="cell-mono">09:38</td>
+                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
+                <td class="cell-strong">Tom Beresford</td>
+                <td>Daniel Okafor</td>
+                <td><span class="pill pill--info">Callback booked</span></td>
+                <td><span class="pill pill--flag">Flagged</span></td>
+                <td class="cell-snippet">Customer asked to verify identity; DPA step not completed.</td>
+              </tr>
+              <tr class="clickable" data-href="interaction.html">
+                <td class="cell-mono">09:32</td>
+                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
+                <td class="cell-strong">Aisha Rahman</td>
+                <td>Grace Thompson</td>
+                <td><span class="pill pill--info">Sale</span></td>
+                <td><span class="pill pill--pass">Pass</span></td>
+                <td class="cell-snippet">Upgraded to Pro plan; sent confirmation and onboarding link.</td>
+              </tr>
+              <tr class="clickable" data-href="interaction.html">
+                <td class="cell-mono">09:26</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td class="cell-strong">Liam Foster</td>
+                <td>Marcus Bennett</td>
+                <td><span class="pill pill--muted">Escalated</span></td>
+                <td><span class="pill pill--fail">Fail</span></td>
+                <td class="cell-snippet">Complaint about delivery; escalated to team lead, tone flagged.</td>
+              </tr>
+              <tr class="clickable" data-href="interaction.html">
+                <td class="cell-mono">09:19</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td class="cell-strong">Sophie Clarke</td>
+                <td>Priya Nair</td>
+                <td><span class="pill pill--info">Resolved</span></td>
+                <td><span class="pill pill--pass">Pass</span></td>
+                <td class="cell-snippet">Password reset and account unlocked; confirmed security questions.</td>
+              </tr>
+              <tr class="clickable" data-href="interaction.html">
+                <td class="cell-mono">09:11</td>
+                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
+                <td class="cell-strong">Henry Walsh</td>
+                <td>Olivia Hughes</td>
+                <td><span class="pill pill--muted">No answer</span></td>
+                <td><span class="pill pill--muted">N/A</span></td>
+                <td class="cell-snippet">Auto-reply sent; awaiting customer response on quote.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

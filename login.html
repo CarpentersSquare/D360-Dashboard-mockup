@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in · Dial360</title>
+  <meta name="description" content="Dial360 admin console — prototype login." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <!-- Brand panel -->
+    <section class="login-brand">
+      <div class="login-brand__logo">
+        <img src="assets/logo.svg" alt="Dial360" />
+      </div>
+      <div>
+        <h2>The all-in-one AI call centre workstation.</h2>
+        <p>Telephony, email and live chat in one place — with automated QA and AI wrap-up that cuts after-call work from ~2.5&nbsp;min to ~10&nbsp;sec.</p>
+        <ul class="login-brand__points">
+          <li>✓ Unified interactions across every channel</li>
+          <li>✓ Automated QA on every call</li>
+          <li>✓ AI wrap-up &amp; validated actions</li>
+        </ul>
+      </div>
+      <p class="small" style="color:rgba(255,255,255,.8)">Prototype — not a live system.</p>
+    </section>
+
+    <!-- Form -->
+    <section class="login-form-wrap">
+      <form class="login-form" id="login-form" novalidate>
+        <h1>Sign in</h1>
+        <p class="muted" style="margin-bottom:24px;">Welcome back. Sign in to your Dial360 console.</p>
+
+        <div class="field-full">
+          <label for="email">Work email</label>
+          <input type="email" id="email" name="email" placeholder="you@company.co.uk" autocomplete="username" />
+        </div>
+        <div class="field-full">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div class="login-form__row">
+          <label><input type="checkbox" /> Remember me</label>
+          <a href="#" onclick="return false;">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn--primary">Sign in</button>
+
+        <p class="login-foot">
+          This is a static prototype. Any details (or none) will sign you in.<br />
+          Prototype — not a live system.
+        </p>
+      </form>
+    </section>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
