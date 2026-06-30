@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Single sign-on · Dial360</title>
+  <meta name="description" content="Dial360 console — mocked single sign-on (prototype)." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="proto-bar">Mocked SSO — any input signs you in. <strong>Prototype</strong>, not a live system.</div>
+  <div class="sso-wrap">
+    <div class="sso-card">
+      <div class="sso-card__logo">
+        <a href="index.html" aria-label="Dial360 home">
+          <img src="assets/logo.png" onerror="this.onerror=null;this.src='assets/logo.svg'" alt="Dial360" />
+        </a>
+      </div>
+
+      <!-- Step 1: enter work email -->
+      <div class="sso-step" id="step-email">
+        <h1>Sign in to Dial360</h1>
+        <p class="muted">Use your work account to access the console.</p>
+        <form id="sso-email-form" novalidate>
+          <div class="form-row" style="margin:18px 0 14px;">
+            <label for="sso-email">Work email</label>
+            <input type="email" id="sso-email" value="rob.ashton@dial360-demo.co.uk" autocomplete="username" />
+          </div>
+          <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">Continue with SSO</button>
+        </form>
+        <div class="sso-foot">
+          <a href="login.html">Sign in with email and password instead</a>
+        </div>
+      </div>
+
+      <!-- Step 2: identity provider hand-off -->
+      <div class="sso-step" id="step-idp" hidden>
+        <h1>Continue to your provider</h1>
+        <p class="muted">We found single sign-on for <strong>dial360-demo.co.uk</strong>.</p>
+        <div class="sso-idp" style="margin-top:18px;">
+          <span class="sso-idp__logo">A</span>
+          <div style="flex:1;">
+            <div style="font-weight:700;">Acme Contact Centre</div>
+            <div class="small muted">Identity provider · SSO</div>
+          </div>
+          <span class="pill pill--info">SAML</span>
+        </div>
+        <button type="button" id="sso-continue" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;">Sign in with SSO</button>
+        <div class="sso-foot"><a href="#" id="sso-back">Use a different account</a></div>
+      </div>
+
+      <!-- Step 3: authenticating -->
+      <div class="sso-step" id="step-auth" hidden style="text-align:center;">
+        <h1>Signing you in…</h1>
+        <p class="muted">Authenticating with your identity provider.</p>
+        <div class="sso-spinner" role="status" aria-label="Authenticating"></div>
+        <div class="sso-foot" style="margin-top:24px;">Redirecting to the Dial360 console…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var stepEmail = document.getElementById("step-email");
+      var stepIdp = document.getElementById("step-idp");
+      var stepAuth = document.getElementById("step-auth");
+
+      function show(el) {
+        [stepEmail, stepIdp, stepAuth].forEach(function (s) { s.hidden = true; });
+        el.hidden = false;
+      }
+
+      document.getElementById("sso-email-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        show(stepIdp);
+      });
+      document.getElementById("sso-back").addEventListener("click", function (e) {
+        e.preventDefault();
+        show(stepEmail);
+      });
+      document.getElementById("sso-continue").addEventListener("click", function () {
+        show(stepAuth);
+        // Mocked hand-off: land on the dashboard after a brief delay.
+        window.setTimeout(function () { window.location.href = "dashboard.html"; }, 1600);
+      });
+    })();
+  </script>
+</body>
+</html>
