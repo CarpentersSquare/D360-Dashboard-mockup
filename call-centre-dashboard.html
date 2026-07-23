@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Billing &amp; plan · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — subscription, usage and invoices (prototype)." />
+  <title>Call Centre Dashboard · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — live floor view of queue, agents and service level (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="billing">
+<body data-page="call-centre-dashboard">
   <div class="app">
 
     <!-- ===== Sidebar ===== -->
@@ -100,178 +100,163 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>Billing &amp; plan</h1>
-          <div class="sub">Manage your subscription, usage and invoices</div>
+          <h1>Call Centre Dashboard</h1>
+          <div class="sub">Live view of the floor right now · updates every few seconds</div>
         </div>
         <div class="page-head__actions">
-          <button class="btn btn--ghost">Manage payment</button>
-          <button class="btn btn--primary">Upgrade plan</button>
+          <a class="btn" href="analytics.html">View analytics</a>
+          <a class="btn btn--primary" href="agents.html">Manage agents</a>
         </div>
       </div>
 
-      <!-- Current plan + Payment method -->
-      <div class="grid grid--2-1 mb-18">
+      <!-- Live KPI tiles -->
+      <div class="grid grid--kpi mb-18">
+        <div class="kpi">
+          <div class="kpi__label">Calls in queue</div>
+          <div class="kpi__value">6</div>
+          <div class="kpi__delta warn">▲ 2 in the last 5 min</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Longest wait</div>
+          <div class="kpi__value">1:48</div>
+          <div class="kpi__sub">target under 1:00</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Service level (20s)</div>
+          <div class="kpi__value">91.2%</div>
+          <div class="kpi__delta up">▲ 0.6 pts vs last hour</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Agents available</div>
+          <div class="kpi__value">5<span class="muted" style="font-size:18px;">/9</span></div>
+          <div class="kpi__sub">3 on call · 1 on break</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Abandonment rate</div>
+          <div class="kpi__value">2.4%</div>
+          <div class="kpi__delta up">▼ 0.3 pts vs yesterday</div>
+        </div>
+      </div>
+
+      <!-- Queue trend + Channel load -->
+      <div class="grid grid--1-2 mb-18">
+        <div class="card">
+          <div class="card__head"><h3>Live channel load</h3></div>
+          <div class="card__body">
+            <div class="donut-wrap">
+              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="Live channel load donut: calls 64%, chat 22%, email 14%">
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="221.2 345.6" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="76 345.6" stroke-dashoffset="-221.2" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="48.4 345.6" stroke-dashoffset="-297.2" transform="rotate(-90 75 75)"/>
+                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">14</text>
+                <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">active now</text>
+              </svg>
+              <div class="legend" style="flex-direction:column;gap:10px;">
+                <span><i style="background:#7976F3"></i> Calls — 9 (64%)</span>
+                <span><i style="background:#F481F1"></i> Live chat — 3 (22%)</span>
+                <span><i style="background:#A177DA"></i> Email — 2 (14%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card__head">
-            <h3>Current plan</h3>
-            <button class="btn btn--ghost btn--sm">Change plan</button>
+            <h3>Calls in queue — last 60 minutes</h3>
+            <span class="tag">Live</span>
           </div>
           <div class="card__body">
-            <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
-              <span class="pill pill--info" style="font-size:13px;padding:5px 14px;">Business</span>
-              <span style="font-size:24px;font-weight:800;letter-spacing:-.02em;">£499</span>
-              <span class="muted">/ month</span>
-            </div>
-            <div style="margin-bottom:18px;">
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Agent seats</span>
-                <span class="small muted">9 of 12 used</span>
-              </div>
-              <div class="bar" aria-label="9 of 12 seats used"><span style="width:75%;"></span></div>
-            </div>
-            <dl class="dl">
-              <dt>Renewal date</dt>
-              <dd>Renews 14 Jul 2026</dd>
-              <dt>Billing cycle</dt>
-              <dd>Monthly</dd>
-              <dt>Account</dt>
-              <dd>Dial360 Ltd</dd>
-            </dl>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__head">
-            <h3>Payment method</h3>
-            <button class="btn btn--ghost btn--sm">Update</button>
-          </div>
-          <div class="card__body">
-            <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
-              <span class="int-card__logo" style="width:48px;height:32px;font-size:13px;letter-spacing:.04em;">VISA</span>
-              <div>
-                <div class="cell-strong">Visa •••• 4471</div>
-                <div class="small muted">Expires 09/27</div>
-              </div>
-            </div>
-            <dl class="dl">
-              <dt>Name on card</dt>
-              <dd>Dial360 Ltd</dd>
-              <dt>Billing email</dt>
-              <dd>accounts@dial360-demo.co.uk</dd>
-            </dl>
+            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="Calls in queue over the last 60 minutes, currently at 6, peaking at 9">
+              <defs>
+                <linearGradient id="queue-area" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#F481F1" stop-opacity="0.28"/>
+                  <stop offset="1" stop-color="#F481F1" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <g stroke="#EBEBEB" stroke-width="1">
+                <line x1="40" y1="30" x2="620" y2="30"/>
+                <line x1="40" y1="80" x2="620" y2="80"/>
+                <line x1="40" y1="130" x2="620" y2="130"/>
+                <line x1="40" y1="180" x2="620" y2="180"/>
+              </g>
+              <g fill="#90A4AE" font-size="10" text-anchor="end">
+                <text x="34" y="34">10</text><text x="34" y="84">7.5</text><text x="34" y="134">5</text><text x="34" y="184">2.5</text>
+              </g>
+              <path d="M40,170 L84,160 L128,165 L172,140 L216,120 L260,100 L304,110 L348,80 L392,95 L436,70 L480,90 L524,60 L568,75 L620,90 L620,180 L40,180 Z" fill="url(#queue-area)"/>
+              <polyline fill="none" stroke="#F481F1" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
+                points="40,170 84,160 128,165 172,140 216,120 260,100 304,110 348,80 392,95 436,70 480,90 524,60 568,75 620,90"/>
+              <circle cx="620" cy="90" r="4" fill="#F481F1"/>
+              <g fill="#90A4AE" font-size="10" text-anchor="middle">
+                <text x="40" y="200">60 min ago</text><text x="216" y="200">40 min ago</text><text x="392" y="200">20 min ago</text><text x="568" y="200">now</text>
+              </g>
+            </svg>
           </div>
         </div>
       </div>
 
-      <!-- Usage this period -->
-      <div class="card mb-18">
-        <div class="card__head">
-          <h3>Usage this period</h3>
-          <span class="tag">1 Jun – 30 Jun 2026</span>
-        </div>
-        <div class="card__body">
-          <div class="grid grid--2">
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Agent seats</span>
-                <span class="small muted">9 / 12</span>
-              </div>
-              <div class="bar" aria-label="9 of 12 agent seats used"><span style="width:75%;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Call minutes</span>
-                <span class="small muted">18,420 / 25,000</span>
-              </div>
-              <div class="bar bar--warn" aria-label="18,420 of 25,000 call minutes used"><span style="width:74%;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">AI wrap-ups generated</span>
-                <span class="small muted">9,860 / unlimited</span>
-              </div>
-              <div class="bar" aria-label="9,860 AI wrap-ups generated, unlimited allowance"><span style="width:18%;opacity:.45;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">QA reviews</span>
-                <span class="small muted">1,284 / 2,000</span>
-              </div>
-              <div class="bar" aria-label="1,284 of 2,000 QA reviews used"><span style="width:64%;"></span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Invoice history -->
+      <!-- Agent status board -->
       <div class="card">
         <div class="card__head">
-          <h3>Invoice history</h3>
-          <span class="tag">GBP (£)</span>
+          <h3>Agent status board</h3>
+          <a class="btn btn--sm" href="agents.html">View all agents</a>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Invoice #</th><th>Date</th><th>Amount</th><th>Status</th><th>Download</th>
+                <th>Agent</th><th>Status</th><th>Channel</th><th>Duration</th><th>Calls today</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="cell-mono">INV-2026-0712</td>
-                <td>1 Jul 2026</td>
-                <td class="cell-strong">£541.20</td>
-                <td><span class="pill pill--flag">Due</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Priya Nair</td>
+                <td><span class="pill pill--pass">On call</span></td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td class="cell-mono">4:12</td>
+                <td>21</td>
               </tr>
               <tr>
-                <td class="cell-mono">INV-2026-0611</td>
-                <td>1 Jun 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Daniel Okafor</td>
+                <td><span class="pill pill--pass">On call</span></td>
+                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
+                <td class="cell-mono">1:35</td>
+                <td>17</td>
               </tr>
               <tr>
-                <td class="cell-mono">INV-2026-0510</td>
-                <td>1 May 2026</td>
-                <td class="cell-strong">£541.20</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Grace Thompson</td>
+                <td><span class="pill pill--info">Available</span></td>
+                <td>—</td>
+                <td class="cell-mono">—</td>
+                <td>19</td>
               </tr>
               <tr>
-                <td class="cell-mono">INV-2026-0409</td>
-                <td>1 Apr 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Marcus Bennett</td>
+                <td><span class="pill pill--flag">Break</span></td>
+                <td>—</td>
+                <td class="cell-mono">6:40</td>
+                <td>14</td>
               </tr>
               <tr>
-                <td class="cell-mono">INV-2026-0308</td>
-                <td>1 Mar 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Olivia Hughes</td>
+                <td><span class="pill pill--info">Available</span></td>
+                <td>—</td>
+                <td class="cell-mono">—</td>
+                <td>16</td>
               </tr>
               <tr>
-                <td class="cell-mono">INV-2026-0207</td>
-                <td>1 Feb 2026</td>
-                <td class="cell-strong">£517.80</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Sophie Clarke</td>
+                <td><span class="pill pill--pass">On call</span></td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td class="cell-mono">0:52</td>
+                <td>23</td>
               </tr>
               <tr>
-                <td class="cell-mono">INV-2026-0106</td>
-                <td>1 Jan 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
-              </tr>
-              <tr>
-                <td class="cell-mono">INV-2025-1205</td>
-                <td>1 Dec 2025</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+                <td class="cell-strong">Rob Ashton</td>
+                <td><span class="pill pill--info">Available</span></td>
+                <td>—</td>
+                <td class="cell-mono">—</td>
+                <td>8</td>
               </tr>
             </tbody>
           </table>
