@@ -14,24 +14,32 @@
 <body>
   <div class="proto-bar">This is a <strong>PROTOTYPE</strong> — a static mockup of dial360.ai for stakeholder review. Not a live system.</div>
 
-  <!-- ===== Playful floating header ===== -->
+  <!-- ===== Playful floating header (fixed overlay, always on top) ===== -->
   <div id="mike-header" style="
-    position: relative;
-    text-align: center;
-    padding: 18px 12px;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 800;
-    font-size: clamp(22px, 4vw, 40px);
-    background: linear-gradient(90deg, #7976F3, #F481F1);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    user-select: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 2147483647;
+    pointer-events: none;
   ">
     <span id="mike-text" style="
+      pointer-events: auto;
       display: inline-block;
+      margin-top: 52px;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 800;
+      font-size: clamp(20px, 3.4vw, 38px);
+      line-height: 1.1;
+      white-space: nowrap;
+      color: #fff;
+      background: linear-gradient(90deg, #7976F3, #F481F1);
+      box-shadow: 0 10px 30px rgba(121,118,243,.45);
       will-change: transform;
-      transition: transform 0.25s cubic-bezier(.2,.8,.2,1);
+      transition: transform 0.22s cubic-bezier(.2,.8,.2,1);
     ">Mike is the bestest ✨</span>
   </div>
 
@@ -40,6 +48,23 @@
       var el = document.getElementById('mike-text');
       if (!el) return;
       var offX = 0, offY = 0;
+      var margin = 12;
+
+      function apply() {
+        var r = el.getBoundingClientRect();
+        var vw = window.innerWidth, vh = window.innerHeight;
+        // "home" position = current rect minus the offset already applied
+        var homeLeft = r.left - offX, homeTop = r.top - offY;
+        // clamp so the pill always stays fully on screen
+        var minX = margin - homeLeft;
+        var maxX = vw - margin - r.width - homeLeft;
+        var minY = margin - homeTop;
+        var maxY = vh - margin - r.height - homeTop;
+        offX = Math.max(minX, Math.min(maxX, offX));
+        offY = Math.max(minY, Math.min(maxY, offY));
+        el.style.transform = 'translate(' + offX.toFixed(1) + 'px,' + offY.toFixed(1) + 'px)';
+      }
+
       document.addEventListener('mousemove', function (e) {
         var r = el.getBoundingClientRect();
         var cx = r.left + r.width / 2;
@@ -47,18 +72,20 @@
         var dx = cx - e.clientX;
         var dy = cy - e.clientY;
         var dist = Math.hypot(dx, dy);
-        var radius = 220; // how close the mouse has to get before it flees
+        var radius = 200; // how close the mouse has to get before it flees
         if (dist < radius && dist > 0) {
           var push = (radius - dist) / radius; // 0..1, stronger the closer you are
-          offX = (dx / dist) * push * 140;
-          offY = (dy / dist) * push * 90;
+          offX += (dx / dist) * push * 26;
+          offY += (dy / dist) * push * 18;
         } else {
           // drift back home when the mouse leaves the danger zone
-          offX *= 0.85;
-          offY *= 0.85;
+          offX *= 0.88;
+          offY *= 0.88;
         }
-        el.style.transform = 'translate(' + offX.toFixed(1) + 'px,' + offY.toFixed(1) + 'px)';
+        apply();
       });
+
+      window.addEventListener('resize', apply);
     })();
   </script>
 
