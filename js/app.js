@@ -116,7 +116,7 @@
   function wireEsc() {
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") {
-        document.querySelectorAll(".modal-overlay.open, .drawer.open, .drawer-overlay.open")
+        document.querySelectorAll(".modal-overlay.open, .drawer.open, .drawer-overlay.open, .role-switch__menu.open")
           .forEach(function (el) { el.classList.remove("open"); });
       }
     });
@@ -134,7 +134,7 @@
   }
 
   /* ---- 9. Role switch (view-as, prototype only) ----
-     Topbar toggle filters [data-roles] elements (nav items, account
+     Topbar dropdown filters [data-roles] elements (nav items, account
      menu links) to what that role can see, and updates the account
      role label. Persisted in localStorage so it carries across pages.
      No real RBAC enforcement — page content itself is unrestricted. */
@@ -142,8 +142,11 @@
   var ROLE_LABELS = { admin: "Admin", teamlead: "Team lead", agent: "Agent" };
 
   function applyRole(role) {
-    document.querySelectorAll(".role-switch__btn").forEach(function (btn) {
-      btn.classList.toggle("active", btn.getAttribute("data-role") === role);
+    document.querySelectorAll(".role-switch__option").forEach(function (opt) {
+      opt.classList.toggle("active", opt.getAttribute("data-role") === role);
+    });
+    document.querySelectorAll(".role-switch__current-role").forEach(function (el) {
+      el.textContent = ROLE_LABELS[role] || ROLE_LABELS.admin;
     });
     document.querySelectorAll("[data-roles]").forEach(function (el) {
       var allowed = el.getAttribute("data-roles").split(",");
@@ -154,15 +157,26 @@
   }
 
   function wireRoleSwitch() {
-    var group = document.querySelector(".role-switch");
-    if (!group) return;
+    var wrap = document.querySelector(".role-switch");
+    if (!wrap) return;
+    var trigger = wrap.querySelector(".role-switch__trigger");
+    var menu = wrap.querySelector(".role-switch__menu");
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     applyRole(role);
-    group.querySelectorAll(".role-switch__btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        role = btn.getAttribute("data-role");
+
+    trigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      menu.classList.toggle("open");
+    });
+    document.addEventListener("click", function () { menu.classList.remove("open"); });
+    menu.addEventListener("click", function (e) { e.stopPropagation(); });
+
+    menu.querySelectorAll(".role-switch__option").forEach(function (opt) {
+      opt.addEventListener("click", function () {
+        role = opt.getAttribute("data-role");
         localStorage.setItem(ROLE_KEY, role);
         applyRole(role);
+        menu.classList.remove("open");
       });
     });
   }
