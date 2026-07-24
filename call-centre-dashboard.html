@@ -48,13 +48,13 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           <span class="nav-item__label">My Performance</span>
         </a>
-        <a class="nav-item" data-nav="interactions" href="interactions.html" data-roles="admin,manager,teamlead,trainer">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span class="nav-item__label">Interactions</span>
-        </a>
         <a class="nav-item" data-nav="qa" href="qa.html" data-roles="admin,manager,trainer">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           <span class="nav-item__label">QA Review</span>
+        </a>
+        <a class="nav-item" data-nav="complaints" href="complaints.html" data-roles="admin,manager,teamlead,trainer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <span class="nav-item__label">Complaints</span>
         </a>
         <div class="nav-group" data-roles="teamlead">
           <a class="nav-item" data-nav="my-team-performance" href="my-team-performance.html">
@@ -74,7 +74,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
           <span class="nav-item__label">Analytics</span>
         </a>
-        <a class="nav-item" data-nav="agents" href="agents.html" data-roles="admin,manager,teamlead">
+        <a class="nav-item" data-nav="agents" href="agents.html" data-roles="admin,manager">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           <span class="nav-item__label">Agents</span>
         </a>
@@ -93,6 +93,10 @@
         <a class="nav-item" data-nav="settings" href="settings.html" data-roles="admin">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <span class="nav-item__label">Settings</span>
+        </a>
+        <a class="nav-item" data-nav="interactions" href="interactions.html" data-roles="admin,manager,teamlead,trainer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-item__label">Interactions</span>
         </a>
       </nav>
       <div class="sidebar__footer">
@@ -179,28 +183,38 @@
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
           <div class="kpi__label">Calls in queue</div>
-          <div class="kpi__value">6</div>
-          <div class="kpi__delta warn">▲ 2 in the last 5 min</div>
+          <div class="kpi__value">4</div>
+          <div class="kpi__delta warn">▲ 1 in the last 5 min</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Longest wait</div>
-          <div class="kpi__value">1:48</div>
-          <div class="kpi__sub">target under 1:00</div>
+          <div class="kpi__label">Calls active</div>
+          <div class="kpi__value">5</div>
+          <div class="kpi__sub">agents on a call now</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Service level (20s)</div>
-          <div class="kpi__value">91.2%</div>
-          <div class="kpi__delta up">▲ 0.6 pts vs last hour</div>
+          <div class="kpi__label">Chats in queue</div>
+          <div class="kpi__value">2</div>
+          <div class="kpi__sub">steady over last 15 min</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Agents available</div>
-          <div class="kpi__value">5<span class="muted" style="font-size:18px;">/9</span></div>
-          <div class="kpi__sub">3 on call · 1 on break</div>
+          <div class="kpi__label">Chats active</div>
+          <div class="kpi__value">3</div>
+          <div class="kpi__sub">agents in a chat now</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Abandonment rate</div>
-          <div class="kpi__value">2.4%</div>
-          <div class="kpi__delta up">▼ 0.3 pts vs yesterday</div>
+          <div class="kpi__label">Answer rate</div>
+          <div class="kpi__value">96.1%</div>
+          <div class="kpi__delta up">▲ 0.8 pts vs last hour</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Abandoned calls</div>
+          <div class="kpi__value" style="color:var(--warning);">3</div>
+          <div class="kpi__sub">today · target under 5</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Abandoned chats</div>
+          <div class="kpi__value" style="color:var(--warning);">1</div>
+          <div class="kpi__sub">today</div>
         </div>
       </div>
 
@@ -210,18 +224,18 @@
           <div class="card__head"><h3>Live channel load</h3></div>
           <div class="card__body">
             <div class="donut-wrap">
-              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="Live channel load donut: calls 64%, chat 22%, email 14%">
+              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="Live channel load donut: calls 50%, chat 30%, email 20%">
                 <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="221.2 345.6" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="76 345.6" stroke-dashoffset="-221.2" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="48.4 345.6" stroke-dashoffset="-297.2" transform="rotate(-90 75 75)"/>
-                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">14</text>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="172.8 345.6" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="103.7 345.6" stroke-dashoffset="-172.8" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="69.1 345.6" stroke-dashoffset="-276.5" transform="rotate(-90 75 75)"/>
+                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">10</text>
                 <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">active now</text>
               </svg>
               <div class="legend" style="flex-direction:column;gap:10px;">
-                <span><i style="background:#7976F3"></i> Calls — 9 (64%)</span>
-                <span><i style="background:#F481F1"></i> Live chat — 3 (22%)</span>
-                <span><i style="background:#A177DA"></i> Email — 2 (14%)</span>
+                <span><i style="background:#7976F3"></i> Calls — 5 (50%)</span>
+                <span><i style="background:#F481F1"></i> Live chat — 3 (30%)</span>
+                <span><i style="background:#A177DA"></i> Email — 2 (20%)</span>
               </div>
             </div>
           </div>
@@ -233,7 +247,7 @@
             <span class="tag">Live</span>
           </div>
           <div class="card__body">
-            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="Calls in queue over the last 60 minutes, currently at 6, peaking at 9">
+            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="Calls in queue over the last 60 minutes, currently at 4, peaking at 8.5">
               <defs>
                 <linearGradient id="queue-area" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stop-color="#F481F1" stop-opacity="0.28"/>
@@ -249,10 +263,10 @@
               <g fill="#90A4AE" font-size="10" text-anchor="end">
                 <text x="34" y="34">10</text><text x="34" y="84">7.5</text><text x="34" y="134">5</text><text x="34" y="184">2.5</text>
               </g>
-              <path d="M40,170 L84,160 L128,165 L172,140 L216,120 L260,100 L304,110 L348,80 L392,95 L436,70 L480,90 L524,60 L568,75 L620,90 L620,180 L40,180 Z" fill="url(#queue-area)"/>
+              <path d="M40,170 L84,160 L128,165 L172,140 L216,120 L260,100 L304,110 L348,80 L392,95 L436,70 L480,90 L524,60 L568,75 L620,150 L620,180 L40,180 Z" fill="url(#queue-area)"/>
               <polyline fill="none" stroke="#F481F1" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
-                points="40,170 84,160 128,165 172,140 216,120 260,100 304,110 348,80 392,95 436,70 480,90 524,60 568,75 620,90"/>
-              <circle cx="620" cy="90" r="4" fill="#F481F1"/>
+                points="40,170 84,160 128,165 172,140 216,120 260,100 304,110 348,80 392,95 436,70 480,90 524,60 568,75 620,150"/>
+              <circle cx="620" cy="150" r="4" fill="#F481F1"/>
               <g fill="#90A4AE" font-size="10" text-anchor="middle">
                 <text x="40" y="200">60 min ago</text><text x="216" y="200">40 min ago</text><text x="392" y="200">20 min ago</text><text x="568" y="200">now</text>
               </g>
