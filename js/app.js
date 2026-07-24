@@ -420,6 +420,22 @@
     });
   }
 
+  /* ---- 12. Date-range pickers ----
+     A <select data-range-select> with a "Custom range" option reveals a
+     sibling [data-range-custom] pair of date inputs when that option is
+     chosen. Visual only — no filtering happens in this prototype. */
+  function wireRangePickers() {
+    document.querySelectorAll("[data-range-select]").forEach(function (select) {
+      var custom = select.parentElement.querySelector("[data-range-custom]");
+      if (!custom) return;
+      function sync() {
+        custom.style.display = select.value === "custom" ? "flex" : "none";
+      }
+      select.addEventListener("change", sync);
+      sync();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
@@ -430,6 +446,7 @@
     wireEsc();
     wireRowLinks();
     wireTemplateCopy();
+    wireRangePickers();
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
