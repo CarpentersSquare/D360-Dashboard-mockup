@@ -19,13 +19,13 @@
   }
 
   /* ---- 2. Fake login redirect ----
-     login.html form -> always go to overview, regardless of input. */
+     login.html form -> always go to the newsfeed, regardless of input. */
   function wireLogin() {
     var form = document.getElementById("login-form");
     if (!form) return;
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      window.location.href = "dashboard.html";
+      window.location.href = "newsfeed.html";
     });
   }
 
