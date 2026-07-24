@@ -12,10 +12,17 @@
      Nav links carry data-nav="overview". */
   function setActiveNav() {
     var page = document.body.getAttribute("data-page");
-    if (!page) return;
-    document.querySelectorAll(".nav-item[data-nav]").forEach(function (el) {
-      if (el.getAttribute("data-nav") === page) el.classList.add("active");
-    });
+    if (page) {
+      document.querySelectorAll(".nav-item[data-nav]").forEach(function (el) {
+        if (el.getAttribute("data-nav") === page) el.classList.add("active");
+      });
+    }
+    var subpage = document.body.getAttribute("data-subpage");
+    if (subpage) {
+      document.querySelectorAll(".nav-subitem[data-subnav]").forEach(function (el) {
+        if (el.getAttribute("data-subnav") === subpage) el.classList.add("active");
+      });
+    }
   }
 
   /* ---- 2. Fake login redirect ----

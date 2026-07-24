@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="my-team-performance">
+<body data-page="my-team-performance" data-subpage="my-team-qa">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -36,7 +36,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
           <span class="nav-item__label">Newsfeed</span>
         </a>
-        <a class="nav-item" data-nav="overview" href="dashboard.html" data-roles="admin,manager,teamlead">
+        <a class="nav-item" data-nav="overview" href="dashboard.html" data-roles="admin,manager">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
           <span class="nav-item__label">Overview</span>
         </a>
@@ -56,10 +56,16 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           <span class="nav-item__label">QA Review</span>
         </a>
-        <a class="nav-item" data-nav="my-team-performance" href="my-team-performance.html" data-roles="teamlead">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span class="nav-item__label">My Team Performance</span>
-        </a>
+        <div class="nav-group" data-roles="teamlead">
+          <a class="nav-item" data-nav="my-team-performance" href="my-team-performance.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span class="nav-item__label">My Team Performance</span>
+          </a>
+          <div class="nav-subnav">
+            <a class="nav-subitem" data-subnav="my-team-interaction-stats" href="my-team-interaction-stats.html">Interaction Stats</a>
+            <a class="nav-subitem" data-subnav="my-team-qa" href="my-team-qa.html">QA Review</a>
+          </div>
+        </div>
         <a class="nav-item" data-nav="my-qa" href="my-qa.html" data-roles="agent">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
           <span class="nav-item__label">My QA</span>
