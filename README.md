@@ -41,7 +41,9 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `interactions.html` | Unified interaction log (call / email / chat) |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
-| `my-team-qa.html` | A team lead's team QA performance vs other teams (Team lead role only) |
+| `my-team-performance.html` | A team lead's team performance overview, linking to Interaction Stats and QA Review (Team lead role only) |
+| `my-team-interaction-stats.html` | Team lead sub-page — interaction volume by channel and a per-agent breakdown with wrap-up time |
+| `my-team-qa.html` | Team lead sub-page ("QA Review") — team QA performance vs other teams |
 | `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
