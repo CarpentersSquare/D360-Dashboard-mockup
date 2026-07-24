@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Performance · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — an agent's own performance overview (prototype)." />
+  <title>Newsfeed · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — company newsfeed: shoutouts, quote of the day, business updates and birthdays (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="my-performance">
+<body data-page="newsfeed">
   <div class="app">
 
     <!-- ===== Sidebar ===== -->
@@ -144,107 +144,126 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>My Performance</h1>
-          <div class="sub">Your stats today · Tuesday 30 June 2026</div>
-        </div>
-        <div class="page-head__actions">
-          <a class="btn" href="my-qa.html">My QA</a>
-          <a class="btn btn--primary" href="agent-guides.html">Agent guides</a>
+          <h1>Good morning, Rob</h1>
+          <div class="sub">What's happening at Dial360 today · Tuesday 30 June 2026</div>
         </div>
       </div>
 
-      <!-- Personal KPI tiles -->
-      <div class="grid grid--kpi mb-18">
-        <div class="kpi">
-          <div class="kpi__label">Interactions handled yesterday</div>
-          <div class="kpi__value">23</div>
-          <div class="kpi__delta up">▲ 3 vs day before</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg wrap-up time</div>
-          <div class="kpi__value">9s</div>
-          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">My QA pass rate</div>
-          <div class="kpi__value">92.4%</div>
-          <div class="kpi__delta up">▲ 2.1 pts this week</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Customer sentiment</div>
-          <div class="kpi__value">4.6<span class="muted" style="font-size:18px;">/5</span></div>
-          <div class="kpi__sub">based on 18 rated calls</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Rank on team</div>
-          <div class="kpi__value">2<span class="muted" style="font-size:18px;">/9</span></div>
-          <div class="kpi__sub">by QA pass rate this month</div>
-        </div>
-      </div>
-
-      <!-- Performance trend + QA breakdown -->
-      <div class="grid grid--1-2 mb-18">
-        <div class="card">
-          <div class="card__head"><h3>My QA outcomes — this week</h3></div>
-          <div class="card__body">
-            <div class="donut-wrap">
-              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="My QA outcomes donut: pass 84%, flagged 12%, fail 4%">
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#2E7D32" stroke-width="20" stroke-dasharray="290.3 345.6" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#ED6C02" stroke-width="20" stroke-dasharray="41.5 345.6" stroke-dashoffset="-290.3" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#C62828" stroke-width="20" stroke-dasharray="13.8 345.6" stroke-dashoffset="-331.8" transform="rotate(-90 75 75)"/>
-                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">25</text>
-                <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">calls QA'd</text>
-              </svg>
-              <div class="legend" style="flex-direction:column;gap:10px;">
-                <span><i style="background:#2E7D32"></i> Pass — 21 (84%)</span>
-                <span><i style="background:#ED6C02"></i> Flagged — 3 (12%)</span>
-                <span><i style="background:#C62828"></i> Fail — 1 (4%)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <!-- Shoutouts + Quote of the day -->
+      <div class="grid grid--2-1 mb-18">
         <div class="card">
           <div class="card__head">
-            <h3>Interactions handled — last 14 days</h3>
-            <span class="tag">Daily total</span>
+            <h3>🏆 100% QA Shoutouts — this week</h3>
+            <span class="tag">Perfect scores</span>
           </div>
           <div class="card__body">
-            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="My interactions handled over the last 14 days, trending upward from about 16 to 23">
-              <defs>
-                <linearGradient id="my-area" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stop-color="#7976F3" stop-opacity="0.28"/>
-                  <stop offset="1" stop-color="#7976F3" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <g stroke="#EBEBEB" stroke-width="1">
-                <line x1="40" y1="30" x2="620" y2="30"/>
-                <line x1="40" y1="80" x2="620" y2="80"/>
-                <line x1="40" y1="130" x2="620" y2="130"/>
-                <line x1="40" y1="180" x2="620" y2="180"/>
-              </g>
-              <g fill="#90A4AE" font-size="10" text-anchor="end">
-                <text x="34" y="34">30</text><text x="34" y="84">22</text><text x="34" y="134">14</text><text x="34" y="184">6</text>
-              </g>
-              <path d="M40,150 L84,145 L128,155 L172,130 L216,138 L260,120 L304,125 L348,105 L392,112 L436,95 L480,100 L524,85 L568,90 L620,70 L620,180 L40,180 Z" fill="url(#my-area)"/>
-              <polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
-                points="40,150 84,145 128,155 172,130 216,138 260,120 304,125 348,105 392,112 436,95 480,100 524,85 568,90 620,70"/>
-              <circle cx="620" cy="70" r="4" fill="#7976F3"/>
-              <g fill="#90A4AE" font-size="10" text-anchor="middle">
-                <text x="40" y="200">17 Jun</text><text x="216" y="200">21 Jun</text><text x="392" y="200">25 Jun</text><text x="568" y="200">29 Jun</text>
-              </g>
-            </svg>
+            <ul class="checklist">
+              <li>
+                <span class="avatar avatar--sm">SC</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Sophie Clarke <span class="pill pill--pass" style="margin-left:6px;">100%</span></div>
+                  <div class="checklist__desc">Perfect DPA, tone and compliance on INT-10529 — 2nd perfect score this month!</div>
+                </div>
+              </li>
+              <li>
+                <span class="avatar avatar--sm">GT</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Grace Thompson <span class="pill pill--pass" style="margin-left:6px;">100%</span></div>
+                  <div class="checklist__desc">Textbook complaint handling and escalation on INT-10522.</div>
+                </div>
+              </li>
+              <li>
+                <span class="avatar avatar--sm">DO</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Daniel Okafor <span class="pill pill--pass" style="margin-left:6px;">100%</span></div>
+                  <div class="checklist__desc">Flawless DPA verification and a great save on INT-10517. Nice work!</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head"><h3>Quote of the day</h3></div>
+          <div class="card__body" style="text-align:center;">
+            <div style="font-size:36px;color:var(--indigo);line-height:1;font-weight:800;">&ldquo;</div>
+            <p style="font-size:15px;font-weight:600;color:var(--ink);margin:0 0 10px;">Quality is not an act, it is a habit.</p>
+            <div class="small muted">— Aristotle</div>
           </div>
         </div>
       </div>
 
-      <!-- Coaching callout -->
-      <div class="callout mb-18">
-        <div class="callout__big">92.4%</div>
-        <div>
-          <h3>You're ahead of the team average</h3>
-          <p>Team QA pass rate is 88.6% this week — keep flagging DPA steps early to stay on top.</p>
+      <!-- Business updates + Birthdays -->
+      <div class="grid grid--2-1 mb-18">
+        <div class="card">
+          <div class="card__head">
+            <h3>Recent business updates</h3>
+            <span class="tag">Company news</span>
+          </div>
+          <div class="card__body">
+            <ul class="checklist">
+              <li>
+                <div class="checklist__main">
+                  <div class="checklist__title">New AI wrap-up model rolled out <span class="tag" style="margin-left:6px;">Product</span></div>
+                  <div class="checklist__desc">Average wrap-up time is now down to ~9s across the team following this week's model upgrade. · 29 Jun</div>
+                </div>
+              </li>
+              <li>
+                <div class="checklist__main">
+                  <div class="checklist__title">Dial360 shortlisted for CX Awards 2026 <span class="tag" style="margin-left:6px;">Company</span></div>
+                  <div class="checklist__desc">We're a finalist in "Best Use of AI in Customer Service" — winners announced in August. · 27 Jun</div>
+                </div>
+              </li>
+              <li>
+                <div class="checklist__main">
+                  <div class="checklist__title">Salesforce integration now live <span class="tag" style="margin-left:6px;">Product</span></div>
+                  <div class="checklist__desc">Interaction history now syncs automatically to linked Salesforce records. · 24 Jun</div>
+                </div>
+              </li>
+              <li>
+                <div class="checklist__main">
+                  <div class="checklist__title">Office closed — Summer Bank Holiday <span class="tag" style="margin-left:6px;">HR</span></div>
+                  <div class="checklist__desc">Office closed Monday 25 August. Live coverage continues via the Hub as normal. · 20 Jun</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head"><h3>🎂 Upcoming birthdays</h3></div>
+          <div class="card__body">
+            <ul class="checklist">
+              <li>
+                <span class="avatar avatar--sm">PN</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Priya Nair</div>
+                  <div class="checklist__desc">2 Jul</div>
+                </div>
+              </li>
+              <li>
+                <span class="avatar avatar--sm">MB</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Marcus Bennett</div>
+                  <div class="checklist__desc">9 Jul</div>
+                </div>
+              </li>
+              <li>
+                <span class="avatar avatar--sm">OH</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Olivia Hughes</div>
+                  <div class="checklist__desc">15 Jul</div>
+                </div>
+              </li>
+              <li>
+                <span class="avatar avatar--sm">CR</span>
+                <div class="checklist__main">
+                  <div class="checklist__title">Charlotte Reid</div>
+                  <div class="checklist__desc">22 Jul</div>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 

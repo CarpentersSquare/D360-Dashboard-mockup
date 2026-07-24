@@ -23,18 +23,19 @@ Every page is independently deep-linkable.
 ## Flow
 
 `index.html` (marketing homepage) → **Login / Get started** → `sso.html` (mocked SSO) →
-`dashboard.html` (admin console). `login.html` offers an email/password alternative that
-also lands on the dashboard. The dashboard top bar carries a **Launch Hub** button — where an
-agent would open the live calling workstation (a separate app, deliberately not mocked).
+`newsfeed.html` (admin console landing page). `login.html` offers an email/password alternative
+that also lands on the newsfeed. The top bar carries a **Launch Hub** button — where an agent
+would open the live calling workstation (a separate app, deliberately not mocked).
 
 ## Pages / routes
 
 | File | Screen |
 |---|---|
 | `index.html` | Spoofed dial360.ai marketing homepage (Login + Get started) |
-| `sso.html` | Mocked single sign-on (email → identity provider → dashboard) |
-| `login.html` | Facade email/password login — also lands on the dashboard |
-| `dashboard.html` | Admin Overview (landing after sign-in) |
+| `sso.html` | Mocked single sign-on (email → identity provider → newsfeed) |
+| `login.html` | Facade email/password login — also lands on the newsfeed |
+| `newsfeed.html` | Company newsfeed — shoutouts, quote of the day, updates, birthdays (landing page after sign-in) |
+| `dashboard.html` | Admin Overview |
 | `call-centre-dashboard.html` | Live call centre floor view (queue, agent status, service level) |
 | `my-performance.html` | An agent's own performance overview (Agent role only) |
 | `interactions.html` | Unified interaction log (call / email / chat) |
@@ -53,7 +54,7 @@ agent would open the live calling workstation (a separate app, deliberately not 
 
 ```
 /
-├── index.html             → marketing homepage   ├── dashboard.html  → admin Overview
+├── index.html             → marketing homepage   ├── newsfeed.html   → admin landing page
 ├── sso.html · login.html  → sign-in              ├── *.html           → other admin routes
 ├── assets/                → logo.png (real Dial360 wordmark), logo.svg fallback, favicon.svg
 ├── css/styles.css         → single shared stylesheet (brand tokens + components)
@@ -66,7 +67,7 @@ fallback to `assets/logo.svg`).
 ## What `js/app.js` does (visual only)
 
 - Sets the active sidebar item from `<body data-page="…">`.
-- Redirects the login form to `dashboard.html` on submit; `sso.html` runs its own small step flow.
+- Redirects the login form to `newsfeed.html` on submit; `sso.html` runs its own small step flow.
 - Toggles the account menu, tabbed panels, modals, drawers, and clickable table rows
   (`tr[data-href]` / `[data-open-modal]` / `[data-open-drawer]`).
 
