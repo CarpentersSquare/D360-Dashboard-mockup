@@ -45,6 +45,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `my-team-performance.html` | A team lead's team performance overview, linking to Interaction Stats and QA Review (Team lead role only) |
 | `my-team-interaction-stats.html` | Team lead sub-page — interaction volume by channel and a per-agent breakdown with wrap-up time |
 | `my-team-qa.html` | Team lead sub-page ("QA Review") — team QA performance vs other teams |
+| `my-team-qa-reviews.html` | Team lead — every scored call for their team, filterable by agent, date range and outcome |
 | `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
@@ -78,9 +79,10 @@ fallback to `assets/logo.svg`).
 - Drives the **"Viewing as" role switch** in the topbar (Admin / Manager / Team lead / Trainer /
   Agent): filters any `[data-roles]` element to match — sidebar links and account-menu items
   everywhere, plus a few pages that also filter their own content (e.g. `agents.html` shows only
-  a team lead's allocated team, with a separate KPI row for that scoped view). Persists the
-  choice in `localStorage` so it carries across pages. Still purely visual, matching this
-  prototype's "no real RBAC" stance — nothing is actually access-controlled server-side.
+  Admin/Manager the full roster — a Team lead's own team roster lives on `my-team-performance.html`
+  instead, with a separate KPI row for that scoped view). Persists the choice in `localStorage` so
+  it carries across pages. Still purely visual, matching this prototype's "no real RBAC" stance —
+  nothing is actually access-controlled server-side.
 
 - Drives the **rolling announcement banner** at the top of every admin page: auto-rotates
   through short messages every 6s (with dot navigation), and lets Team lead and above post new
