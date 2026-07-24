@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Billing &amp; plan · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — subscription, usage and invoices (prototype)." />
+  <title>My QA · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — an agent's own automated QA scores and coaching feedback (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="billing">
+<body data-page="my-qa">
   <div class="app">
 
     <!-- ===== Sidebar ===== -->
@@ -136,181 +136,150 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>Billing &amp; plan</h1>
-          <div class="sub">Manage your subscription, usage and invoices</div>
+          <h1>My QA</h1>
+          <div class="sub">Your automated QA scores and coaching feedback</div>
         </div>
         <div class="page-head__actions">
-          <button class="btn btn--ghost">Manage payment</button>
-          <button class="btn btn--primary">Upgrade plan</button>
+          <a class="btn btn--ghost" href="my-performance.html">My performance</a>
         </div>
       </div>
 
-      <!-- Current plan + Payment method -->
-      <div class="grid grid--2-1 mb-18">
-        <div class="card">
-          <div class="card__head">
-            <h3>Current plan</h3>
-            <button class="btn btn--ghost btn--sm">Change plan</button>
-          </div>
-          <div class="card__body">
-            <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
-              <span class="pill pill--info" style="font-size:13px;padding:5px 14px;">Business</span>
-              <span style="font-size:24px;font-weight:800;letter-spacing:-.02em;">£499</span>
-              <span class="muted">/ month</span>
-            </div>
-            <div style="margin-bottom:18px;">
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Agent seats</span>
-                <span class="small muted">9 of 12 used</span>
-              </div>
-              <div class="bar" aria-label="9 of 12 seats used"><span style="width:75%;"></span></div>
-            </div>
-            <dl class="dl">
-              <dt>Renewal date</dt>
-              <dd>Renews 14 Jul 2026</dd>
-              <dt>Billing cycle</dt>
-              <dd>Monthly</dd>
-              <dt>Account</dt>
-              <dd>Dial360 Ltd</dd>
-            </dl>
-          </div>
+      <!-- Summary tiles -->
+      <div class="grid grid--kpi mb-18">
+        <div class="kpi">
+          <div class="kpi__label">My QA pass rate</div>
+          <div class="kpi__value">92.4%</div>
+          <div class="kpi__delta up">▲ 2.1 pts this week</div>
         </div>
-
-        <div class="card">
-          <div class="card__head">
-            <h3>Payment method</h3>
-            <button class="btn btn--ghost btn--sm">Update</button>
-          </div>
-          <div class="card__body">
-            <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
-              <span class="int-card__logo" style="width:48px;height:32px;font-size:13px;letter-spacing:.04em;">VISA</span>
-              <div>
-                <div class="cell-strong">Visa •••• 4471</div>
-                <div class="small muted">Expires 09/27</div>
-              </div>
-            </div>
-            <dl class="dl">
-              <dt>Name on card</dt>
-              <dd>Dial360 Ltd</dd>
-              <dt>Billing email</dt>
-              <dd>accounts@dial360-demo.co.uk</dd>
-            </dl>
-          </div>
+        <div class="kpi">
+          <div class="kpi__label">Calls scored this week</div>
+          <div class="kpi__value">25</div>
+          <div class="kpi__sub">auto-QA'd</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Flagged for review</div>
+          <div class="kpi__value" style="color:var(--warning);">3</div>
+          <div class="kpi__delta warn">1 still open</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Avg score</div>
+          <div class="kpi__value">91<span class="muted" style="font-size:18px;">/100</span></div>
+          <div class="kpi__sub">across 25 scored calls</div>
         </div>
       </div>
 
-      <!-- Usage this period -->
-      <div class="card mb-18">
-        <div class="card__head">
-          <h3>Usage this period</h3>
-          <span class="tag">1 Jun – 30 Jun 2026</span>
+      <!-- Coaching callout -->
+      <div class="callout mb-18">
+        <div class="callout__big">2<span class="muted" style="font-size:18px;">/9</span></div>
+        <div>
+          <h3>You're ranked 2nd on the team this month</h3>
+          <p>Your one flagged theme this week is <strong>DPA verification</strong> — confirm name, postcode and address line before discussing account details.</p>
         </div>
-        <div class="card__body">
-          <div class="grid grid--2">
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Agent seats</span>
-                <span class="small muted">9 / 12</span>
-              </div>
-              <div class="bar" aria-label="9 of 12 agent seats used"><span style="width:75%;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Call minutes</span>
-                <span class="small muted">18,420 / 25,000</span>
-              </div>
-              <div class="bar bar--warn" aria-label="18,420 of 25,000 call minutes used"><span style="width:74%;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">AI wrap-ups generated</span>
-                <span class="small muted">9,860 / unlimited</span>
-              </div>
-              <div class="bar" aria-label="9,860 AI wrap-ups generated, unlimited allowance"><span style="width:18%;opacity:.45;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">QA reviews</span>
-                <span class="small muted">1,284 / 2,000</span>
-              </div>
-              <div class="bar" aria-label="1,284 of 2,000 QA reviews used"><span style="width:64%;"></span></div>
-            </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filterbar">
+        <div class="field">
+          <label for="f-status">Status</label>
+          <select id="f-status">
+            <option>All</option>
+            <option>Needs review</option>
+            <option>In review</option>
+            <option>Resolved</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-reason">Failure reason</label>
+          <select id="f-reason">
+            <option>All</option>
+            <option>DPA not completed</option>
+            <option>Compliance phrase missing</option>
+            <option>Tone</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div class="row" style="gap:10px;">
+            <button class="btn btn--primary" type="button">Apply</button>
+            <button class="btn btn--ghost" type="button">Clear</button>
           </div>
         </div>
       </div>
 
-      <!-- Invoice history -->
+      <!-- My QA scorecards -->
       <div class="card">
         <div class="card__head">
-          <h3>Invoice history</h3>
-          <span class="tag">GBP (£)</span>
+          <h3>My recent QA scorecards</h3>
+          <span class="tag">Most recent first</span>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Invoice #</th><th>Date</th><th>Amount</th><th>Status</th><th>Download</th>
+                <th>Interaction</th>
+                <th>Customer</th>
+                <th>Score</th>
+                <th>Top failure reason</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="cell-mono">INV-2026-0712</td>
-                <td>1 Jul 2026</td>
-                <td class="cell-strong">£541.20</td>
-                <td><span class="pill pill--flag">Due</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              <tr class="clickable" data-href="scorecard.html">
+                <td class="cell-mono">INT-10512</td>
+                <td class="cell-strong">Margaret Whitfield</td>
+                <td><span class="cell-strong" style="color:var(--success);">96/100</span></td>
+                <td class="muted">—</td>
+                <td><span class="pill pill--pass">Resolved</span></td>
               </tr>
-              <tr>
-                <td class="cell-mono">INV-2026-0611</td>
-                <td>1 Jun 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              <tr class="clickable" data-href="scorecard.html">
+                <td class="cell-mono">INT-10505</td>
+                <td class="cell-strong">Tom Beresford</td>
+                <td><span class="cell-strong" style="color:var(--warning);">67/100</span></td>
+                <td>DPA not completed</td>
+                <td><span class="pill pill--info">In review</span></td>
               </tr>
-              <tr>
-                <td class="cell-mono">INV-2026-0510</td>
-                <td>1 May 2026</td>
-                <td class="cell-strong">£541.20</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              <tr class="clickable" data-href="scorecard.html">
+                <td class="cell-mono">INT-10498</td>
+                <td class="cell-strong">Aisha Rahman</td>
+                <td><span class="cell-strong" style="color:var(--success);">94/100</span></td>
+                <td class="muted">—</td>
+                <td><span class="pill pill--pass">Resolved</span></td>
               </tr>
-              <tr>
-                <td class="cell-mono">INV-2026-0409</td>
-                <td>1 Apr 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              <tr class="clickable" data-href="scorecard.html">
+                <td class="cell-mono">INT-10491</td>
+                <td class="cell-strong">Liam Foster</td>
+                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
+                <td>Tone</td>
+                <td><span class="pill pill--flag">Needs review</span></td>
               </tr>
-              <tr>
-                <td class="cell-mono">INV-2026-0308</td>
-                <td>1 Mar 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              <tr class="clickable" data-href="scorecard.html">
+                <td class="cell-mono">INT-10484</td>
+                <td class="cell-strong">Sophie Clarke</td>
+                <td><span class="cell-strong" style="color:var(--success);">91/100</span></td>
+                <td class="muted">—</td>
+                <td><span class="pill pill--pass">Resolved</span></td>
               </tr>
-              <tr>
-                <td class="cell-mono">INV-2026-0207</td>
-                <td>1 Feb 2026</td>
-                <td class="cell-strong">£517.80</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
-              </tr>
-              <tr>
-                <td class="cell-mono">INV-2026-0106</td>
-                <td>1 Jan 2026</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
-              </tr>
-              <tr>
-                <td class="cell-mono">INV-2025-1205</td>
-                <td>1 Dec 2025</td>
-                <td class="cell-strong">£499.00</td>
-                <td><span class="pill pill--pass">Paid</span></td>
-                <td><a href="#" onclick="return false;" class="btn btn--sm">Download</a></td>
+              <tr class="clickable" data-href="scorecard.html">
+                <td class="cell-mono">INT-10477</td>
+                <td class="cell-strong">Henry Walsh</td>
+                <td><span class="cell-strong" style="color:var(--danger);">42/100</span></td>
+                <td>Compliance phrase missing</td>
+                <td><span class="pill pill--flag">Needs review</span></td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="card__foot">
+          <div class="pagination">
+            <div class="pagination__info">Showing 6 of 25 scored calls</div>
+            <div class="pager">
+              <button type="button" disabled aria-label="Previous page">‹</button>
+              <button type="button" class="active" aria-current="page">1</button>
+              <button type="button">2</button>
+              <button type="button">3</button>
+              <button type="button" aria-label="Next page">›</button>
+            </div>
+          </div>
         </div>
       </div>
 

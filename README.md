@@ -40,6 +40,7 @@ agent would open the live calling workstation (a separate app, deliberately not 
 | `interactions.html` | Unified interaction log (call / email / chat) |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
+| `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
 | `agents.html` | Team / agents (invite modal, detail drawer) |
