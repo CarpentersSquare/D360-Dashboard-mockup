@@ -139,7 +139,10 @@
      role label. Persisted in localStorage so it carries across pages.
      No real RBAC enforcement — page content itself is unrestricted. */
   var ROLE_KEY = "d360-role";
-  var ROLE_LABELS = { admin: "Admin", teamlead: "Team lead", agent: "Agent" };
+  var ROLE_LABELS = {
+    admin: "Admin", manager: "Manager", teamlead: "Team lead",
+    trainer: "Trainer", agent: "Agent"
+  };
 
   function applyRole(role) {
     document.querySelectorAll(".role-switch__option").forEach(function (opt) {
