@@ -41,6 +41,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `interactions.html` | Unified interaction log (call / email / chat) |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
+| `my-team-qa.html` | A team lead's team QA performance vs other teams (Team lead role only) |
 | `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
@@ -72,10 +73,11 @@ fallback to `assets/logo.svg`).
   (`tr[data-href]` / `[data-open-modal]` / `[data-open-drawer]`).
 
 - Drives the **"Viewing as" role switch** in the topbar (Admin / Manager / Team lead / Trainer /
-  Agent): filters
-  `[data-roles]` sidebar links and account-menu items to match, updates the account role label,
-  and persists the choice in `localStorage` so it carries across pages. Purely visual — the page
-  content itself isn't gated, matching this prototype's "no real RBAC" stance.
+  Agent): filters any `[data-roles]` element to match — sidebar links and account-menu items
+  everywhere, plus a few pages that also filter their own content (e.g. `agents.html` shows only
+  a team lead's allocated team, with a separate KPI row for that scoped view). Persists the
+  choice in `localStorage` so it carries across pages. Still purely visual, matching this
+  prototype's "no real RBAC" stance — nothing is actually access-controlled server-side.
 
 No data is fetched or persisted (aside from the role switch above); filters and form controls
 are otherwise decorative.
