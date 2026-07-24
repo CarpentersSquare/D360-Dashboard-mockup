@@ -41,7 +41,9 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `interactions.html` | Unified interaction log (call / email / chat) |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
-| `my-team-qa.html` | A team lead's team QA performance vs other teams (Team lead role only) |
+| `my-team-performance.html` | A team lead's team performance overview, linking to Interaction Stats and QA Review (Team lead role only) |
+| `my-team-interaction-stats.html` | Team lead sub-page — interaction volume by channel and a per-agent breakdown with wrap-up time |
+| `my-team-qa.html` | Team lead sub-page ("QA Review") — team QA performance vs other teams |
 | `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
@@ -79,8 +81,14 @@ fallback to `assets/logo.svg`).
   choice in `localStorage` so it carries across pages. Still purely visual, matching this
   prototype's "no real RBAC" stance — nothing is actually access-controlled server-side.
 
-No data is fetched or persisted (aside from the role switch above); filters and form controls
-are otherwise decorative.
+- Drives the **rolling announcement banner** at the top of every admin page: auto-rotates
+  through short messages every 6s (with dot navigation), and lets Team lead and above post new
+  ones via an "Edit" button. Team lead posts are scoped to their own team ("Team Priya" — the
+  one named team in this prototype's dummy data); Manager/Admin posts go to everyone; Trainer and
+  Agent can view but not post. Messages persist in `localStorage` alongside the role choice.
+
+No data is fetched or persisted (aside from the role switch and banner messages above); filters
+and other form controls are otherwise decorative.
 
 ## Branding
 

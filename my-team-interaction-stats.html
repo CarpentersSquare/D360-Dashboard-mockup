@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QA Review · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — automated QA review queue (prototype)." />
+  <title>Interaction Stats · My Team Performance · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — a team lead's team interaction volume by channel, with a per-agent breakdown (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="qa">
+<body data-page="my-team-performance">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -158,262 +158,154 @@
 
     <!-- ===== Main ===== -->
     <main class="main">
+      <div class="breadcrumb">
+        <a href="my-team-performance.html">My Team Performance</a> / Interaction Stats
+      </div>
+
       <div class="page-head">
         <div>
-          <h1>QA Review</h1>
-          <div class="sub">Automated quality assurance across every call — review flags and scorecards</div>
+          <h1>Interaction Stats</h1>
+          <div class="sub">Team Priya's interaction volume by channel · this week</div>
         </div>
         <div class="page-head__actions">
-          <a class="btn btn--ghost" href="settings.html">QA settings</a>
-          <button class="btn btn--primary" type="button">Export</button>
+          <a class="btn btn--ghost" href="interactions.html">View interaction log</a>
         </div>
       </div>
 
       <!-- Summary tiles -->
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
-          <div class="kpi__label">Calls auto-QA'd this week</div>
-          <div class="kpi__value">1,284</div>
-          <div class="kpi__delta up">▲ 6.1% vs last week</div>
+          <div class="kpi__label">Total interactions</div>
+          <div class="kpi__value">474</div>
+          <div class="kpi__delta up">▲ 5.2% vs last week</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Auto-passed</div>
-          <div class="kpi__value">88.6%</div>
-          <div class="kpi__delta up">▲ 1.2 pts this week</div>
+          <div class="kpi__label">Inbound calls</div>
+          <div class="kpi__value">189</div>
+          <div class="kpi__sub">39.9% of interactions</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Flagged for manual review</div>
-          <div class="kpi__value" style="color:var(--warning);">23</div>
-          <div class="kpi__delta warn">9 still unassigned</div>
+          <div class="kpi__label">Outbound calls</div>
+          <div class="kpi__value">103</div>
+          <div class="kpi__sub">21.7% of interactions</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Avg score</div>
-          <div class="kpi__value">86<span class="muted" style="font-size:18px;">/100</span></div>
-          <div class="kpi__sub">across 1,284 scored calls</div>
+          <div class="kpi__label">Live chat</div>
+          <div class="kpi__value">72</div>
+          <div class="kpi__sub">15.2% of interactions</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Emails</div>
+          <div class="kpi__value">110</div>
+          <div class="kpi__sub">23.2% of interactions</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Avg wrap-up time</div>
+          <div class="kpi__value">11s</div>
+          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="filterbar">
-        <div class="field">
-          <label for="f-status">Status</label>
-          <select id="f-status">
-            <option>All</option>
-            <option selected>Needs review</option>
-            <option>In review</option>
-            <option>Resolved</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f-agent">Agent</label>
-          <select id="f-agent">
-            <option>All</option>
-            <option>Rob Ashton</option>
-            <option>Priya Nair</option>
-            <option>Daniel Okafor</option>
-            <option>Grace Thompson</option>
-            <option>Marcus Bennett</option>
-            <option>Olivia Hughes</option>
-            <option>Charlotte Reid</option>
-            <option>James Whitmore</option>
-            <option>Hannah Price</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f-reason">Failure reason</label>
-          <select id="f-reason">
-            <option>All</option>
-            <option>DPA not completed</option>
-            <option>Compliance phrase missing</option>
-            <option>Tone</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>&nbsp;</label>
-          <div class="row" style="gap:10px;">
-            <button class="btn btn--primary" type="button">Apply</button>
-            <button class="btn btn--ghost" type="button">Clear</button>
+      <!-- Channel split -->
+      <div class="card mb-18">
+        <div class="card__head"><h3>Channel split — this week</h3></div>
+        <div class="card__body">
+          <div class="donut-wrap">
+            <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="Channel split donut: calls 61.6%, email 23.2%, chat 15.2%">
+              <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
+              <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="213 345.6" transform="rotate(-90 75 75)"/>
+              <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="80 345.6" stroke-dashoffset="-213" transform="rotate(-90 75 75)"/>
+              <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="52 345.6" stroke-dashoffset="-293" transform="rotate(-90 75 75)"/>
+              <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">474</text>
+              <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">interactions</text>
+            </svg>
+            <div class="legend" style="flex-direction:column;gap:10px;">
+              <span><i style="background:#7976F3"></i> Calls (inbound + outbound) — 292 (61.6%)</span>
+              <span><i style="background:#A177DA"></i> Email — 110 (23.2%)</span>
+              <span><i style="background:#F481F1"></i> Live chat — 72 (15.2%)</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Flagged queue -->
+      <!-- Per-agent breakdown -->
       <div class="card">
         <div class="card__head">
-          <h3>Flagged for review</h3>
-          <span class="tag">Sorted by lowest score</span>
+          <h3>Interactions by agent — Team Priya</h3>
+          <span class="tag">This week</span>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Interaction</th>
-                <th>Customer</th>
                 <th>Agent</th>
-                <th>Score</th>
-                <th>Top failure reason</th>
-                <th>Status</th>
-                <th>Assigned reviewer</th>
+                <th>Inbound calls</th>
+                <th>Outbound calls</th>
+                <th>Live chat</th>
+                <th>Email</th>
+                <th>Total</th>
+                <th>Avg wrap-up</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10477</td>
-                <td class="cell-strong">Liam Foster</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">48/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
+              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Priya Nair">
+                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span><span class="cell-strong">Priya Nair</span></span></td>
+                <td class="cell-mono">38</td>
+                <td class="cell-mono">22</td>
+                <td class="cell-mono">15</td>
+                <td class="cell-mono">23</td>
+                <td class="cell-strong">98</td>
+                <td class="cell-mono">8s</td>
               </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10461</td>
-                <td class="cell-strong">Tom Beresford</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">52/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Daniel Okafor">
+                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span><span class="cell-strong">Daniel Okafor</span></span></td>
+                <td class="cell-mono">48</td>
+                <td class="cell-mono">25</td>
+                <td class="cell-mono">16</td>
+                <td class="cell-mono">23</td>
+                <td class="cell-strong">112</td>
+                <td class="cell-mono">11s</td>
               </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10454</td>
-                <td class="cell-strong">Raj Sharma</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">55/100</span></td>
-                <td>Compliance phrase missing</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
+              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Grace Thompson">
+                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span><span class="cell-strong">Grace Thompson</span></span></td>
+                <td class="cell-mono">34</td>
+                <td class="cell-mono">18</td>
+                <td class="cell-mono">14</td>
+                <td class="cell-mono">21</td>
+                <td class="cell-strong">87</td>
+                <td class="cell-mono">10s</td>
               </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10448</td>
-                <td class="cell-strong">Nadia Hussain</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
+              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Marcus Bennett">
+                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span><span class="cell-strong">Marcus Bennett</span></span></td>
+                <td class="cell-mono">28</td>
+                <td class="cell-mono">15</td>
+                <td class="cell-mono">12</td>
+                <td class="cell-mono">18</td>
+                <td class="cell-strong">73</td>
+                <td class="cell-mono">15s</td>
               </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10442</td>
-                <td class="cell-strong">George Hamilton</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">61/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10436</td>
-                <td class="cell-strong">Sophie Clarke</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">63/100</span></td>
-                <td>Compliance phrase missing</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10429</td>
-                <td class="cell-strong">Oliver Grant</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">64/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10421</td>
-                <td class="cell-strong">Beatrice Coleman</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">67/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10415</td>
-                <td class="cell-strong">William Pearce</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">69/100</span></td>
-                <td>Compliance phrase missing</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10408</td>
-                <td class="cell-strong">Chloe Sutton</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">71/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--pass">Resolved</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10402</td>
-                <td class="cell-strong">Yusuf Demir</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">73/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10396</td>
-                <td class="cell-strong">Catherine Lowe</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">75/100</span></td>
-                <td>Compliance phrase missing</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10389</td>
-                <td class="cell-strong">Dominic Reyes</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">77/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10381</td>
-                <td class="cell-strong">Eleanor Davies</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">79/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--pass">Resolved</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10374</td>
-                <td class="cell-strong">Priscilla Adeyemi</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">82/100</span></td>
-                <td>Compliance phrase missing</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10367</td>
-                <td class="cell-strong">Nathan Cole</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">84/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
+              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Olivia Hughes">
+                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span><span class="cell-strong">Olivia Hughes</span></span></td>
+                <td class="cell-mono">41</td>
+                <td class="cell-mono">23</td>
+                <td class="cell-mono">15</td>
+                <td class="cell-mono">25</td>
+                <td class="cell-strong">104</td>
+                <td class="cell-mono">10s</td>
               </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                <td class="cell-strong">Team total</td>
+                <td class="cell-strong">189</td>
+                <td class="cell-strong">103</td>
+                <td class="cell-strong">72</td>
+                <td class="cell-strong">110</td>
+                <td class="cell-strong">474</td>
+                <td class="cell-strong">11s</td>
+              </tr>
+            </tfoot>
           </table>
-        </div>
-        <div class="card__foot">
-          <div class="pagination">
-            <div class="pagination__info">Showing 1–16 of 23 flagged</div>
-            <div class="pager">
-              <button type="button" disabled aria-label="Previous page">‹</button>
-              <button type="button" class="active" aria-current="page">1</button>
-              <button type="button">2</button>
-              <button type="button" aria-label="Next page">›</button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -439,6 +331,30 @@
       <div class="modal__foot">
         <button class="btn" data-close-modal>Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== Agent detail drawer ===== -->
+  <div class="drawer-overlay" id="agent-drawer-overlay"></div>
+  <div class="drawer" id="agent-drawer" aria-label="Agent details">
+    <div class="drawer__head">
+      <h3 data-drawer-name>Agent</h3>
+      <button class="icon-btn" data-close-drawer aria-label="Close agent details">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer__body">
+      <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
+        <span class="avatar avatar--lg" aria-hidden="true">AG</span>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span class="tag">Agent</span>
+            <span class="status-dot online">Online</span>
+          </div>
+          <div class="muted small">Team Priya · joined Mar 2025</div>
+        </div>
+      </div>
+      <a class="btn btn--sm" href="agents.html">View full roster</a>
     </div>
   </div>
 
