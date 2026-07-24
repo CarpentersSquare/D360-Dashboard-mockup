@@ -104,6 +104,25 @@ p { margin: 0 0 12px; }
 .topbar__search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); }
 .topbar__spacer { flex: 1; }
 
+/* ---------- Role switch (view-as, prototype only) ---------- */
+.role-switch { display: flex; align-items: center; gap: 8px; }
+.role-switch__label {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
+}
+.role-switch__group {
+  display: flex; gap: 2px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px;
+}
+.role-switch__btn {
+  border: none; background: transparent; color: var(--muted);
+  font-family: var(--font); font-size: 12px; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+}
+.role-switch__btn:hover { color: var(--ink); }
+.role-switch__btn.active { background: var(--gradient); color: #fff; }
+
 .env-badge {
   background: var(--magenta);
   color: #fff;

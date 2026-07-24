@@ -67,7 +67,13 @@ fallback to `assets/logo.svg`).
 - Toggles the account menu, tabbed panels, modals, drawers, and clickable table rows
   (`tr[data-href]` / `[data-open-modal]` / `[data-open-drawer]`).
 
-No data is fetched or persisted; filters and form controls are decorative.
+- Drives the **"Viewing as" role switch** in the topbar (Admin / Team lead / Agent): filters
+  `[data-roles]` sidebar links and account-menu items to match, updates the account role label,
+  and persists the choice in `localStorage` so it carries across pages. Purely visual — the page
+  content itself isn't gated, matching this prototype's "no real RBAC" stance.
+
+No data is fetched or persisted (aside from the role switch above); filters and form controls
+are otherwise decorative.
 
 ## Branding
 
