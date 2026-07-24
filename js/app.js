@@ -133,13 +133,60 @@
     });
   }
 
-  /* ---- 9. Role switch (view-as, prototype only) ----
+  /* ---- 9. Template copy-to-clipboard ----
+     .tpl-copy buttons copy their card's body text so agents (who can't
+     edit templates) can grab the wording to use elsewhere. */
+  function wireTemplateCopy() {
+    document.querySelectorAll(".tpl-copy").forEach(function (btn) {
+      var originalHTML = btn.innerHTML;
+      var resetTimer = null;
+
+      function showResult(label) {
+        btn.textContent = label;
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(function () { btn.innerHTML = originalHTML; }, 1500);
+      }
+
+      btn.addEventListener("click", function () {
+        var card = btn.closest(".card");
+        var body = card && card.querySelector(".card__body p");
+        if (!body) return;
+        var text = body.textContent.trim();
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(
+            function () { showResult("Copied ✓"); },
+            function () { showResult("Copy failed"); }
+          );
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand("copy");
+            showResult("Copied ✓");
+          } catch (e) {
+            showResult("Copy failed");
+          }
+          document.body.removeChild(ta);
+        }
+      });
+    });
+  }
+
+  /* ---- 10. Role switch (view-as, prototype only) ----
      Topbar dropdown filters [data-roles] elements (nav items, account
      menu links) to what that role can see, and updates the account
      role label. Persisted in localStorage so it carries across pages.
      No real RBAC enforcement — page content itself is unrestricted. */
   var ROLE_KEY = "d360-role";
-  var ROLE_LABELS = { admin: "Admin", teamlead: "Team lead", agent: "Agent" };
+  var ROLE_LABELS = {
+    admin: "Admin", manager: "Manager", teamlead: "Team lead",
+    trainer: "Trainer", agent: "Agent"
+  };
 
   function applyRole(role) {
     document.querySelectorAll(".role-switch__option").forEach(function (opt) {
@@ -190,6 +237,7 @@
     wireDrawers();
     wireEsc();
     wireRowLinks();
+    wireTemplateCopy();
     wireRoleSwitch();
   });
 })();

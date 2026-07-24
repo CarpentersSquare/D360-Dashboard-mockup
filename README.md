@@ -36,6 +36,7 @@ agent would open the live calling workstation (a separate app, deliberately not 
 | `login.html` | Facade email/password login — also lands on the dashboard |
 | `dashboard.html` | Admin Overview (landing after sign-in) |
 | `call-centre-dashboard.html` | Live call centre floor view (queue, agent status, service level) |
+| `my-performance.html` | An agent's own performance overview (Agent role only) |
 | `interactions.html` | Unified interaction log (call / email / chat) |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
@@ -67,7 +68,8 @@ fallback to `assets/logo.svg`).
 - Toggles the account menu, tabbed panels, modals, drawers, and clickable table rows
   (`tr[data-href]` / `[data-open-modal]` / `[data-open-drawer]`).
 
-- Drives the **"Viewing as" role switch** in the topbar (Admin / Team lead / Agent): filters
+- Drives the **"Viewing as" role switch** in the topbar (Admin / Manager / Team lead / Trainer /
+  Agent): filters
   `[data-roles]` sidebar links and account-menu items to match, updates the account role label,
   and persists the choice in `localStorage` so it carries across pages. Purely visual — the page
   content itself isn't gated, matching this prototype's "no real RBAC" stance.
