@@ -167,7 +167,7 @@
         <div class="kpi">
           <div class="kpi__label">Flagged for review</div>
           <div class="kpi__value" style="color:var(--warning);">3</div>
-          <div class="kpi__delta warn">1 still open</div>
+          <div class="kpi__delta warn">2 pending feedback</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Avg score</div>
@@ -191,9 +191,8 @@
           <label for="f-status">Status</label>
           <select id="f-status">
             <option>All</option>
-            <option>Needs review</option>
-            <option>In review</option>
             <option>Resolved</option>
+            <option>Feedback Delivered</option>
           </select>
         </div>
         <div class="field">
@@ -218,7 +217,7 @@
       <div class="card">
         <div class="card__head">
           <h3>My recent QA scorecards</h3>
-          <span class="tag">Most recent first</span>
+          <span class="tag">Scores 90 or below stay hidden until feedback is delivered</span>
         </div>
         <div class="table-wrap">
           <table class="data">
@@ -240,25 +239,11 @@
                 <td><span class="pill pill--pass">Resolved</span></td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10505</td>
-                <td class="cell-strong">Tom Beresford</td>
-                <td><span class="cell-strong" style="color:var(--warning);">67/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--info">In review</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10498</td>
                 <td class="cell-strong">Aisha Rahman</td>
                 <td><span class="cell-strong" style="color:var(--success);">94/100</span></td>
                 <td class="muted">—</td>
                 <td><span class="pill pill--pass">Resolved</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10491</td>
-                <td class="cell-strong">Liam Foster</td>
-                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10484</td>
@@ -268,24 +253,22 @@
                 <td><span class="pill pill--pass">Resolved</span></td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10477</td>
-                <td class="cell-strong">Henry Walsh</td>
-                <td><span class="cell-strong" style="color:var(--danger);">42/100</span></td>
-                <td>Compliance phrase missing</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
+                <td class="cell-mono">INT-10491</td>
+                <td class="cell-strong">Liam Foster</td>
+                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
+                <td>Tone</td>
+                <td><span class="pill pill--info">Feedback Delivered</span></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="card__foot">
           <div class="pagination">
-            <div class="pagination__info">Showing 6 of 25 scored calls</div>
+            <div class="pagination__info">Showing 4 of 25 scored calls · 2 more pending feedback</div>
             <div class="pager">
               <button type="button" disabled aria-label="Previous page">‹</button>
               <button type="button" class="active" aria-current="page">1</button>
-              <button type="button">2</button>
-              <button type="button">3</button>
-              <button type="button" aria-label="Next page">›</button>
+              <button type="button" aria-label="Next page" disabled>›</button>
             </div>
           </div>
         </div>
