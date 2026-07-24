@@ -133,6 +133,40 @@
     });
   }
 
+  /* ---- 9. Role switch (view-as, prototype only) ----
+     Topbar toggle filters [data-roles] elements (nav items, account
+     menu links) to what that role can see, and updates the account
+     role label. Persisted in localStorage so it carries across pages.
+     No real RBAC enforcement — page content itself is unrestricted. */
+  var ROLE_KEY = "d360-role";
+  var ROLE_LABELS = { admin: "Admin", teamlead: "Team lead", agent: "Agent" };
+
+  function applyRole(role) {
+    document.querySelectorAll(".role-switch__btn").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-role") === role);
+    });
+    document.querySelectorAll("[data-roles]").forEach(function (el) {
+      var allowed = el.getAttribute("data-roles").split(",");
+      el.style.display = allowed.indexOf(role) === -1 ? "none" : "";
+    });
+    var roleLabel = document.querySelector(".account__role");
+    if (roleLabel) roleLabel.textContent = ROLE_LABELS[role] || ROLE_LABELS.admin;
+  }
+
+  function wireRoleSwitch() {
+    var group = document.querySelector(".role-switch");
+    if (!group) return;
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    applyRole(role);
+    group.querySelectorAll(".role-switch__btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        role = btn.getAttribute("data-role");
+        localStorage.setItem(ROLE_KEY, role);
+        applyRole(role);
+      });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
@@ -142,5 +176,6 @@
     wireDrawers();
     wireEsc();
     wireRowLinks();
+    wireRoleSwitch();
   });
 })();
