@@ -69,12 +69,24 @@
         <input type="text" placeholder="Search interactions, agents, customers…" aria-label="Search" />
       </div>
       <div class="topbar__spacer"></div>
-      <div class="role-switch" role="group" aria-label="Viewing as role">
-        <span class="role-switch__label">Viewing as</span>
-        <div class="role-switch__group">
-          <button type="button" class="role-switch__btn" data-role="admin">Admin</button>
-          <button type="button" class="role-switch__btn" data-role="teamlead">Team lead</button>
-          <button type="button" class="role-switch__btn" data-role="agent">Agent</button>
+      <div class="role-switch">
+        <button type="button" class="btn btn--ghost role-switch__trigger" aria-haspopup="true" aria-label="Change viewing role">
+          <span class="role-switch__current"><span class="muted">Viewing as</span> <span class="role-switch__current-role">Admin</span></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="role-switch__menu" role="menu">
+          <button type="button" class="role-switch__option active" data-role="admin" role="menuitem">
+            <span>Admin</span>
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+          <button type="button" class="role-switch__option" data-role="teamlead" role="menuitem">
+            <span>Team lead</span>
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+          <button type="button" class="role-switch__option" data-role="agent" role="menuitem">
+            <span>Agent</span>
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
         </div>
       </div>
       <span class="env-badge" title="This is a non-production prototype">Prototype</span>
