@@ -12,6 +12,18 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body data-page="my-team-qa">
+  <div class="banner-ticker" role="region" aria-label="Announcements">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+    <div class="banner-ticker__viewport">
+      <div class="banner-ticker__text" id="banner-ticker-text">Loading announcements…</div>
+    </div>
+    <div class="banner-ticker__dots" id="banner-ticker-dots"></div>
+    <button type="button" class="banner-ticker__edit" id="banner-ticker-edit" data-open-modal="banner-modal" data-roles="admin,manager,teamlead" title="Edit banner messages">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+      Edit
+    </button>
+  </div>
+
   <div class="app">
 
     <!-- ===== Sidebar ===== -->
@@ -292,6 +304,29 @@
 
     </main>
   </div>
+  <!-- ===== Banner messages modal ===== -->
+  <div class="modal-overlay" id="banner-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="banner-modal-title">
+      <div class="modal__head">
+        <h3 id="banner-modal-title">Banner messages</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <p class="small muted" style="margin:0;" id="banner-audience-note">Your message will be shown to <strong>all teams</strong>.</p>
+        <div class="form-row">
+          <label for="banner-msg-input">New message</label>
+          <textarea id="banner-msg-input" rows="2" maxlength="140" placeholder="e.g. Great work hitting target this week!"></textarea>
+        </div>
+        <button type="button" class="btn btn--primary btn--sm" id="banner-msg-add" style="align-self:flex-start;">Post message</button>
+        <hr class="divider" style="margin:2px 0;" />
+        <div id="banner-msg-list" class="stack" style="gap:0;"></div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
       <!-- Launch Hub modal (visual): the live agent workstation opens as a separate app -->
     <div class="modal-overlay" id="hub-modal">
       <div class="modal">

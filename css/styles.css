@@ -59,6 +59,52 @@ h1, h2, h3, h4 { color: var(--ink); margin: 0; font-weight: 700; }
 p { margin: 0 0 12px; }
 
 /* ============================================================
+   Rolling announcement banner
+   ============================================================ */
+.banner-ticker {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--gradient); color: #fff;
+  padding: 9px 20px; font-size: 13px; font-weight: 600;
+  position: relative; z-index: 20;
+}
+.banner-ticker__icon { flex: none; opacity: .9; }
+.banner-ticker__viewport { flex: 1; overflow: hidden; position: relative; height: 18px; min-width: 0; }
+.banner-ticker__text {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 1; transition: opacity .25s ease;
+}
+.banner-ticker__text.is-leaving { opacity: 0; }
+.banner-ticker__dots { display: flex; gap: 5px; flex: none; }
+.banner-ticker__dots span {
+  width: 5px; height: 5px; border-radius: 999px; background: rgba(255,255,255,.4);
+  cursor: pointer; padding: 0; border: none; display: block;
+}
+.banner-ticker__dots span.active { background: #fff; }
+.banner-ticker__edit {
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid rgba(255,255,255,.5); background: rgba(255,255,255,.12); color: #fff;
+  font-family: var(--font); font-size: 11.5px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px; cursor: pointer;
+}
+.banner-ticker__edit:hover { background: rgba(255,255,255,.22); }
+
+.banner-msg-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border-soft);
+}
+.banner-msg-row:last-child { border-bottom: none; }
+.banner-msg-row__main { flex: 1; min-width: 0; }
+.banner-msg-row__text { font-size: 13px; color: var(--ink); margin-bottom: 4px; word-break: break-word; }
+.banner-msg-row__meta { font-size: 11.5px; color: var(--muted); }
+.banner-msg-row__del {
+  flex: none; border: none; background: none; color: var(--muted); cursor: pointer;
+  width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+}
+.banner-msg-row__del:hover { background: var(--bg); color: var(--danger); }
+.banner-empty { font-size: 13px; color: var(--muted); padding: 10px 0; }
+
+/* ============================================================
    App shell layout
    ============================================================ */
 .app {

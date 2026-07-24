@@ -79,8 +79,14 @@ fallback to `assets/logo.svg`).
   choice in `localStorage` so it carries across pages. Still purely visual, matching this
   prototype's "no real RBAC" stance — nothing is actually access-controlled server-side.
 
-No data is fetched or persisted (aside from the role switch above); filters and form controls
-are otherwise decorative.
+- Drives the **rolling announcement banner** at the top of every admin page: auto-rotates
+  through short messages every 6s (with dot navigation), and lets Team lead and above post new
+  ones via an "Edit" button. Team lead posts are scoped to their own team ("Team Priya" — the
+  one named team in this prototype's dummy data); Manager/Admin posts go to everyone; Trainer and
+  Agent can view but not post. Messages persist in `localStorage` alongside the role choice.
+
+No data is fetched or persisted (aside from the role switch and banner messages above); filters
+and other form controls are otherwise decorative.
 
 ## Branding
 
