@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My QA · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — an agent's own automated QA scores and coaching feedback (prototype)." />
+  <title>Complaints · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — customer complaints from raised through to resolution (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="my-qa">
+<body data-page="complaints">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -170,44 +170,35 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>My QA</h1>
-          <div class="sub">Your automated QA scores and coaching feedback</div>
+          <h1>Complaints</h1>
+          <div class="sub">Customer complaints, tracked from raised through to resolution</div>
         </div>
         <div class="page-head__actions">
-          <a class="btn btn--ghost" href="my-performance.html">My performance</a>
+          <button class="btn btn--primary" type="button">Export</button>
         </div>
       </div>
 
       <!-- Summary tiles -->
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
-          <div class="kpi__label">My QA pass rate</div>
-          <div class="kpi__value">92.4%</div>
-          <div class="kpi__delta up">▲ 2.1 pts this week</div>
+          <div class="kpi__label">Raised</div>
+          <div class="kpi__value" style="color:var(--warning);">7</div>
+          <div class="kpi__delta warn">2 raised today</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Calls scored this week</div>
-          <div class="kpi__value">25</div>
-          <div class="kpi__sub">auto-QA'd</div>
+          <div class="kpi__label">In progress</div>
+          <div class="kpi__value">9</div>
+          <div class="kpi__sub">assigned across 5 agents</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Flagged for review</div>
-          <div class="kpi__value" style="color:var(--warning);">3</div>
-          <div class="kpi__delta warn">2 pending feedback</div>
+          <div class="kpi__label">Resolved</div>
+          <div class="kpi__value" style="color:var(--success);">34</div>
+          <div class="kpi__delta up">▲ 91% resolved within SLA</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Avg score</div>
-          <div class="kpi__value">91<span class="muted" style="font-size:18px;">/100</span></div>
-          <div class="kpi__sub">across 25 scored calls</div>
-        </div>
-      </div>
-
-      <!-- Coaching callout -->
-      <div class="callout mb-18">
-        <div class="callout__big">2<span class="muted" style="font-size:18px;">/9</span></div>
-        <div>
-          <h3>You're ranked 2nd on the team this month</h3>
-          <p>Your one flagged theme this week is <strong>DPA verification</strong> — confirm name, postcode and address line before discussing account details.</p>
+          <div class="kpi__label">Escalated</div>
+          <div class="kpi__value" style="color:var(--danger);">3</div>
+          <div class="kpi__delta warn">avg 2.1 days to escalate</div>
         </div>
       </div>
 
@@ -217,17 +208,38 @@
           <label for="f-status">Status</label>
           <select id="f-status">
             <option>All</option>
+            <option>Raised</option>
+            <option>In progress</option>
             <option>Resolved</option>
-            <option>Feedback Delivered</option>
+            <option>Escalated</option>
           </select>
         </div>
         <div class="field">
-          <label for="f-reason">Failure reason</label>
-          <select id="f-reason">
+          <label for="f-category">Category</label>
+          <select id="f-category">
             <option>All</option>
-            <option>DPA not completed</option>
-            <option>Compliance phrase missing</option>
-            <option>Tone</option>
+            <option>Billing dispute</option>
+            <option>Service delay</option>
+            <option>Product fault</option>
+            <option>Staff conduct</option>
+            <option>Data &amp; privacy</option>
+            <option>Refund request</option>
+            <option>Contract / cancellation</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-agent">Agent</label>
+          <select id="f-agent">
+            <option>All</option>
+            <option>Rob Ashton</option>
+            <option>Priya Nair</option>
+            <option>Daniel Okafor</option>
+            <option>Grace Thompson</option>
+            <option>Marcus Bennett</option>
+            <option>Olivia Hughes</option>
+            <option>Charlotte Reid</option>
+            <option>James Whitmore</option>
+            <option>Hannah Price</option>
           </select>
         </div>
         <div class="field">
@@ -239,62 +251,180 @@
         </div>
       </div>
 
-      <!-- My QA scorecards -->
+      <!-- Complaints queue -->
       <div class="card">
         <div class="card__head">
-          <h3>My recent QA scorecards</h3>
-          <span class="tag">Scores 90 or below stay hidden until feedback is delivered</span>
+          <h3>All complaints</h3>
+          <span class="tag">Sorted by most recent</span>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Interaction</th>
+                <th>Complaint</th>
                 <th>Customer</th>
-                <th>Score</th>
-                <th>Top failure reason</th>
+                <th>Category</th>
+                <th>Channel</th>
+                <th>Agent</th>
+                <th>Raised</th>
                 <th>Status</th>
+                <th>Assigned to</th>
               </tr>
             </thead>
             <tbody>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10512</td>
+              <tr>
+                <td class="cell-mono">CMP-2051</td>
                 <td class="cell-strong">Margaret Whitfield</td>
-                <td><span class="cell-strong" style="color:var(--success);">96/100</span></td>
-                <td class="muted">—</td>
-                <td><span class="pill pill--pass">Resolved</span></td>
+                <td>Billing dispute</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td class="cell-mono">Today</td>
+                <td><span class="pill pill--fail">Escalated</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
               </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10498</td>
+              <tr>
+                <td class="cell-mono">CMP-2050</td>
+                <td class="cell-strong">Tom Beresford</td>
+                <td>Staff conduct</td>
+                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
+                <td class="cell-mono">Today</td>
+                <td><span class="pill pill--flag">Raised</span></td>
+                <td class="muted">Unassigned</td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2049</td>
                 <td class="cell-strong">Aisha Rahman</td>
-                <td><span class="cell-strong" style="color:var(--success);">94/100</span></td>
-                <td class="muted">—</td>
-                <td><span class="pill pill--pass">Resolved</span></td>
+                <td>Refund request</td>
+                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
+                <td class="cell-mono">Yesterday</td>
+                <td><span class="pill pill--info">In progress</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
               </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10484</td>
-                <td class="cell-strong">Sophie Clarke</td>
-                <td><span class="cell-strong" style="color:var(--success);">91/100</span></td>
-                <td class="muted">—</td>
-                <td><span class="pill pill--pass">Resolved</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10491</td>
+              <tr>
+                <td class="cell-mono">CMP-2048</td>
                 <td class="cell-strong">Liam Foster</td>
-                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--info">Feedback Delivered</span></td>
+                <td>Service delay</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
+                <td class="cell-mono">Yesterday</td>
+                <td><span class="pill pill--fail">Escalated</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2047</td>
+                <td class="cell-strong">Sophie Clarke</td>
+                <td>Product fault</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td class="cell-mono">Yesterday</td>
+                <td><span class="pill pill--flag">Raised</span></td>
+                <td class="muted">Unassigned</td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2046</td>
+                <td class="cell-strong">Henry Walsh</td>
+                <td>Data &amp; privacy</td>
+                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
+                <td class="cell-mono">2 days ago</td>
+                <td><span class="pill pill--info">In progress</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2045</td>
+                <td class="cell-strong">Raj Sharma</td>
+                <td>Billing dispute</td>
+                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
+                <td class="cell-mono">2 days ago</td>
+                <td><span class="pill pill--flag">Raised</span></td>
+                <td class="muted">Unassigned</td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2044</td>
+                <td class="cell-strong">Yusuf Demir</td>
+                <td>Contract / cancellation</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
+                <td class="cell-mono">3 days ago</td>
+                <td><span class="pill pill--info">In progress</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2043</td>
+                <td class="cell-strong">Chloe Sutton</td>
+                <td>Service delay</td>
+                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
+                <td class="cell-mono">3 days ago</td>
+                <td><span class="pill pill--pass">Resolved</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2042</td>
+                <td class="cell-strong">Nathan Cole</td>
+                <td>Product fault</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
+                <td class="cell-mono">4 days ago</td>
+                <td><span class="pill pill--fail">Escalated</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2041</td>
+                <td class="cell-strong">Oliver Grant</td>
+                <td>Refund request</td>
+                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
+                <td class="cell-mono">4 days ago</td>
+                <td><span class="pill pill--flag">Raised</span></td>
+                <td class="muted">Unassigned</td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2040</td>
+                <td class="cell-strong">Beatrice Coleman</td>
+                <td>Staff conduct</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
+                <td class="cell-mono">5 days ago</td>
+                <td><span class="pill pill--info">In progress</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2039</td>
+                <td class="cell-strong">William Pearce</td>
+                <td>Billing dispute</td>
+                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
+                <td class="cell-mono">5 days ago</td>
+                <td><span class="pill pill--pass">Resolved</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
+              </tr>
+              <tr>
+                <td class="cell-mono">CMP-2038</td>
+                <td class="cell-strong">Priscilla Adeyemi</td>
+                <td>Service delay</td>
+                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
+                <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
+                <td class="cell-mono">6 days ago</td>
+                <td><span class="pill pill--flag">Raised</span></td>
+                <td class="muted">Unassigned</td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="card__foot">
           <div class="pagination">
-            <div class="pagination__info">Showing 4 of 25 scored calls · 2 more pending feedback</div>
+            <div class="pagination__info">Showing 1–14 of 53 complaints</div>
             <div class="pager">
               <button type="button" disabled aria-label="Previous page">‹</button>
               <button type="button" class="active" aria-current="page">1</button>
-              <button type="button" aria-label="Next page" disabled>›</button>
+              <button type="button">2</button>
+              <button type="button">3</button>
+              <button type="button">4</button>
+              <button type="button" aria-label="Next page">›</button>
             </div>
           </div>
         </div>
