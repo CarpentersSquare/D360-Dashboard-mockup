@@ -317,6 +317,8 @@ p { margin: 0 0 12px; }
 }
 .btn--primary:hover { filter: brightness(1.06); background: var(--gradient); }
 .btn--ghost { background: transparent; border-color: var(--border); }
+.btn--accent { background: var(--info-bg); border-color: transparent; color: var(--indigo); font-weight: 700; }
+.btn--accent:hover { background: #E0DFFC; }
 .btn--sm { padding: 6px 12px; font-size: 12.5px; }
 
 /* Cards */

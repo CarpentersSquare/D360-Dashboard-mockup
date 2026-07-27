@@ -560,38 +560,51 @@
   }
 
   /* ============================================================
-     5. QA tab — weekly/monthly score trends, fail/ops lists,
-        agent comparison
+     5. QA tab — score trend, fail/ops lists, agent comparison
      ============================================================ */
-  function generateQAWeeklySeries(f) {
-    var buckets = bucketDates(f.from, f.to, "Weekly");
+  function generateQATrendSeries(f) {
+    var buckets = bucketDates(f.from, f.to, f.period);
     return buckets.map(function (b) {
       return { label: b.label, compliance: rand(84, 96), operational: rand(82, 92) };
     });
   }
-  function generateQAMonthlySeries() {
-    var points = [];
-    var m = new Date(TODAY.getFullYear(), TODAY.getMonth() - 5, 1);
-    for (var i = 0; i < 6; i++) {
-      points.push({ label: fmtMonth(m), compliance: rand(86, 95), operational: rand(84, 91) });
-      m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
-    }
-    return points;
-  }
 
-  function renderQAScoreChart(svgId, points) {
-    var svg = document.getElementById(svgId);
+  function renderQATrendChart(points) {
+    var svg = document.getElementById("qa-trend-chart-svg");
     if (!svg) return;
     var N = points.length;
-    var plotLeft = 44, plotRight = 440;
-    var spacing = N > 1 ? (plotRight - plotLeft) / (N - 1) : 0;
+    var plotLeft = 70, plotRight = 900, plotTop = 30, plotBottom = 260;
+    var spacing = N > 1 ? (plotRight - plotLeft) / (N - 1) : (plotRight - plotLeft);
     var xs = points.map(function (p, i) { return N > 1 ? plotLeft + i * spacing : (plotLeft + plotRight) / 2; });
-    function y(v) { v = Math.max(75, Math.min(100, v)); return 220 - (v - 80) * 12; }
+
+    // Dynamic y-range from the data, always wide enough to comfortably show the 90% target.
+    var allVals = [];
+    points.forEach(function (p) { allVals.push(p.compliance, p.operational); });
+    var lo = Math.min(85, Math.floor((Math.min.apply(null, allVals) - 3) / 5) * 5);
+    var hi = Math.max(95, Math.ceil((Math.max.apply(null, allVals) + 3) / 5) * 5);
+    lo = Math.max(0, lo);
+    hi = Math.min(100, hi);
+    function y(v) { return plotBottom - (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (plotBottom - plotTop); }
 
     var parts = [];
-    parts.push('<g stroke="#EBEBEB" stroke-width="1"><line x1="44" y1="40" x2="440" y2="40"/><line x1="44" y1="100" x2="440" y2="100"/><line x1="44" y1="160" x2="440" y2="160"/><line x1="44" y1="220" x2="440" y2="220"/></g>');
-    parts.push('<g fill="#90A4AE" font-size="10" text-anchor="end"><text x="38" y="44">95%</text><text x="38" y="104">90%</text><text x="38" y="164">85%</text><text x="38" y="224">80%</text></g>');
-    parts.push('<line x1="44" y1="100" x2="440" y2="100" stroke="#2E7D32" stroke-width="2" stroke-dasharray="6 5"/>');
+    parts.push('<g stroke="#EBEBEB" stroke-width="1">');
+    for (var g = 0; g <= 4; g++) {
+      var gy = plotTop + g * (plotBottom - plotTop) / 4;
+      parts.push('<line x1="' + (plotLeft - 6) + '" y1="' + gy + '" x2="908" y2="' + gy + '"/>');
+    }
+    parts.push("</g>");
+    parts.push('<g fill="#90A4AE" font-size="10" text-anchor="end">');
+    for (var g2 = 0; g2 <= 4; g2++) {
+      var gy2 = plotTop + g2 * (plotBottom - plotTop) / 4;
+      var val = hi - g2 * (hi - lo) / 4;
+      parts.push('<text x="' + (plotLeft - 10) + '" y="' + (gy2 + 4) + '">' + Math.round(val) + "%</text>");
+    }
+    parts.push("</g>");
+
+    var haloAttrs = ' paint-order="stroke" stroke="#fff" stroke-width="4"';
+    parts.push('<line x1="' + (plotLeft - 6) + '" y1="' + y(90) + '" x2="908" y2="' + y(90) + '" stroke="#2E7D32" stroke-width="2" stroke-dasharray="6 5"/>');
+    parts.push('<text x="908" y="' + (y(90) - 7) + '" text-anchor="end" font-size="10" font-weight="700" fill="#2E7D32"' + haloAttrs + '>Target · 90%</text>');
+
     var compPts = points.map(function (p, i) { return xs[i] + "," + y(p.compliance); }).join(" ");
     var opPts = points.map(function (p, i) { return xs[i] + "," + y(p.operational); }).join(" ");
     parts.push('<polyline fill="none" stroke="#A177DA" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + compPts + '"/>');
@@ -600,15 +613,15 @@
     parts.push('<circle cx="' + xs[N - 1] + '" cy="' + y(points[N - 1].operational) + '" r="4" fill="#7976F3"/>');
 
     parts.push('<g fill="#90A4AE" font-size="10" text-anchor="middle">');
-    var labelEvery = Math.max(1, Math.ceil(N / 5));
+    var labelEvery = Math.max(1, Math.ceil(N / 6));
     points.forEach(function (p, i) {
-      if (i % labelEvery === 0 || i === N - 1) parts.push('<text x="' + xs[i] + '" y="244">' + escapeHtml(p.label) + "</text>");
+      if (i % labelEvery === 0 || i === N - 1) parts.push('<text x="' + xs[i] + '" y="' + (plotBottom + 22) + '">' + escapeHtml(p.label) + "</text>");
     });
     parts.push("</g>");
 
     points.forEach(function (p, i) {
-      var hitW = Math.max(8, spacing * 0.9 || 40);
-      parts.push('<rect class="chart-hit" data-idx="' + i + '" x="' + (xs[i] - hitW / 2) + '" y="30" width="' + hitW + '" height="200"/>');
+      var hitW = Math.max(8, spacing * 0.9);
+      parts.push('<rect class="chart-hit" data-idx="' + i + '" x="' + (xs[i] - hitW / 2) + '" y="' + plotTop + '" width="' + hitW + '" height="' + (plotBottom - plotTop) + '"/>');
     });
 
     svg.innerHTML = parts.join("");
@@ -743,11 +756,9 @@
 
   function applyQAFilters() {
     var f = readFilters("qa");
-    var weekly = generateQAWeeklySeries(f);
-    var monthly = generateQAMonthlySeries();
-    renderQAScoreChart("qa-weekly-chart-svg", weekly);
-    renderQAScoreChart("qa-monthly-chart-svg", monthly);
-    setText("qa-weekly-tag", "Target 90% · " + rangeLabel(weekly));
+    var trend = generateQATrendSeries(f);
+    renderQATrendChart(trend);
+    setText("qa-trend-tag", f.period + " · Target 90% · " + rangeLabel(trend));
     renderFailsList(generateFails());
     renderOpsList(generateOps());
     renderAgentChart(generateAgentScores());
