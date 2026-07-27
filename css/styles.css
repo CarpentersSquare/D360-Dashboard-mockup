@@ -622,6 +622,22 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .chart-svg { width: 100%; height: auto; display: block; }
 .donut-wrap { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 
+/* Chart hover tooltip (analytics.js) */
+.chart-hit { fill: transparent; cursor: pointer; pointer-events: all; }
+.chart-tooltip {
+  position: fixed; z-index: 500; pointer-events: none;
+  background: var(--ink); color: #fff; border-radius: 8px;
+  padding: 10px 12px; font-size: 12px; line-height: 1.5;
+  box-shadow: var(--shadow-lg); max-width: 260px; display: none;
+}
+.chart-tooltip.open { display: block; }
+.chart-tooltip__title { font-weight: 700; font-size: 12.5px; margin-bottom: 5px; white-space: nowrap; }
+.chart-tooltip__row { display: flex; align-items: center; gap: 16px; justify-content: space-between; }
+.chart-tooltip__row + .chart-tooltip__row { margin-top: 3px; }
+.chart-tooltip__label { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.75); white-space: nowrap; }
+.chart-tooltip__label i { width: 8px; height: 8px; border-radius: 999px; display: inline-block; flex: none; }
+.chart-tooltip__value { font-weight: 700; white-space: nowrap; }
+
 /* ============================================================
    Responsive
    ============================================================ */
