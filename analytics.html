@@ -174,7 +174,10 @@
           <div class="sub">Overview, activity and QA dashboards — reporting across volume, channels and agent performance</div>
         </div>
         <div class="page-head__actions">
-          <a class="btn btn--ghost" href="#" style="align-self:flex-end;" onclick="return false;">Customer Dashboard</a>
+          <a class="btn btn--accent" href="#" style="align-self:flex-end;" onclick="return false;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            Custom Dashboard
+          </a>
           <a class="btn btn--ghost" href="#" style="align-self:flex-end;" onclick="return false;">Schedule Report</a>
           <a class="btn btn--primary" href="#" style="align-self:flex-end;" onclick="return false;">Export</a>
         </div>
@@ -279,7 +282,7 @@
 
           <div class="card mb-18">
             <div class="card__head">
-              <h3>Interactions &amp; answer rates over time</h3>
+              <h3>Interactions &amp; Answer Rates Over Time</h3>
               <span class="tag" id="ov-chart-tag">Weekly · 1 Jun – 27 Jul 2026</span>
             </div>
             <div class="card__body">
@@ -383,7 +386,7 @@
 
           <div class="card">
             <div class="card__head">
-              <h3>Daily activity breakdown</h3>
+              <h3>Daily Activity Breakdown</h3>
               <span class="tag">Lunch policy ≤ 30 min · Break policy ≤ 25 min</span>
             </div>
             <div class="table-wrap">
@@ -470,34 +473,17 @@
             </div>
           </form>
 
-          <div class="grid grid--2 mb-18">
-            <div class="card">
-              <div class="card__head">
-                <h3>Avg scores over time — weekly</h3>
-                <span class="tag" id="qa-weekly-tag">Target 90%</span>
-              </div>
-              <div class="card__body">
-                <svg id="qa-weekly-chart-svg" viewBox="0 0 460 260" class="chart-svg" role="img" aria-label="Weekly compliance and operational QA scores against a 90 percent target. Hover a point to see exact values."></svg>
-                <div class="legend" style="margin-top:8px;">
-                  <span><i style="background:#A177DA"></i> Compliance score</span>
-                  <span><i style="background:#7976F3"></i> Operational score</span>
-                  <span class="muted">Dashed = 90% target</span>
-                </div>
-              </div>
+          <div class="card mb-18">
+            <div class="card__head">
+              <h3>Avg Scores Over Time</h3>
+              <span class="tag" id="qa-trend-tag">Weekly · Target 90%</span>
             </div>
-
-            <div class="card">
-              <div class="card__head">
-                <h3>Avg scores over time — monthly</h3>
-                <span class="tag">Last 6 months</span>
-              </div>
-              <div class="card__body">
-                <svg id="qa-monthly-chart-svg" viewBox="0 0 460 260" class="chart-svg" role="img" aria-label="Monthly compliance and operational QA scores over the last 6 months against a 90 percent target. Hover a point to see exact values."></svg>
-                <div class="legend" style="margin-top:8px;">
-                  <span><i style="background:#A177DA"></i> Compliance score</span>
-                  <span><i style="background:#7976F3"></i> Operational score</span>
-                  <span class="muted">Dashed = 90% target</span>
-                </div>
+            <div class="card__body">
+              <svg id="qa-trend-chart-svg" viewBox="0 0 980 300" class="chart-svg" role="img" aria-label="Compliance and operational QA scores over time against a 90 percent target, at the period selected in the filters above. Hover a point to see exact values."></svg>
+              <div class="legend" style="margin-top:8px;">
+                <span><i style="background:#A177DA"></i> Compliance score</span>
+                <span><i style="background:#7976F3"></i> Operational score</span>
+                <span class="muted">Dashed = 90% target</span>
               </div>
             </div>
           </div>
@@ -505,7 +491,7 @@
           <div class="grid grid--2 mb-18">
             <div class="card">
               <div class="card__head">
-                <h3>Top compliance fail reasons</h3>
+                <h3>Top Compliance Fail Reasons</h3>
                 <span class="tag">Flags · selected period</span>
               </div>
               <div class="card__body" style="display:flex;flex-direction:column;gap:14px;" id="qa-fails-list">
@@ -514,7 +500,7 @@
 
             <div class="card">
               <div class="card__head">
-                <h3>Operational question scores</h3>
+                <h3>Operational Question Scores</h3>
                 <span class="tag">Avg. score · selected period</span>
               </div>
               <div class="card__body" style="display:flex;flex-direction:column;gap:14px;" id="qa-ops-list">
@@ -524,7 +510,7 @@
 
           <div class="card">
             <div class="card__head">
-              <h3>QA score by agent</h3>
+              <h3>QA Score by Agent</h3>
               <span class="tag">Avg. compliance + operational · selected period</span>
             </div>
             <div class="card__body">
