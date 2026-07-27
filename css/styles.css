@@ -404,6 +404,9 @@ table.data tbody tr.clickable:hover { background: #FAFAFC; }
 .cell-mono { font-variant-numeric: tabular-nums; color: var(--muted); }
 .cell-snippet { color: var(--muted); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell-user { display: flex; align-items: center; gap: 9px; }
+.cell-ok { background: var(--success-bg); color: var(--success); font-weight: 700; border-radius: 6px; }
+.cell-warn { background: var(--warning-bg); color: var(--warning); font-weight: 700; border-radius: 6px; }
+.cell-bad { background: var(--danger-bg); color: var(--danger); font-weight: 700; border-radius: 6px; }
 
 /* Filter bar */
 .filterbar {
