@@ -456,16 +456,23 @@
   function generateActivityRows(f) {
     var buckets = bucketDates(f.from, f.to, f.period, { skipWeekends: f.period === "Daily" });
     return buckets.map(function (b) {
+      var ready = rand(6.5 * 3600, 8.5 * 3600);
+      var interaction = ready * rand(0.76, 0.84);
+      var occupancy = interaction / ready * 100;
+      var util = Math.max(0, Math.min(100, occupancy + rand(3, 9)));
       return {
         label: fmtDMY(b.start),
-        ready: rand(6.5 * 3600, 8.5 * 3600),
+        ready: ready,
         notReady: rand(50 * 60, 100 * 60),
         lunch: rand(17 * 60, 30 * 60),
         training: Math.random() < 0.4 ? 0 : rand(2 * 60, 20 * 60),
         brk: rand(17 * 60, 32 * 60),
         meetings: rand(1 * 60, 12 * 60),
         techDiff: Math.random() < 0.55 ? 0 : rand(30, 5 * 60),
-        other: rand(5 * 60, 20 * 60)
+        other: rand(5 * 60, 20 * 60),
+        interaction: interaction,
+        occupancy: occupancy,
+        util: util
       };
     });
   }
@@ -538,9 +545,15 @@
 
   function updateActivityKPIs(rows) {
     if (!rows.length) return;
-    var sumReady = 0, sumLunch = 0, sumBreak = 0;
-    rows.forEach(function (r) { sumReady += r.ready; sumLunch += r.lunch; sumBreak += r.brk; });
+    var sumReady = 0, sumLunch = 0, sumBreak = 0, sumInteraction = 0, sumUtil = 0;
+    rows.forEach(function (r) {
+      sumReady += r.ready; sumLunch += r.lunch; sumBreak += r.brk;
+      sumInteraction += r.interaction; sumUtil += r.util;
+    });
     var avgReady = sumReady / rows.length, avgLunch = sumLunch / rows.length, avgBreak = sumBreak / rows.length;
+    var avgInteraction = sumInteraction / rows.length;
+    var occupancy = sumReady ? (sumInteraction / sumReady * 100) : 0;
+    var avgUtil = sumUtil / rows.length;
 
     setText("act-kpi-ready-value", fmtHoursMins(avgReady));
     setText("act-kpi-lunch-value", fmtMinSec(avgLunch));
@@ -548,6 +561,89 @@
     setPolicyPill("act-kpi-ready-sub", avgReady >= 7.5 * 3600, "Policy min 7h 30m/day");
     setPolicyPill("act-kpi-lunch-sub", avgLunch <= 30 * 60, "Policy max 30 min");
     setPolicyPill("act-kpi-break-sub", avgBreak <= 25 * 60, "Policy max 25 min");
+
+    setText("act-kpi-interaction-value", fmtHoursMins(avgInteraction));
+    setText("act-kpi-occupancy-value", occupancy.toFixed(1) + "%");
+    setText("act-kpi-occupancy-delta", (occupancy >= 80 ? "▲ above" : "▼ below") + " 80% target");
+    var occDeltaEl = document.getElementById("act-kpi-occupancy-delta");
+    if (occDeltaEl) occDeltaEl.className = "kpi__delta " + (occupancy >= 80 ? "up" : "down");
+
+    setText("act-kpi-utilisation-value", avgUtil.toFixed(1) + "%");
+    setText("act-kpi-utilisation-delta", (avgUtil >= 85 ? "▲ above" : "▼ below") + " 85% target");
+    var utilDeltaEl = document.getElementById("act-kpi-utilisation-delta");
+    if (utilDeltaEl) utilDeltaEl.className = "kpi__delta " + (avgUtil >= 85 ? "up" : "down");
+  }
+
+  function renderActivityTrendChart(rows) {
+    var svg = document.getElementById("act-trend-chart-svg");
+    if (!svg || !rows.length) return;
+    var N = rows.length;
+    var plotLeft = 70, plotRight = 900, plotTop = 30, plotBottom = 260;
+    var spacing = N > 1 ? (plotRight - plotLeft) / (N - 1) : (plotRight - plotLeft);
+    var xs = rows.map(function (r, i) { return N > 1 ? plotLeft + i * spacing : (plotLeft + plotRight) / 2; });
+
+    var allVals = [];
+    rows.forEach(function (r) { allVals.push(r.occupancy, r.util); });
+    var lo = Math.min(70, Math.floor((Math.min.apply(null, allVals) - 3) / 5) * 5);
+    var hi = Math.max(90, Math.ceil((Math.max.apply(null, allVals) + 3) / 5) * 5);
+    lo = Math.max(0, lo);
+    hi = Math.min(100, hi);
+    function y(v) { return plotBottom - (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (plotBottom - plotTop); }
+
+    var parts = [];
+    parts.push('<g stroke="#EBEBEB" stroke-width="1">');
+    for (var g = 0; g <= 4; g++) {
+      var gy = plotTop + g * (plotBottom - plotTop) / 4;
+      parts.push('<line x1="' + (plotLeft - 6) + '" y1="' + gy + '" x2="908" y2="' + gy + '"/>');
+    }
+    parts.push("</g>");
+    parts.push('<g fill="#90A4AE" font-size="10" text-anchor="end">');
+    for (var g2 = 0; g2 <= 4; g2++) {
+      var gy2 = plotTop + g2 * (plotBottom - plotTop) / 4;
+      var val = hi - g2 * (hi - lo) / 4;
+      parts.push('<text x="' + (plotLeft - 10) + '" y="' + (gy2 + 4) + '">' + Math.round(val) + "%</text>");
+    }
+    parts.push("</g>");
+
+    var haloAttrs = ' paint-order="stroke" stroke="#fff" stroke-width="4"';
+    parts.push('<line x1="' + (plotLeft - 6) + '" y1="' + y(80) + '" x2="908" y2="' + y(80) + '" stroke="#A177DA" stroke-width="1.5" stroke-dasharray="6 5" opacity="0.7"/>');
+    parts.push('<text x="908" y="' + (y(80) - 7) + '" text-anchor="end" font-size="10" font-weight="700" fill="#A177DA"' + haloAttrs + '>Occupancy target · 80%</text>');
+    parts.push('<line x1="' + (plotLeft - 6) + '" y1="' + y(85) + '" x2="908" y2="' + y(85) + '" stroke="#7976F3" stroke-width="1.5" stroke-dasharray="6 5" opacity="0.7"/>');
+    parts.push('<text x="' + plotLeft + '" y="' + (y(85) - 7) + '" font-size="10" font-weight="700" fill="#7976F3"' + haloAttrs + '>Utilisation target · 85%</text>');
+
+    var occPts = rows.map(function (r, i) { return xs[i] + "," + y(r.occupancy); }).join(" ");
+    var utilPts = rows.map(function (r, i) { return xs[i] + "," + y(r.util); }).join(" ");
+    parts.push('<polyline fill="none" stroke="#A177DA" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + occPts + '"/>');
+    parts.push('<circle cx="' + xs[N - 1] + '" cy="' + y(rows[N - 1].occupancy) + '" r="4" fill="#A177DA"/>');
+    parts.push('<polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + utilPts + '"/>');
+    parts.push('<circle cx="' + xs[N - 1] + '" cy="' + y(rows[N - 1].util) + '" r="4" fill="#7976F3"/>');
+
+    parts.push('<g fill="#90A4AE" font-size="10" text-anchor="middle">');
+    var labelEvery = Math.max(1, Math.ceil(N / 6));
+    rows.forEach(function (r, i) {
+      if (i % labelEvery === 0 || i === N - 1) parts.push('<text x="' + xs[i] + '" y="' + (plotBottom + 22) + '">' + escapeHtml(r.label) + "</text>");
+    });
+    parts.push("</g>");
+
+    rows.forEach(function (r, i) {
+      var hitW = Math.max(8, spacing * 0.9);
+      parts.push('<rect class="chart-hit" data-idx="' + i + '" x="' + (xs[i] - hitW / 2) + '" y="' + plotTop + '" width="' + hitW + '" height="' + (plotBottom - plotTop) + '"/>');
+    });
+
+    svg.innerHTML = parts.join("");
+    svg.querySelectorAll(".chart-hit").forEach(function (el) {
+      var idx = +el.getAttribute("data-idx");
+      var r = rows[idx];
+      wireHit(el, function () {
+        return {
+          title: r.label,
+          rows: [
+            { label: "Occupancy", value: r.occupancy.toFixed(1) + "%", color: "#A177DA" },
+            { label: "Utilisation", value: r.util.toFixed(1) + "%", color: "#7976F3" }
+          ]
+        };
+      });
+    });
   }
 
   function applyActivityFilters() {
@@ -557,6 +653,8 @@
     activityState.noun = f.period === "Daily" ? "days" : (f.period === "Weekly" ? "weeks" : "months");
     updateActivityKPIs(activityState.rows);
     renderActivityTable();
+    renderActivityTrendChart(activityState.rows);
+    setText("act-trend-tag", f.period + " · Targets 80% / 85%");
   }
 
   /* ============================================================
