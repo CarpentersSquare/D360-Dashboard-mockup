@@ -171,7 +171,7 @@
       <div class="page-head">
         <div>
           <h1>Analytics</h1>
-          <div class="sub">Overview, activity and QA dashboards — reporting across volume, channels and agent performance</div>
+          <div class="sub">Overview, Activity &amp; Productivity and QA dashboards — reporting across volume, channels and agent performance</div>
         </div>
         <div class="page-head__actions">
           <a class="btn btn--accent" href="#" style="align-self:flex-end;" onclick="return false;">
@@ -186,7 +186,7 @@
       <div data-tabs>
         <div class="tabs" role="tablist">
           <button class="tab active" data-tab="overview">Overview</button>
-          <button class="tab" data-tab="activity">Activity</button>
+          <button class="tab" data-tab="activity">Activity and Productivity</button>
           <button class="tab" data-tab="qa">QA</button>
         </div>
 
@@ -382,9 +382,24 @@
               <div class="kpi__value" id="act-kpi-break-value">23m 06s</div>
               <div class="kpi__sub" id="act-kpi-break-sub"><span class="pill pill--pass">On policy</span> Policy max 25 min</div>
             </div>
+            <div class="kpi">
+              <div class="kpi__label">Avg Interaction Time</div>
+              <div class="kpi__value" id="act-kpi-interaction-value">6h 10m</div>
+              <div class="kpi__sub">Average time spent working customer interactions a day</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Occupancy</div>
+              <div class="kpi__value" id="act-kpi-occupancy-value">80.2%</div>
+              <div class="kpi__delta up" id="act-kpi-occupancy-delta">▲ above 80% target</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi__label">Utilisation</div>
+              <div class="kpi__value" id="act-kpi-utilisation-value">85.4%</div>
+              <div class="kpi__delta up" id="act-kpi-utilisation-delta">▲ above 85% target</div>
+            </div>
           </div>
 
-          <div class="card">
+          <div class="card mb-18">
             <div class="card__head">
               <h3>Daily Activity Breakdown</h3>
               <span class="tag">Lunch policy ≤ 30 min · Break policy ≤ 25 min</span>
@@ -415,6 +430,21 @@
                 <button type="button" class="active" aria-current="page">1</button>
                 <button type="button">2</button>
                 <button type="button" aria-label="Next page">›</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__head">
+              <h3>Occupancy &amp; Utilisation Over Time</h3>
+              <span class="tag" id="act-trend-tag">Daily · Targets 80% / 85%</span>
+            </div>
+            <div class="card__body">
+              <svg id="act-trend-chart-svg" viewBox="0 0 980 300" class="chart-svg" role="img" aria-label="Occupancy and Utilisation over time against their 80 percent and 85 percent targets. Hover a point to see exact values."></svg>
+              <div class="legend" style="margin-top:8px;">
+                <span><i style="background:#A177DA"></i> Occupancy</span>
+                <span><i style="background:#7976F3"></i> Utilisation</span>
+                <span class="muted">Dashed = targets (80% Occupancy · 85% Utilisation)</span>
               </div>
             </div>
           </div>
