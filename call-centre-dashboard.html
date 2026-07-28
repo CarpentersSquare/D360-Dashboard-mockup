@@ -187,8 +187,9 @@
         </div>
       </div>
 
-      <!-- Live queue board -->
-      <div class="queue-grid mb-18">
+      <!-- Live queue board + Agents panel, side by side -->
+      <div class="cc-live-row mb-18">
+      <div class="queue-grid">
 
         <!-- Inbound Calls -->
         <div class="queue-card" style="--queue-accent:#66BB6A;">
@@ -303,72 +304,130 @@
 
       </div>
 
-      <!-- Agent status board -->
-      <div class="card">
-        <div class="card__head">
-          <h3>Agent status board</h3>
-          <a class="btn btn--sm" href="agents.html">View all agents</a>
+      <!-- Agents status panel -->
+      <div class="queue-card agents-panel" style="--queue-accent:#ED6C02;">
+        <div class="agents-panel__head">
+          <h3 class="agents-panel__eyebrow">Agents</h3>
+          <span class="agents-panel__total">9 total</span>
         </div>
-        <div class="table-wrap">
-          <table class="data">
+
+        <div class="agents-status-row">
+          <span class="agents-status-pill" style="--dot-color:#66BB6A;"><span class="dot"></span>Available <b>2</b></span>
+          <span class="agents-status-pill" style="--dot-color:#F5A623;"><span class="dot"></span>Voice - On Call <b>4</b></span>
+          <span class="agents-status-pill" style="--dot-color:#42A5F5;"><span class="dot"></span>Admin <b>1</b></span>
+          <span class="agents-status-pill" style="--dot-color:#EF5350;"><span class="dot"></span>Break <b>1</b></span>
+          <span class="agents-status-pill" style="--dot-color:#EC407A;"><span class="dot"></span>Unavailable <b>1</b></span>
+        </div>
+
+        <button type="button" class="agents-refresh">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+          Refresh activities
+        </button>
+
+        <div class="agents-search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" placeholder="Search by name…" aria-label="Search agents" />
+        </div>
+
+        <div class="table-wrap agents-table-wrap">
+          <table class="agents-table">
             <thead>
-              <tr>
-                <th>Agent</th><th>Status</th><th>Channel</th><th>Duration</th><th>Calls today</th>
-              </tr>
+              <tr><th>Name</th><th>Status</th><th>Since</th><th>Available</th><th>Skills</th></tr>
             </thead>
             <tbody>
               <tr>
                 <td class="cell-strong">Priya Nair</td>
-                <td><span class="pill pill--pass">On call</span></td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-mono">4:12</td>
-                <td>21</td>
+                <td><span class="agents-status-tag" style="--dot-color:#F5A623;"><span class="dot"></span>Voice - On Call</span></td>
+                <td class="muted-dark">4:12</td>
+                <td class="agents-avail--yes">Yes</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F481F1" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A177DA" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                </div></td>
               </tr>
               <tr>
                 <td class="cell-strong">Daniel Okafor</td>
-                <td><span class="pill pill--pass">On call</span></td>
-                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
-                <td class="cell-mono">1:35</td>
-                <td>17</td>
+                <td><span class="agents-status-tag" style="--dot-color:#F5A623;"><span class="dot"></span>Voice - On Call</span></td>
+                <td class="muted-dark">1:35</td>
+                <td class="agents-avail--yes">Yes</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F481F1" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div></td>
               </tr>
               <tr>
                 <td class="cell-strong">Grace Thompson</td>
-                <td><span class="pill pill--info">Available</span></td>
-                <td>—</td>
-                <td class="cell-mono">—</td>
-                <td>19</td>
+                <td><span class="agents-status-tag" style="--dot-color:#66BB6A;"><span class="dot"></span>Available</span></td>
+                <td class="muted-dark">2h 04m</td>
+                <td class="agents-avail--yes">Yes</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A177DA" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                </div></td>
               </tr>
               <tr>
                 <td class="cell-strong">Marcus Bennett</td>
-                <td><span class="pill pill--flag">Break</span></td>
-                <td>—</td>
-                <td class="cell-mono">6:40</td>
-                <td>14</td>
+                <td><span class="agents-status-tag" style="--dot-color:#EF5350;"><span class="dot"></span>Break</span></td>
+                <td class="muted-dark">6:40</td>
+                <td class="agents-avail--no">No</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div></td>
               </tr>
               <tr>
                 <td class="cell-strong">Olivia Hughes</td>
-                <td><span class="pill pill--info">Available</span></td>
-                <td>—</td>
-                <td class="cell-mono">—</td>
-                <td>16</td>
+                <td><span class="agents-status-tag" style="--dot-color:#66BB6A;"><span class="dot"></span>Available</span></td>
+                <td class="muted-dark">48m</td>
+                <td class="agents-avail--yes">Yes</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F481F1" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A177DA" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                </div></td>
               </tr>
               <tr>
-                <td class="cell-strong">Sophie Clarke</td>
-                <td><span class="pill pill--pass">On call</span></td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-mono">0:52</td>
-                <td>23</td>
+                <td class="cell-strong">Charlotte Reid</td>
+                <td><span class="agents-status-tag" style="--dot-color:#F5A623;"><span class="dot"></span>Voice - On Call</span></td>
+                <td class="muted-dark">2:04</td>
+                <td class="agents-avail--yes">Yes</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F481F1" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div></td>
+              </tr>
+              <tr>
+                <td class="cell-strong">James Whitmore</td>
+                <td><span class="agents-status-tag" style="--dot-color:#42A5F5;"><span class="dot"></span>Admin</span></td>
+                <td class="muted-dark">25m</td>
+                <td class="agents-avail--no">No</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A177DA" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                </div></td>
+              </tr>
+              <tr>
+                <td class="cell-strong">Hannah Price</td>
+                <td><span class="agents-status-tag" style="--dot-color:#EC407A;"><span class="dot"></span>Unavailable</span></td>
+                <td class="muted-dark">27m</td>
+                <td class="agents-avail--no">No</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7976F3" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A177DA" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                </div></td>
               </tr>
               <tr>
                 <td class="cell-strong">Rob Ashton</td>
-                <td><span class="pill pill--info">Available</span></td>
-                <td>—</td>
-                <td class="cell-mono">—</td>
-                <td>8</td>
+                <td><span class="agents-status-tag" style="--dot-color:#F5A623;"><span class="dot"></span>Voice - On Call</span></td>
+                <td class="muted-dark">0:52</td>
+                <td class="agents-avail--yes">Yes</td>
+                <td><div class="agents-skill-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:rgba(255,255,255,.5);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                </div></td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
       </div>
 
     </main>
