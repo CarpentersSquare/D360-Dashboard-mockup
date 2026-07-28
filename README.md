@@ -51,6 +51,9 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `analytics.html` | Reporting & inline-SVG charts |
 | `agents.html` | Team / agents (invite modal, detail drawer) |
 | `templates.html` | Response template library |
+| `simulations.html` | Customer Simulations — rehearse inbound/outbound calls with simulated personas (Trainer role and above) |
+| `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
+| `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide (Trainer role and above) |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
 | `billing.html` | Plan, usage & invoices |
 | `settings.html` | Account / integrations / numbers / branding / security / roles |
@@ -90,8 +93,18 @@ fallback to `assets/logo.svg`).
   one named team in this prototype's dummy data); Manager/Admin posts go to everyone; Trainer and
   Agent can view but not post. Messages persist in `localStorage` alongside the role choice.
 
-No data is fetched or persisted (aside from the role switch and banner messages above); filters
-and other form controls are otherwise decorative.
+- Drives **QA Colin (SDL)** (`colin-scorecard.html`): submitting an AI-marked scorecard stores the
+  result in `localStorage`, which `qa.html`'s flagged queue then reads and prepends (tagged
+  "Colin") — this prototype's stand-in for the score "moving" into QA Review.
+
+- Drives **Training & Development** (`training-development.html`): a `GUIDE_MAP` matches known QA
+  failure reasons (from either `qa.html` or a Colin scorecard) to an Agent Guide and stores an
+  assignment in `localStorage`. `my-performance.html` lists an agent's own assignments with a
+  "Mark complete" action; `agent-guides.html` supports a `?open=guide-id` deep link so assignment
+  links land straight on the right guide.
+
+No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
+submissions, training packages); filters and other form controls are otherwise decorative.
 
 ## Branding
 
