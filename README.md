@@ -38,7 +38,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `dashboard.html` | Admin Overview |
 | `call-centre-dashboard.html` | Live call centre floor view (queue, agent status, service level) |
 | `my-performance.html` | An agent's own performance overview (Agent role only) |
-| `interactions.html` | Unified interaction log (call / email / chat) |
+| `interactions.html` | Unified interaction log (call / email / chat) — no sidebar tab; reached via "View all interactions" links on Dashboard / My Team Performance / Interaction Stats |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
 | `complaints.html` | Customer complaints queue — Raised / In progress / Resolved / Escalated |
