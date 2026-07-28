@@ -76,23 +76,29 @@
 
   /* ---- 5. Modals ----
      [data-open-modal="id"] opens, [data-close-modal] / overlay click closes. */
-  function wireModals() {
+  /* Shared by the initial page-load wiring pass below and by
+     renderCustomGuides(), which injects new [data-open-modal]
+     triggers/.modal-overlay elements after that pass has already run. */
+  function wireModalTrigger(trigger) {
     var onGuidesPage = document.body.getAttribute("data-page") === "agent-guides";
-    document.querySelectorAll("[data-open-modal]").forEach(function (trigger) {
-      trigger.addEventListener("click", function () {
-        var id = trigger.getAttribute("data-open-modal");
-        var m = document.getElementById(id);
-        if (m) m.classList.add("open");
-        if (onGuidesPage && id.indexOf("guide-") === 0) recordGuideRead(id);
-      });
+    trigger.addEventListener("click", function () {
+      var id = trigger.getAttribute("data-open-modal");
+      var m = document.getElementById(id);
+      if (m) m.classList.add("open");
+      if (onGuidesPage && id.indexOf("guide-") === 0) recordGuideRead(id);
     });
-    document.querySelectorAll(".modal-overlay").forEach(function (overlay) {
-      overlay.addEventListener("click", function (e) {
-        if (e.target === overlay || e.target.hasAttribute("data-close-modal")) {
-          overlay.classList.remove("open");
-        }
-      });
+  }
+  function wireModalOverlay(overlay) {
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay || e.target.hasAttribute("data-close-modal")) {
+        overlay.classList.remove("open");
+      }
     });
+  }
+
+  function wireModals() {
+    document.querySelectorAll("[data-open-modal]").forEach(wireModalTrigger);
+    document.querySelectorAll(".modal-overlay").forEach(wireModalOverlay);
   }
 
   /* ---- 6. Drawers ----
@@ -1198,6 +1204,256 @@
     });
   }
 
+  /* ---- 14d. Guide management: add/edit/remove (Admin/Manager/Trainer) ----
+     The 9 built-in guides stay real static HTML — title, tags,
+     description, "Updated" date, and their bespoke step-by-step modal.
+     Editing one only layers a title/category/tags/description/updated
+     override on top (applyGuideOverrides()), plus an optional
+     plain-text body that replaces the modal's content if the admin
+     chooses to fill it in — the rich step-by-step markup is never
+     duplicated into JS. Guides created via "Add a guide" are fully
+     custom instead: stored whole in d360-guides-custom and rendered
+     (card + modal) from scratch by renderCustomGuides(). Removing
+     either kind just adds its id to a shared "removed" list. */
+  var GUIDE_OVERRIDES_KEY = "d360-guide-overrides";
+  var GUIDE_REMOVED_KEY = "d360-guide-removed";
+  var CUSTOM_GUIDES_KEY = "d360-guides-custom";
+  var guideFormEditingId = null;
+
+  function getGuideOverrides() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveGuideOverrides(map) { localStorage.setItem(GUIDE_OVERRIDES_KEY, JSON.stringify(map)); }
+
+  function getGuideRemoved() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_REMOVED_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveGuideRemoved(list) { localStorage.setItem(GUIDE_REMOVED_KEY, JSON.stringify(list)); }
+
+  function getCustomGuides() {
+    try { return JSON.parse(localStorage.getItem(CUSTOM_GUIDES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveCustomGuides(list) { localStorage.setItem(CUSTOM_GUIDES_KEY, JSON.stringify(list)); }
+
+  function fmtGuideDate(iso) {
+    return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  }
+
+  function guideBodyHtml(bodyText) {
+    var lines = String(bodyText || "").split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
+    return lines.length ? lines.map(function (l) { return "<p>" + l + "</p>"; }).join("") : "";
+  }
+
+  function guideCategoryGrid(category) {
+    var heading = Array.prototype.filter.call(document.querySelectorAll(".section-title"), function (h) {
+      return h.textContent.trim() === category;
+    })[0];
+    return heading ? heading.nextElementSibling : null;
+  }
+
+  function categoryOfGuideCard(card) {
+    var grid = card.parentElement;
+    var heading = grid && grid.previousElementSibling;
+    return (heading && heading.classList.contains("section-title")) ? heading.textContent.trim() : "Compliance & Verification";
+  }
+
+  /* Re-applies every saved override on top of the static guide cards —
+     called once at load, and again after every edit. */
+  function applyGuideOverrides() {
+    var overrides = getGuideOverrides();
+    Object.keys(overrides).forEach(function (id) {
+      var card = document.querySelector('[data-guide-card="' + id + '"]');
+      if (!card) return;
+      var o = overrides[id];
+      var titleEl = card.querySelector(".card__head h3");
+      if (titleEl && o.title) titleEl.textContent = o.title;
+      var tagsRow = card.querySelector(".card__body .row");
+      if (tagsRow && o.tags) tagsRow.innerHTML = o.tags.map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("");
+      var descEl = card.querySelector(".card__body p");
+      if (descEl && o.description) descEl.textContent = o.description;
+      var updatedEl = card.querySelector(".card__foot .small.muted");
+      if (updatedEl && o.updatedAt) updatedEl.textContent = "Updated " + fmtGuideDate(o.updatedAt);
+
+      var modalTitleEl = document.getElementById(id + "-title");
+      if (modalTitleEl && o.title) modalTitleEl.textContent = o.title;
+      if (o.bodyText) {
+        var modal = document.getElementById(id);
+        var modalBody = modal && modal.querySelector(".modal__body");
+        if (modalBody) modalBody.innerHTML = guideBodyHtml(o.bodyText);
+      }
+
+      if (o.category) {
+        var grid = guideCategoryGrid(o.category);
+        if (grid && card.parentElement !== grid) grid.appendChild(card);
+      }
+    });
+  }
+
+  function applyGuideRemovals() {
+    getGuideRemoved().forEach(function (id) {
+      var card = document.querySelector('[data-guide-card="' + id + '"]');
+      if (card) card.style.display = "none";
+    });
+  }
+
+  function guideCardHtml(g) {
+    return '<div class="card" data-guide-card="' + g.id + '">' +
+      '<div class="card__head"><h3>' + g.title + "</h3></div>" +
+      '<div class="card__body">' +
+      '<div class="row" style="gap:6px;margin-bottom:12px;">' + (g.tags || []).map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("") + "</div>" +
+      '<p class="muted" style="margin:0;">' + (g.description || "") + "</p>" +
+      "</div>" +
+      '<div class="card__foot row" style="justify-content:space-between;align-items:center;">' +
+      '<span class="small muted">Updated ' + fmtGuideDate(g.updatedAt) + "</span>" +
+      '<button class="btn btn--primary btn--sm" type="button" data-open-modal="' + g.id + '">Open guide</button>' +
+      '<span class="row" style="gap:6px;" data-roles="admin,manager,trainer">' +
+      '<button class="btn btn--ghost btn--sm" type="button" data-edit-guide="' + g.id + '">Edit</button>' +
+      '<button class="btn btn--ghost btn--sm" type="button" data-remove-guide="' + g.id + '">Remove</button>' +
+      "</span></div></div>";
+  }
+
+  function guideModalHtml(g) {
+    var body = guideBodyHtml(g.bodyText) || '<p class="muted">No details added for this guide yet.</p>';
+    return '<div class="modal-overlay" id="' + g.id + '">' +
+      '<div class="modal modal--guide" role="dialog" aria-modal="true" aria-labelledby="' + g.id + '-title">' +
+      '<div class="modal__head"><h3 id="' + g.id + '-title">' + g.title + "</h3>" +
+      '<button class="icon-btn" data-close-modal aria-label="Close">×</button></div>' +
+      '<div class="modal__body">' + body + "</div>" +
+      '<div class="modal__foot"><button class="btn" data-close-modal>Close</button></div>' +
+      "</div></div>";
+  }
+
+  /* Rebuilds every custom (admin-added) guide's card + modal from
+     scratch — simplest way to keep them in sync after an add/edit/
+     remove, since there are only ever a handful in this prototype. */
+  function renderCustomGuides() {
+    var modalsContainer = document.getElementById("custom-guide-modals");
+    if (!modalsContainer) return;
+    document.querySelectorAll('[data-guide-card^="guide-custom-"]').forEach(function (el) { el.remove(); });
+    modalsContainer.innerHTML = "";
+
+    var removed = getGuideRemoved();
+    var guides = getCustomGuides().filter(function (g) { return removed.indexOf(g.id) === -1; });
+    guides.forEach(function (g) {
+      var grid = guideCategoryGrid(g.category);
+      if (grid) grid.insertAdjacentHTML("beforeend", guideCardHtml(g));
+      modalsContainer.insertAdjacentHTML("beforeend", guideModalHtml(g));
+    });
+    document.querySelectorAll('[data-guide-card^="guide-custom-"] [data-open-modal]').forEach(wireModalTrigger);
+    modalsContainer.querySelectorAll(".modal-overlay").forEach(wireModalOverlay);
+  }
+
+  function wireGuideManagement() {
+    var modal = document.getElementById("add-guide-modal");
+    if (!modal) return;
+
+    var titleInput = document.getElementById("guide-form-title");
+    var categorySelect = document.getElementById("guide-form-category");
+    var tagsInput = document.getElementById("guide-form-tags");
+    var descInput = document.getElementById("guide-form-description");
+    var bodyInput = document.getElementById("guide-form-body");
+    var modalTitleEl = document.getElementById("add-guide-modal-title");
+    var bodyNote = document.getElementById("guide-form-body-note");
+
+    function resetForm() {
+      guideFormEditingId = null;
+      titleInput.value = "";
+      categorySelect.value = "Compliance & Verification";
+      tagsInput.value = "";
+      descInput.value = "";
+      bodyInput.value = "";
+      modalTitleEl.textContent = "Add a guide";
+      bodyNote.textContent = 'Optional — one paragraph per line.';
+    }
+
+    document.querySelectorAll('.page-head [data-open-modal="add-guide-modal"]').forEach(function (btn) {
+      btn.addEventListener("click", resetForm);
+    });
+
+    document.addEventListener("click", function (e) {
+      var editBtn = e.target.closest("[data-edit-guide]");
+      if (editBtn) {
+        var id = editBtn.getAttribute("data-edit-guide");
+        guideFormEditingId = id;
+        var custom = getCustomGuides().filter(function (g) { return g.id === id; })[0];
+        if (custom) {
+          titleInput.value = custom.title;
+          categorySelect.value = custom.category;
+          tagsInput.value = (custom.tags || []).join(", ");
+          descInput.value = custom.description || "";
+          bodyInput.value = custom.bodyText || "";
+          bodyNote.textContent = "One paragraph per line.";
+        } else {
+          var card = document.querySelector('[data-guide-card="' + id + '"]');
+          var o = getGuideOverrides()[id] || {};
+          var cardTags = card ? Array.prototype.map.call(card.querySelectorAll(".card__body .row .tag"), function (t) { return t.textContent; }) : [];
+          titleInput.value = o.title || (card ? card.querySelector(".card__head h3").textContent.trim() : id);
+          categorySelect.value = o.category || (card ? categoryOfGuideCard(card) : "Compliance & Verification");
+          tagsInput.value = (o.tags || cardTags).join(", ");
+          descInput.value = o.description || (card ? card.querySelector(".card__body p").textContent.trim() : "");
+          bodyInput.value = o.bodyText || "";
+          bodyNote.textContent = 'Leave blank to keep this guide\'s current step-by-step content — filling it in replaces "Open guide" with plain text.';
+        }
+        modalTitleEl.textContent = "Edit guide";
+        modal.classList.add("open");
+        return;
+      }
+
+      var removeBtn = e.target.closest("[data-remove-guide]");
+      if (removeBtn) {
+        var rid = removeBtn.getAttribute("data-remove-guide");
+        var card2 = document.querySelector('[data-guide-card="' + rid + '"]');
+        var name = card2 ? card2.querySelector(".card__head h3").textContent.trim() : rid;
+        if (window.confirm('Remove "' + name + '"? This can\'t be undone in this prototype session.')) {
+          var removedList = getGuideRemoved();
+          if (removedList.indexOf(rid) === -1) removedList.push(rid);
+          saveGuideRemoved(removedList);
+          applyGuideRemovals();
+          renderCustomGuides();
+        }
+      }
+    });
+
+    document.getElementById("guide-form-submit").addEventListener("click", function () {
+      var title = titleInput.value.trim();
+      if (!title) { titleInput.focus(); return; }
+      var category = categorySelect.value;
+      var tags = tagsInput.value.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+      var description = descInput.value.trim();
+      var bodyText = bodyInput.value.trim();
+      var now = new Date().toISOString();
+
+      if (guideFormEditingId) {
+        var custom = getCustomGuides().filter(function (g) { return g.id === guideFormEditingId; })[0];
+        if (custom) {
+          custom.title = title; custom.category = category; custom.tags = tags;
+          custom.description = description; custom.updatedAt = now;
+          if (bodyText) custom.bodyText = bodyText;
+          saveCustomGuides(getCustomGuides().map(function (g) { return g.id === custom.id ? custom : g; }));
+        } else {
+          var overrides = getGuideOverrides();
+          var existing = overrides[guideFormEditingId] || {};
+          overrides[guideFormEditingId] = {
+            title: title, category: category, tags: tags, description: description,
+            updatedAt: now, bodyText: bodyText || existing.bodyText
+          };
+          saveGuideOverrides(overrides);
+          applyGuideOverrides();
+        }
+      } else {
+        var list = getCustomGuides();
+        list.unshift({
+          id: "guide-custom-" + Date.now(),
+          title: title, category: category, tags: tags, description: description,
+          updatedAt: now, bodyText: bodyText
+        });
+        saveCustomGuides(list);
+      }
+      renderCustomGuides();
+      modal.classList.remove("open");
+    });
+  }
+
   /* ---- 14c. Team lead training view (prototype only) ----
      training-development.html (Team lead role) shows the same
      training-package and guide-request data as the company-wide view
@@ -1502,6 +1758,10 @@
     renderTeamTraining();
     renderMyTraining();
     renderMyTrainingSummary();
+    applyGuideOverrides();
+    applyGuideRemovals();
+    renderCustomGuides();
+    wireGuideManagement();
     openGuideFromQuery();
     seedGuideRequests();
     renderGuideRequestsQueue();
