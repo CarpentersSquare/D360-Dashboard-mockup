@@ -47,6 +47,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `my-team-qa.html` | Team lead sub-page ("QA Review") — team QA performance vs other teams |
 | `my-team-qa-reviews.html` | Team lead — every scored call for their team, filterable by agent, date range and outcome |
 | `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
+| `my-training-development.html` | An agent's own assigned training — guide, expected action-by date, sign off (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
 | `agents.html` | Team / agents (invite modal, detail drawer) |
@@ -99,9 +100,11 @@ fallback to `assets/logo.svg`).
 
 - Drives **Training & Development** (`training-development.html`): a `GUIDE_MAP` matches known QA
   failure reasons (from either `qa.html` or a Colin scorecard) to an Agent Guide and stores an
-  assignment in `localStorage`. `my-performance.html` lists an agent's own assignments with a
-  "Mark complete" action; `agent-guides.html` supports a `?open=guide-id` deep link so assignment
-  links land straight on the right guide.
+  assignment in `localStorage`, with a 7-day "action by" date computed from when it was assigned.
+  `my-training-development.html` (Agent role only) lists the agent's own assignments — guide link,
+  action-by date (colour-coded once due soon or overdue), and a "Sign off" action; `my-performance
+  .html` shows a compact summary of the same data. `agent-guides.html` supports a `?open=guide-id`
+  deep link so assignment links land straight on the right guide.
 
 No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
 submissions, training packages); filters and other form controls are otherwise decorative.
