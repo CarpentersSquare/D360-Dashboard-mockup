@@ -191,6 +191,17 @@
         </div>
       </div>
 
+      <!-- To-do: guide requests awaiting a Trainer -->
+      <div class="card mb-18" id="guide-requests-alert" data-roles="admin,manager,trainer" style="display:none;border-left:4px solid var(--warning);">
+        <div class="card__head">
+          <h3>📋 To-do — Guide requests <span data-guide-requests-count>0</span> waiting</h3>
+          <a class="btn btn--sm" href="agent-guides.html">Review</a>
+        </div>
+        <div class="card__body">
+          <ul class="checklist" data-guide-requests-list></ul>
+        </div>
+      </div>
+
       <!-- Shoutouts + Quote of the day -->
       <div class="grid grid--2-1 mb-18">
         <div class="card">

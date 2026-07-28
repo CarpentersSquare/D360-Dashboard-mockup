@@ -189,6 +189,12 @@
           <h1>Agent Guides</h1>
           <div class="sub">Step-by-step process guides — click a guide to open it</div>
         </div>
+        <div class="page-head__actions">
+          <button class="btn btn--primary" type="button" data-open-modal="request-guide-modal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Request a guide
+          </button>
+        </div>
       </div>
 
       <!-- Filter bar (decorative) -->
@@ -213,6 +219,31 @@
           </div>
         </div>
       </form>
+
+      <!-- Guide requests — Trainer role and above (the guide authors) -->
+      <div class="card mb-24" data-roles="admin,manager,trainer">
+        <div class="card__head">
+          <h3>Guide requests</h3>
+          <span class="tag" title="Submitted via the Request a guide button">From agents &amp; trainers</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Requested by</th>
+                <th>Details</th>
+                <th>Requested</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody data-guide-requests-queue>
+              <tr><td colspan="6" class="muted" style="padding:16px;">Loading guide requests…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <!-- ===== Compliance & Verification ===== -->
       <h2 class="section-title">Compliance &amp; Verification</h2>
@@ -730,6 +761,35 @@
       </div>
       <div class="modal__foot">
         <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Request a guide modal ===== -->
+  <div class="modal-overlay" id="request-guide-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="request-guide-modal-title">
+      <div class="modal__head">
+        <h3 id="request-guide-modal-title">Request a guide</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-row">
+          <label for="request-guide-subject">Subject</label>
+          <input type="text" id="request-guide-subject" placeholder="e.g. Handling angry customers on outbound calls" />
+        </div>
+        <div class="form-row">
+          <label for="request-guide-details">What should it cover? (optional)</label>
+          <textarea id="request-guide-details" rows="3" placeholder="Any specific scenario, wording or edge case you'd like included…"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="request-guide-name">Your name</label>
+          <input type="text" id="request-guide-name" placeholder="e.g. Grace Thompson" />
+        </div>
+        <p class="muted small" style="margin:0;">Submitting alerts Trainers on their Newsfeed to write the guide — no real notification is sent in this prototype.</p>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" data-close-modal>Cancel</button>
+        <button class="btn btn--primary" id="request-guide-submit">Submit request</button>
       </div>
     </div>
   </div>

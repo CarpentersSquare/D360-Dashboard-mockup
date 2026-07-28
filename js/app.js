@@ -694,6 +694,129 @@
     if (modal) modal.classList.add("open");
   }
 
+  /* ---- 14b. Guide requests (prototype only) ----
+     "Request a guide" on agent-guides.html lets anyone (typically an
+     Agent) ask for a new process guide on a given subject. Requests
+     are stored in localStorage and rendered two places: the "Guide
+     requests" queue on agent-guides.html itself (Trainer role and
+     above — the guide authors), and a to-do alert card on the
+     Newsfeed landing page so Trainers see it the moment they sign in. */
+  var GUIDE_REQUESTS_KEY = "d360-guide-requests";
+
+  function getGuideRequests() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_REQUESTS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveGuideRequests(list) { localStorage.setItem(GUIDE_REQUESTS_KEY, JSON.stringify(list)); }
+
+  function seedGuideRequests() {
+    if (localStorage.getItem(GUIDE_REQUESTS_KEY)) return;
+    saveGuideRequests([
+      {
+        id: "gr1", subject: "Handling angry customers on outbound calls",
+        details: "We keep getting escalations on outbound collections calls specifically — could use scripted de-escalation lines for that context.",
+        requestedBy: "Grace Thompson", requestedAt: "2026-07-25T09:12:00.000Z", status: "pending"
+      },
+      {
+        id: "gr2", subject: "Processing a partial refund",
+        details: "Full refunds are covered but not partial/goodwill refunds — several agents have asked.",
+        requestedBy: "James Whitmore", requestedAt: "2026-07-27T14:30:00.000Z", status: "pending"
+      }
+    ]);
+  }
+
+  function guideRequestStatusPill(status) {
+    if (status === "done") return '<span class="pill pill--pass">Done</span>';
+    if (status === "in-progress") return '<span class="pill pill--info">In progress</span>';
+    return '<span class="pill pill--flag">Pending</span>';
+  }
+
+  function renderGuideRequestsQueue() {
+    var tbody = document.querySelector("[data-guide-requests-queue]");
+    if (!tbody) return;
+    var list = getGuideRequests();
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No guide requests right now.</td></tr>';
+      return;
+    }
+    list.forEach(function (r) {
+      var row = document.createElement("tr");
+      var nextStatus = r.status === "pending" ? "in-progress" : r.status === "in-progress" ? "done" : null;
+      var actionLabel = r.status === "pending" ? "Start" : r.status === "in-progress" ? "Mark done" : "";
+      row.innerHTML =
+        '<td class="cell-strong">' + r.subject + '</td>' +
+        '<td>' + r.requestedBy + '</td>' +
+        '<td class="cell-snippet" title="' + (r.details || "").replace(/"/g, "&quot;") + '">' + (r.details || "—") + '</td>' +
+        '<td class="muted">' + new Date(r.requestedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</td>' +
+        '<td>' + guideRequestStatusPill(r.status) + '</td>' +
+        '<td>' + (nextStatus ? '<button type="button" class="btn btn--sm" data-advance-request="' + r.id + '">' + actionLabel + '</button>' : "") + '</td>';
+      tbody.appendChild(row);
+    });
+
+    tbody.querySelectorAll("[data-advance-request]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-advance-request");
+        var list2 = getGuideRequests();
+        list2.forEach(function (r) {
+          if (r.id === id) r.status = r.status === "pending" ? "in-progress" : "done";
+        });
+        saveGuideRequests(list2);
+        renderGuideRequestsQueue();
+        renderGuideRequestsAlert();
+      });
+    });
+  }
+
+  function renderGuideRequestsAlert() {
+    var card = document.getElementById("guide-requests-alert");
+    if (!card) return;
+    var pending = getGuideRequests().filter(function (r) { return r.status !== "done"; });
+    if (!pending.length) {
+      card.style.display = "none";
+      return;
+    }
+    card.style.display = "";
+    var countEl = card.querySelector("[data-guide-requests-count]");
+    if (countEl) countEl.textContent = pending.length;
+    var list = card.querySelector("[data-guide-requests-list]");
+    if (list) {
+      list.innerHTML = pending.slice(0, 4).map(function (r) {
+        return '<li><div class="checklist__main"><div class="checklist__title">' + r.subject + '</div>' +
+          '<div class="checklist__desc">Requested by ' + r.requestedBy + ' · ' +
+          new Date(r.requestedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</div></div>' +
+          guideRequestStatusPill(r.status) + '</li>';
+      }).join("");
+    }
+  }
+
+  function wireGuideRequestForm() {
+    var submitBtn = document.getElementById("request-guide-submit");
+    if (!submitBtn) return;
+    submitBtn.addEventListener("click", function () {
+      var subjectEl = document.getElementById("request-guide-subject");
+      var detailsEl = document.getElementById("request-guide-details");
+      var nameEl = document.getElementById("request-guide-name");
+      var subject = (subjectEl.value || "").trim();
+      if (!subject) { subjectEl.focus(); return; }
+
+      var list = getGuideRequests();
+      list.unshift({
+        id: "gr" + Date.now(),
+        subject: subject,
+        details: (detailsEl.value || "").trim(),
+        requestedBy: (nameEl.value || "").trim() || "Anonymous agent",
+        requestedAt: new Date().toISOString(),
+        status: "pending"
+      });
+      saveGuideRequests(list);
+      renderGuideRequestsQueue();
+
+      subjectEl.value = ""; detailsEl.value = ""; nameEl.value = "";
+      var modal = document.getElementById("request-guide-modal");
+      if (modal) modal.classList.remove("open");
+    });
+  }
+
   /* ---- 14. Date-range pickers ----
      A <select data-range-select> with a "Custom range" option reveals a
      sibling [data-range-custom] pair of date inputs when that option is
@@ -730,6 +853,10 @@
     renderTrainingQueue();
     renderMyTraining();
     openGuideFromQuery();
+    seedGuideRequests();
+    renderGuideRequestsQueue();
+    renderGuideRequestsAlert();
+    wireGuideRequestForm();
   });
 
   window.D360 = window.D360 || {};
