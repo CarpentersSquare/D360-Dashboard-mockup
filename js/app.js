@@ -148,16 +148,6 @@
         var userId = trigger.getAttribute("data-user-id");
         var roleTag = d && d.querySelector("[data-drawer-role]");
         if (roleTag && agentRole) roleTag.textContent = AGENT_ROLE_LABELS[agentRole] || agentRole;
-        var statusTag = d && d.querySelector("[data-drawer-status]");
-        if (statusTag && userId) {
-          var su = getUsers().filter(function (u) { return u.id === userId; })[0];
-          if (su) {
-            var sLabel = su.status === "online" ? "Online" : su.status === "away" ? "Away" : "Offline";
-            statusTag.className = "status-dot " + su.status;
-            statusTag.textContent = sLabel;
-          }
-        }
-
         var roleSection = d && d.querySelector("#drawer-role-section");
         if (roleSection && userId) {
           drawerOpenUserId = userId;
@@ -1105,15 +1095,15 @@
   function seedUsers() {
     if (localStorage.getItem(USERS_KEY)) return;
     saveUsers([
-      { id: "u1", name: "Rob Ashton", role: "admin", teamLead: null, status: "online", interactions: 64, qaScore: 92, wrapup: "9s" },
-      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null, status: "online", interactions: 98, qaScore: 94, wrapup: "8s" },
-      { id: "u3", name: "Daniel Okafor", role: "agent", teamLead: "Priya Nair", status: "online", interactions: 112, qaScore: 88, wrapup: "11s" },
-      { id: "u4", name: "Grace Thompson", role: "agent", teamLead: "Priya Nair", status: "online", interactions: 87, qaScore: 95, wrapup: "10s" },
-      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair", status: "away", interactions: 73, qaScore: 79, wrapup: "15s" },
-      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair", status: "online", interactions: 104, qaScore: 90, wrapup: "10s" },
-      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null, status: "online", interactions: 91, qaScore: 85, wrapup: "12s" },
-      { id: "u8", name: "James Whitmore", role: "agent", teamLead: null, status: "online", interactions: 56, qaScore: 83, wrapup: "13s" },
-      { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null, status: "away", interactions: 38, qaScore: 81, wrapup: "16s" }
+      { id: "u1", name: "Rob Ashton", role: "admin", teamLead: null },
+      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null },
+      { id: "u3", name: "Daniel Okafor", role: "agent", teamLead: "Priya Nair" },
+      { id: "u4", name: "Grace Thompson", role: "agent", teamLead: "Priya Nair" },
+      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair" },
+      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair" },
+      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null },
+      { id: "u8", name: "James Whitmore", role: "agent", teamLead: null },
+      { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null }
     ]);
   }
 
@@ -1124,19 +1114,10 @@
     return (first + last).toUpperCase();
   }
 
-  function parseWrapupSeconds(w) {
-    var m = typeof w === "string" ? w.match(/^(\d+)s$/) : null;
-    return m ? parseInt(m[1], 10) : null;
-  }
-
   function renderUsersKpis(list) {
     var totalEl = document.getElementById("users-kpi-total");
     if (!totalEl) return;
     var breakdownEl = document.getElementById("users-kpi-breakdown");
-    var onlineEl = document.getElementById("users-kpi-online");
-    var onlineSubEl = document.getElementById("users-kpi-online-sub");
-    var qaEl = document.getElementById("users-kpi-qa");
-    var wrapupEl = document.getElementById("users-kpi-wrapup");
 
     var ROLE_ORDER = ["admin", "manager", "teamlead", "trainer", "agent"];
     var ROLE_SINGULAR = { admin: "admin", manager: "manager", teamlead: "team lead", trainer: "trainer", agent: "agent" };
@@ -1147,18 +1128,6 @@
       return counts[r] + " " + ROLE_SINGULAR[r] + (counts[r] === 1 ? "" : "s");
     });
     breakdownEl.textContent = parts.length ? parts.join(" · ") : "—";
-
-    var online = list.filter(function (u) { return u.status === "online"; }).length;
-    var away = list.filter(function (u) { return u.status === "away"; }).length;
-    var offline = list.filter(function (u) { return u.status === "offline"; }).length;
-    onlineEl.innerHTML = online + '<span class="muted" style="font-size:18px;">/' + list.length + '</span>';
-    onlineSubEl.textContent = away + " away · " + offline + " offline";
-
-    var qaScores = list.map(function (u) { return u.qaScore; }).filter(function (v) { return typeof v === "number"; });
-    qaEl.textContent = qaScores.length ? Math.round(qaScores.reduce(function (a, b) { return a + b; }, 0) / qaScores.length) : "–";
-
-    var wrapSecs = list.map(function (u) { return parseWrapupSeconds(u.wrapup); }).filter(function (v) { return v !== null; });
-    wrapupEl.textContent = wrapSecs.length ? Math.round(wrapSecs.reduce(function (a, b) { return a + b; }, 0) / wrapSecs.length) + "s" : "–";
   }
 
   /* Builds a team lead <select>'s options from every current Team lead,
@@ -1191,7 +1160,7 @@
     if (!tbody) return;
     tbody.innerHTML = "";
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="muted" style="padding:16px;">No users yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="muted" style="padding:16px;">No users yet.</td></tr>';
       return;
     }
     list.forEach(function (u) {
@@ -1202,15 +1171,10 @@
       row.setAttribute("data-agent-role", u.role);
       row.setAttribute("data-user-id", u.id);
       var teamLeadCell = u.role === "agent" && u.teamLead ? u.teamLead : '<span class="muted">—</span>';
-      var statusLabel = u.status === "online" ? "Online" : u.status === "away" ? "Away" : "Offline";
       row.innerHTML =
         '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
         '<td><span class="tag">' + (ROLE_LABELS[u.role] || u.role) + '</span></td>' +
         '<td>' + teamLeadCell + '</td>' +
-        '<td><span class="status-dot ' + u.status + '">' + statusLabel + '</span></td>' +
-        '<td class="cell-mono">' + u.interactions + '</td>' +
-        '<td class="cell-mono">' + u.qaScore + '</td>' +
-        '<td class="cell-mono">' + u.wrapup + '</td>' +
         '<td><button type="button" class="btn btn--sm btn--ghost" data-remove-user="' + u.id + '">Remove</button></td>';
       tbody.appendChild(row);
     });
@@ -1254,11 +1218,7 @@
         id: "u-" + Date.now(),
         name: name,
         role: role,
-        teamLead: role === "agent" ? (teamleadSelect.value || null) : null,
-        status: "online",
-        interactions: 0,
-        qaScore: "–",
-        wrapup: "–"
+        teamLead: role === "agent" ? (teamleadSelect.value || null) : null
       });
       saveUsers(list);
       nameInput.value = "";
