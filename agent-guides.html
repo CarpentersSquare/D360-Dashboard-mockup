@@ -186,6 +186,10 @@
           <div class="sub">Step-by-step process guides — click a guide to open it</div>
         </div>
         <div class="page-head__actions">
+          <button class="btn btn--ghost" type="button" data-open-modal="add-guide-modal" data-roles="admin,manager,trainer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Add a guide
+          </button>
           <button class="btn btn--primary" type="button" data-open-modal="request-guide-modal">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             Request a guide
@@ -203,8 +207,10 @@
           My Training &amp; Development page, with an expected action-by date — the agent must read
           it and sign off once done. Signing off updates that agent's status on the Trainer's (and, for
           their own team, the Team lead's) Training &amp; Development queue, so they can confirm it's
-          been actioned and keep track of ongoing training. Not enforced — this prototype has no real
-          authentication or RBAC; see <a href="settings.html#roles">Team roles</a> for the role definitions.
+          been actioned and keep track of ongoing training. Trainers, Managers and Admins can also add,
+          edit and remove guides here — hidden from Team lead and Agent. Not enforced — this prototype
+          has no real authentication or RBAC; see <a href="settings.html#roles">Team roles</a> for the
+          role definitions.
         </div>
       </div>
 
@@ -260,7 +266,7 @@
       <h2 class="section-title">Compliance &amp; Verification</h2>
       <div class="grid grid--3 mb-24">
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-dpa">
           <div class="card__head">
             <h3>DPA Verification</h3>
           </div>
@@ -273,10 +279,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 28 Jun</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-dpa">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-dpa">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-dpa">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-password-reset">
           <div class="card__head">
             <h3>Password Reset Verification</h3>
           </div>
@@ -289,10 +299,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 21 Jun</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-password-reset">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-password-reset">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-password-reset">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-dispute-rights">
           <div class="card__head">
             <h3>Dispute Rights &amp; Validation Notice</h3>
           </div>
@@ -305,10 +319,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 14 Jul</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-dispute-rights">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-dispute-rights">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-dispute-rights">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-confidentiality">
           <div class="card__head">
             <h3>Confidentiality &amp; Third-Party Disclosure</h3>
           </div>
@@ -321,10 +339,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 14 Jul</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-confidentiality">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-confidentiality">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-confidentiality">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-call-recording">
           <div class="card__head">
             <h3>Call Recording Disclosure</h3>
           </div>
@@ -337,6 +359,10 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 14 Jul</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-call-recording">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-call-recording">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-call-recording">Remove</button>
+            </span>
           </div>
         </div>
 
@@ -346,7 +372,7 @@
       <h2 class="section-title">Call Handling</h2>
       <div class="grid grid--3 mb-24">
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-tone">
           <div class="card__head">
             <h3>Tone &amp; De-escalation</h3>
           </div>
@@ -359,10 +385,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 14 Jul</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-tone">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-tone">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-tone">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-complaint">
           <div class="card__head">
             <h3>Complaint Handling &amp; Escalation</h3>
           </div>
@@ -375,10 +405,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 25 Jun</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-complaint">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-complaint">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-complaint">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-callback">
           <div class="card__head">
             <h3>Callback Booking</h3>
           </div>
@@ -391,10 +425,14 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 22 Jun</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-callback">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-callback">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-callback">Remove</button>
+            </span>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card" data-guide-card="guide-wrapup">
           <div class="card__head">
             <h3>Call Wrap-up Checklist</h3>
           </div>
@@ -407,6 +445,10 @@
           <div class="card__foot row" style="justify-content:space-between;align-items:center;">
             <span class="small muted">Updated 19 Jun</span>
             <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-wrapup">Open guide</button>
+            <span class="row" style="gap:6px;" data-roles="admin,manager,trainer">
+              <button class="btn btn--ghost btn--sm" type="button" data-edit-guide="guide-wrapup">Edit</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-remove-guide="guide-wrapup">Remove</button>
+            </span>
           </div>
         </div>
 
@@ -804,6 +846,49 @@
       </div>
     </div>
   </div>
+
+  <!-- ===== Add a guide modal (also reused for Edit) ===== -->
+  <div class="modal-overlay" id="add-guide-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-guide-modal-title">
+      <div class="modal__head">
+        <h3 id="add-guide-modal-title">Add a guide</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-row">
+          <label for="guide-form-title">Title</label>
+          <input type="text" id="guide-form-title" placeholder="e.g. Overdraft Explanation Wording" />
+        </div>
+        <div class="form-row">
+          <label for="guide-form-category">Category</label>
+          <select id="guide-form-category">
+            <option>Compliance &amp; Verification</option>
+            <option>Call Handling</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="guide-form-tags">Tags <span class="muted">(comma separated)</span></label>
+          <input type="text" id="guide-form-tags" placeholder="e.g. Compliance, Every call" />
+        </div>
+        <div class="form-row">
+          <label for="guide-form-description">Card description</label>
+          <textarea id="guide-form-description" rows="2" placeholder="One line shown on the guide's card"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="guide-form-body">Guide details <span class="muted">(optional — one paragraph per line)</span></label>
+          <textarea id="guide-form-body" rows="5" placeholder="What the agent needs to do, step by step…"></textarea>
+        </div>
+        <p class="muted small" style="margin:0;" id="guide-form-body-note">Leave "Guide details" blank when editing an existing guide to keep its current step-by-step content — this field only replaces the plain-text body shown in "Open guide".</p>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" data-close-modal>Cancel</button>
+        <button class="btn btn--primary" id="guide-form-submit">Save guide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamically-created guides' "Open guide" modals are appended here -->
+  <div id="custom-guide-modals"></div>
 
   <!-- ===== Banner messages modal ===== -->
   <div class="modal-overlay" id="banner-modal">
