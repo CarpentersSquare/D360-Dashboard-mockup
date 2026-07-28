@@ -534,6 +534,98 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 }
 
 /* ============================================================
+   Customer Simulations tool (simulations.html)
+   Standalone sandbox for rehearsing inbound/outbound calls with
+   simulated customer personas. Trainer role and above.
+   ============================================================ */
+.sim-page { background: var(--bg); min-height: 100vh; }
+
+.sim-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 18px;
+  padding: 12px 28px; flex-wrap: wrap;
+}
+.sim-header__brand { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+.sim-header__brand:hover { text-decoration: none; }
+.sim-header__logo {
+  width: 38px; height: 38px; border-radius: 10px; flex: none;
+  background: var(--gradient); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.sim-header__title { font-weight: 800; font-size: 16px; }
+.sim-header__version {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  background: var(--bg); padding: 3px 8px; border-radius: 6px; margin-left: 8px;
+}
+.sim-header__spacer { flex: 1; }
+
+.sim-segmented { display: inline-flex; background: var(--bg); border-radius: 10px; padding: 4px; gap: 2px; }
+.sim-segmented .tab {
+  border: none; background: none; padding: 8px 18px; border-radius: 8px;
+  font-family: var(--font); font-weight: 700; font-size: 13.5px; color: var(--muted); cursor: pointer;
+  margin: 0;
+}
+.sim-segmented .tab.active { background: #fff; color: var(--ink); box-shadow: var(--shadow); }
+
+.sim-env {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px;
+  font-family: var(--font); font-weight: 600; font-size: 13px; color: var(--ink);
+  background: #fff; cursor: pointer;
+}
+.sim-env .dot-live { width: 8px; height: 8px; border-radius: 999px; background: var(--indigo); flex: none; }
+
+.sim-main { padding: 28px 32px 48px; max-width: 1440px; margin: 0 auto; }
+
+.sim-access-note {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--warning-bg); color: var(--ink);
+  border: 1px solid #F5DCB8; border-radius: var(--radius);
+  padding: 14px 18px; margin-bottom: 22px; font-size: 13px;
+}
+.sim-access-note svg { color: var(--warning); flex: none; margin-top: 1px; }
+.sim-access-note strong { color: var(--warning); }
+
+.sim-page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.sim-page-head h1 { font-size: 23px; }
+.sim-page-head .sub { color: var(--muted); margin-top: 4px; font-size: 13.5px; }
+.sim-search-add { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.sim-search { position: relative; }
+.sim-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.sim-search input { width: 260px; height: 40px; border: 1px solid var(--border); border-radius: 10px; padding: 0 14px 0 36px; font-size: 13px; font-family: var(--font); background: #fff; }
+.btn--dark { background: var(--ink); color: #fff; border: none; }
+.btn--dark:hover { background: #33424a; }
+
+.sim-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.sim-card {
+  background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 18px; display: flex; flex-direction: column; gap: 16px;
+}
+.sim-card__top { display: flex; align-items: center; gap: 12px; }
+.sim-card__avatar {
+  width: 44px; height: 44px; border-radius: 12px; color: #fff; flex: none;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14.5px;
+}
+.sim-card__name { font-weight: 700; font-size: 15px; color: var(--ink); }
+.sim-card__sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.sim-call-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  border: none; background: var(--indigo); color: #fff;
+  font-family: var(--font); font-weight: 700; font-size: 13.5px;
+  padding: 11px; border-radius: 10px; cursor: pointer;
+}
+.sim-call-btn:hover { filter: brightness(1.08); }
+
+@media (max-width: 980px) { .sim-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) {
+  .sim-grid { grid-template-columns: 1fr; }
+  .sim-header { justify-content: center; }
+  .sim-header__spacer { flex-basis: 100%; height: 0; }
+  .sim-search input { width: 100%; }
+  .sim-search-add { width: 100%; }
+}
+
+/* ============================================================
    Marketing homepage (index.html) + mocked SSO (sso.html)
    ============================================================ */
 .proto-bar {
