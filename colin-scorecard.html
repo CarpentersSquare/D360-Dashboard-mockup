@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Colin (SDL) · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — AI-assisted call scorecard tool (prototype). Trainer role and above." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<!--
+  ACCESS NOTE: QA Colin (SDL) is restricted to the Trainer role and
+  above (Trainer, Team lead, Manager, Admin) — see the "Team roles"
+  tab on settings.html. There is no real authentication or RBAC in
+  this prototype, so the restriction is documented here and gated
+  visually via the same data-roles nav mechanism used site-wide.
+
+  Flow: pick an agent -> pick one of their interactions -> an
+  AI-marked (AutoQA) scorecard appears, pre-filled with suggested
+  Pass/Fail/N-A verdicts per compliance item. The trainer can accept
+  or override each mark, add comments, then Save — which pushes the
+  score into this prototype's shared "QA Review" queue (qa.html) via
+  localStorage, since there is no real backend here.
+-->
+<body data-page="colin-scorecard" class="colin-page">
+
+  <header class="colin-header">
+    <a href="dashboard.html" class="colin-header__logo" title="Back to Dial360 Admin">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+    </a>
+    <span class="colin-header__title">QA Colin (SDL)</span>
+    <div class="colin-header__spacer"></div>
+    <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+  </header>
+
+  <div class="colin-body">
+    <!-- ===== Left icon rail — doubles as a drill-down breadcrumb ===== -->
+    <nav class="colin-rail" aria-label="Scorecard steps">
+      <button type="button" class="colin-rail__btn" data-step="agents" title="Agents" disabled>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </button>
+      <button type="button" class="colin-rail__btn" data-step="interactions" title="Interactions" disabled>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+      </button>
+      <button type="button" class="colin-rail__btn" data-step="evaluation" title="Evaluation" disabled>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+      </button>
+    </nav>
+
+    <main class="colin-main">
+
+      <div class="sim-access-note mb-18">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <strong>Trainer role and above.</strong> QA Colin (SDL) lets Trainers, Team leads, Managers and Admins mark
+          AI-suggested scorecards against agent interactions — hidden from the Agent role in the sidebar's
+          "Viewing as" switcher. Not enforced here — this prototype has no real authentication or RBAC; see
+          <a href="settings.html#roles">Team roles</a> for the role definitions.
+        </div>
+      </div>
+
+      <!-- ===== Step 1: Agents ===== -->
+      <div class="colin-step" data-step="agents">
+        <div class="page-head">
+          <div>
+            <h1>Agents to mark</h1>
+            <div class="sub">Select an agent to see their recent interactions</div>
+          </div>
+        </div>
+        <div id="colin-agents-list" class="colin-agent-list"></div>
+      </div>
+
+      <!-- ===== Step 2: Interactions ===== -->
+      <div class="colin-step" data-step="interactions">
+        <div class="page-head">
+          <div>
+            <h1>Interactions</h1>
+            <div class="sub">Pick a call to open its AI-marked scorecard</div>
+          </div>
+        </div>
+
+        <div class="filterbar">
+          <div class="field">
+            <label for="colin-customer-filter">Customer Id</label>
+            <input type="text" id="colin-customer-filter" placeholder="Search customer or ref…" />
+          </div>
+          <div class="field">
+            <label for="colin-range">Range</label>
+            <select id="colin-range"><option>QA This Week</option><option>QA This Month</option><option>All time</option></select>
+          </div>
+          <div class="field">
+            <label for="colin-channels">Channels</label>
+            <select id="colin-channels"><option>All channels</option><option>Voice</option><option>Email</option><option>Chat</option></select>
+          </div>
+          <div class="field">
+            <label for="colin-classification">Classifications</label>
+            <select id="colin-classification">
+              <option>All classifications</option>
+              <option>Pay in Full ACH</option><option>Settlement Offer</option><option>Payment Plan Setup</option>
+              <option>Dispute Callback</option><option>Statement Request</option><option>Skip Trace Follow-up</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="colin-direction">Directions</label>
+            <select id="colin-direction"><option>All</option><option>Inbound</option><option>Outbound</option></select>
+          </div>
+        </div>
+
+        <div class="colin-sort">
+          <button type="button" data-sort="date" class="active">Date <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <button type="button" data-sort="duration">Duration <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+        </div>
+
+        <div class="colin-int-layout">
+          <div id="colin-interactions-list" class="colin-int-list"></div>
+          <div id="colin-agent-card" class="colin-agent-card"></div>
+        </div>
+      </div>
+
+      <!-- ===== Step 3: Evaluation ===== -->
+      <div class="colin-step" data-step="evaluation">
+        <div class="page-head">
+          <div>
+            <h1>Interaction Evaluation</h1>
+            <div class="sub" id="colin-eval-agent-name"></div>
+          </div>
+        </div>
+
+        <div class="colin-eval-layout">
+          <!-- Left: interaction detail -->
+          <div class="card">
+            <div class="card__body">
+              <div id="colin-eval-meta" class="small" style="line-height:1.9;"></div>
+            </div>
+            <div data-tabs>
+              <div class="tabs" role="tablist" style="padding:0 20px;">
+                <button type="button" class="tab active" data-tab="summary">Summary</button>
+                <button type="button" class="tab" data-tab="transcript">Transcript</button>
+                <button type="button" class="tab" data-tab="recordings">Recordings</button>
+                <button type="button" class="tab" data-tab="qa">QA</button>
+              </div>
+              <div class="card__body">
+                <div class="tab-panel active" data-panel="summary" id="colin-tab-summary"></div>
+                <div class="tab-panel" data-panel="transcript" id="colin-tab-transcript"></div>
+                <div class="tab-panel" data-panel="recordings" id="colin-tab-recordings"></div>
+                <div class="tab-panel" data-panel="qa" id="colin-tab-qa"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: evaluation form -->
+          <div class="stack">
+            <div data-tabs>
+              <div class="tabs" role="tablist">
+                <button type="button" class="tab active" data-tab="evaluation">Evaluation</button>
+                <button type="button" class="tab" data-tab="history">History</button>
+                <button type="button" class="tab" data-tab="autoqa">AutoQA</button>
+              </div>
+
+              <div class="tab-panel active" data-panel="evaluation">
+                <div class="colin-section-bar"><span>Feedback</span></div>
+                <div class="colin-section-body">
+                  <p class="muted small" style="font-style:italic;">No feedback</p>
+                </div>
+
+                <div class="colin-section-bar" style="margin-top:16px;"><span>Compliance <span id="colin-score">(0/10)</span></span></div>
+                <div class="colin-section-body">
+                  <div id="colin-compliance-list"></div>
+                </div>
+
+                <div class="colin-submit-bar">
+                  <button type="button" class="btn btn--primary" id="colin-save-btn">Save</button>
+                </div>
+                <div id="colin-submit-note" class="banner banner--pass mb-18" style="display:none;margin-top:14px;"></div>
+              </div>
+
+              <div class="tab-panel" data-panel="history">
+                <p class="muted">No previous evaluations for this interaction yet.</p>
+              </div>
+
+              <div class="tab-panel" data-panel="autoqa" id="colin-tab-autoqa"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/colin.js"></script>
+</body>
+</html>
