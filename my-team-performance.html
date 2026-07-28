@@ -195,27 +195,27 @@
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
           <div class="kpi__label">My team</div>
-          <div class="kpi__value">5</div>
-          <div class="kpi__sub">1 team lead · 4 agents</div>
+          <div class="kpi__value" id="mtp-kpi-team">–</div>
+          <div class="kpi__sub" id="mtp-kpi-team-sub">–</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Online now</div>
-          <div class="kpi__value">4<span class="muted" style="font-size:18px;">/5</span></div>
-          <div class="kpi__sub">1 away · 0 offline</div>
+          <div class="kpi__value" id="mtp-kpi-online">–</div>
+          <div class="kpi__sub" id="mtp-kpi-online-sub">–</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Total interactions</div>
-          <div class="kpi__value">474</div>
+          <div class="kpi__value" id="mtp-kpi-interactions">–</div>
           <div class="kpi__delta up">▲ 5.2% vs last week</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value">89</div>
+          <div class="kpi__value" id="mtp-kpi-qa">–</div>
           <div class="kpi__delta up">▲ 2.3 pts this week</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value">11s</div>
+          <div class="kpi__value" id="mtp-kpi-wrapup">–</div>
           <div class="kpi__delta up">▼ from 2.5 min baseline</div>
         </div>
       </div>
@@ -270,47 +270,8 @@
                 <th>Avg wrap-up</th>
               </tr>
             </thead>
-            <tbody>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Priya Nair">
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span><span class="cell-strong">Priya Nair</span></span></td>
-                <td><span class="tag">Team lead</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">98</td>
-                <td class="cell-mono">94</td>
-                <td class="cell-mono">8s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Daniel Okafor">
-                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span><span class="cell-strong">Daniel Okafor</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">112</td>
-                <td class="cell-mono">88</td>
-                <td class="cell-mono">11s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Grace Thompson">
-                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span><span class="cell-strong">Grace Thompson</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">87</td>
-                <td class="cell-mono">95</td>
-                <td class="cell-mono">10s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Marcus Bennett">
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span><span class="cell-strong">Marcus Bennett</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot away">Away</span></td>
-                <td class="cell-mono">73</td>
-                <td class="cell-mono">79</td>
-                <td class="cell-mono">15s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Olivia Hughes">
-                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span><span class="cell-strong">Olivia Hughes</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">104</td>
-                <td class="cell-mono">90</td>
-                <td class="cell-mono">10s</td>
-              </tr>
+            <tbody data-team-roster>
+              <tr><td colspan="6" class="muted" style="padding:16px;">Loading team…</td></tr>
             </tbody>
           </table>
         </div>
