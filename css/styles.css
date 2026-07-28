@@ -775,20 +775,9 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
    Standalone drill-down: agents -> interactions -> AI-marked
    evaluation. Trainer role and above.
    ============================================================ */
-.colin-page { background: var(--bg); min-height: 100vh; }
-
-.colin-header {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px; padding: 12px 24px;
-}
-.colin-header__logo { color: var(--ink); display: flex; }
-.colin-header__logo:hover { text-decoration: none; }
-.colin-header__title { font-weight: 800; font-size: 16px; color: var(--ink); }
-.colin-header__spacer { flex: 1; }
-
-.colin-body { display: flex; min-height: calc(100vh - 61px); }
+.colin-body { display: flex; gap: 24px; align-items: flex-start; }
 .colin-rail {
-  width: 52px; flex: none; background: var(--surface); border-right: 1px solid var(--border);
+  width: 52px; flex: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 6px;
 }
 .colin-rail__btn {
@@ -799,7 +788,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .colin-rail__btn.reachable:hover { background: var(--bg); color: var(--ink); }
 .colin-rail__btn.active { background: var(--info-bg); color: var(--indigo); }
 
-.colin-main { flex: 1; padding: 24px 28px 48px; max-width: 1400px; }
+.colin-main { flex: 1; min-width: 0; }
 .colin-step { display: none; }
 .colin-step.active { display: block; }
 
@@ -874,7 +863,6 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 }
 @media (max-width: 620px) {
   .colin-rail { width: 44px; }
-  .colin-main { padding: 18px; }
 }
 
 /* ============================================================
