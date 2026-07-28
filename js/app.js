@@ -167,6 +167,15 @@
           if (roleNote) roleNote.style.display = "none";
         }
 
+        var personalSection = d && d.querySelector("#drawer-personal-section");
+        if (personalSection && userId) {
+          var pu = getUsers().filter(function (u) { return u.id === userId; })[0];
+          var birthdayInput = personalSection.querySelector("#drawer-birthday-input");
+          if (birthdayInput) birthdayInput.value = (pu && pu.birthday) || "";
+          var personalNote = personalSection.querySelector("#drawer-personal-note");
+          if (personalNote) personalNote.style.display = "none";
+        }
+
         var accessSection = d && d.querySelector("#drawer-access-section");
         if (accessSection) {
           drawerOpenAgentName = name;
@@ -221,6 +230,22 @@
         if (accessSection && user.name) renderAccessOverrideOptions(accessSection, newRole, user.name);
         var roleNote = document.getElementById("drawer-role-note");
         if (roleNote) roleNote.style.display = "block";
+      });
+    }
+
+    var saveBirthdayBtn = document.getElementById("drawer-save-personal");
+    if (saveBirthdayBtn) {
+      saveBirthdayBtn.addEventListener("click", function () {
+        if (!drawerOpenUserId) return;
+        var list = getUsers();
+        var user = list.filter(function (u) { return u.id === drawerOpenUserId; })[0];
+        if (!user) return;
+        var birthdayInput = document.getElementById("drawer-birthday-input");
+        user.birthday = (birthdayInput && birthdayInput.value) || null;
+        saveUsers(list);
+        renderUpcomingBirthdays();
+        var personalNote = document.getElementById("drawer-personal-note");
+        if (personalNote) personalNote.style.display = "block";
       });
     }
 
@@ -1280,12 +1305,12 @@
     if (localStorage.getItem(USERS_KEY)) return;
     saveUsers([
       { id: "u1", name: "Rob Ashton", role: "admin", teamLead: null },
-      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null },
+      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null, birthday: "1990-07-02" },
       { id: "u3", name: "Daniel Okafor", role: "agent", teamLead: "Priya Nair" },
       { id: "u4", name: "Grace Thompson", role: "agent", teamLead: "Priya Nair" },
-      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair" },
-      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair" },
-      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null },
+      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair", birthday: "1990-07-09" },
+      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair", birthday: "1990-07-15" },
+      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null, birthday: "1990-07-22" },
       { id: "u8", name: "James Whitmore", role: "agent", teamLead: null },
       { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null }
     ]);
@@ -1296,6 +1321,41 @@
     var first = parts[0] ? parts[0][0] : "";
     var last = parts.length > 1 ? parts[parts.length - 1][0] : "";
     return (first + last).toUpperCase();
+  }
+
+  /* This year's (or next year's, if it's already passed) occurrence of
+     a "YYYY-MM-DD" birthday string — the stored year is just whatever
+     the date picker needed, it's never shown or used for age. */
+  function nextBirthdayOccurrence(iso) {
+    var parts = iso.split("-");
+    var month = parseInt(parts[1], 10) - 1;
+    var day = parseInt(parts[2], 10);
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var next = new Date(today.getFullYear(), month, day);
+    if (next < today) next = new Date(today.getFullYear() + 1, month, day);
+    return next;
+  }
+
+  /* Newsfeed's "Upcoming birthdays" card — reads whatever's been typed
+     into each user's Personal details on users.html, rather than a
+     fixed list, so it always reflects the current roster. */
+  function renderUpcomingBirthdays() {
+    var listEl = document.querySelector("[data-birthdays-list]");
+    if (!listEl) return;
+    var withBirthday = getUsers().filter(function (u) { return u.birthday; });
+    withBirthday.forEach(function (u) { u._next = nextBirthdayOccurrence(u.birthday); });
+    withBirthday.sort(function (a, b) { return a._next - b._next; });
+    var upcoming = withBirthday.slice(0, 5);
+    if (!upcoming.length) {
+      listEl.innerHTML = '<li class="muted small">No birthdays on file yet — add one from a user\'s profile on the Users page.</li>';
+      return;
+    }
+    listEl.innerHTML = upcoming.map(function (u) {
+      return '<li><span class="avatar avatar--sm">' + userInitials(u.name) + '</span>' +
+        '<div class="checklist__main"><div class="checklist__title">' + u.name + '</div>' +
+        '<div class="checklist__desc">' + u._next.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</div></div></li>';
+    }).join("");
   }
 
   function renderUsersKpis(list) {
@@ -1380,6 +1440,7 @@
     var teamleadSelect = document.getElementById("add-user-teamlead");
     var nameInput = document.getElementById("add-user-name");
     var emailInput = document.getElementById("add-user-email");
+    var birthdayInput = document.getElementById("add-user-birthday");
     var submitBtn = document.getElementById("add-user-submit");
     if (!roleSelect || !submitBtn) return;
 
@@ -1402,14 +1463,17 @@
         id: "u-" + Date.now(),
         name: name,
         role: role,
-        teamLead: role === "agent" ? (teamleadSelect.value || null) : null
+        teamLead: role === "agent" ? (teamleadSelect.value || null) : null,
+        birthday: (birthdayInput && birthdayInput.value) || null
       });
       saveUsers(list);
       nameInput.value = "";
       if (emailInput) emailInput.value = "";
+      if (birthdayInput) birthdayInput.value = "";
       roleSelect.value = "agent";
       sync();
       renderUsersRoster();
+      renderUpcomingBirthdays();
       var modal = document.getElementById("add-user-modal");
       if (modal) modal.classList.remove("open");
     });
@@ -1430,6 +1494,7 @@
     renderBanner(currentBannerRole());
     wireBannerEditor();
     seedUsers();
+    renderUpcomingBirthdays();
     wireRoleSwitch();
     seedTrainingPackages();
     renderTrainingQueue();

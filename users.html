@@ -280,6 +280,20 @@
         </div>
       </div>
 
+      <!-- Personal details — birthday feeds the Newsfeed "Upcoming birthdays" card -->
+      <div class="card mb-18" id="drawer-personal-section" style="box-shadow:none;">
+        <div class="card__head"><h3 style="font-size:14px;">Personal details</h3></div>
+        <div class="card__body">
+          <div class="form-row">
+            <label for="drawer-birthday-input">Birthday</label>
+            <input type="date" id="drawer-birthday-input" />
+          </div>
+          <p class="small muted" style="margin:0 0 10px;">Shown on the Newsfeed's "Upcoming birthdays" card — not visible anywhere else.</p>
+          <button type="button" class="btn btn--primary btn--sm" id="drawer-save-personal">Save</button>
+          <div class="small" id="drawer-personal-note" style="display:none;margin-top:8px;color:var(--success);font-weight:600;">Saved.</div>
+        </div>
+      </div>
+
       <!-- Additional page access — per-user overrides beyond the role's default access -->
       <div class="card" id="drawer-access-section" style="box-shadow:none;">
         <div class="card__head"><h3 style="font-size:14px;">Additional page access</h3></div>
@@ -330,6 +344,10 @@
           <select id="add-user-teamlead">
             <option value="">— None —</option>
           </select>
+        </div>
+        <div class="form-row">
+          <label for="add-user-birthday">Birthday</label>
+          <input type="date" id="add-user-birthday" />
         </div>
         <p class="muted small" style="margin:0;">Roles are labels in this prototype — no real access control is applied.</p>
       </div>
