@@ -585,6 +585,110 @@
     if (roleLabel) roleLabel.textContent = displayLabel;
     refreshEmployeeOptionHints();
     renderBanner(role);
+    renderMyTeamRoster();
+    scopeTeamRowsToLead();
+  }
+
+  /* Which team lead's roster the "My Team Performance" pages should
+     show. Priya Nair is the only team lead with a named role-switch
+     sub-option in this prototype, so she's the default whenever the
+     generic "Team lead" option (no specific employee) is picked. */
+  function currentTeamLeadName() {
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
+    return (role === "teamlead" && employee) ? employee : "Priya Nair";
+  }
+
+  /* Every user (agents plus the team lead themself) currently
+     assigned to teamLeadName via the Users page's per-agent "Team
+     lead" field — the same field Admin/Manager edit from a user's
+     drawer. Reassigning an agent there is what moves them on/off
+     this list. */
+  function teamLeadRosterNames(teamLeadName) {
+    var names = getUsers().filter(function (u) { return u.teamLead === teamLeadName; }).map(function (u) { return u.name; });
+    names.unshift(teamLeadName);
+    return names;
+  }
+
+  /* Demo performance figures for My Team Performance's roster table —
+     kept separate from d360-users (which is account-settings only,
+     see Users page) since these are performance numbers, not account
+     data. Anyone assigned to a team lead who isn't in this table
+     (e.g. reassigned from elsewhere in the prototype) shows dashes
+     rather than a fabricated score. */
+  var TEAM_PERFORMANCE_STATS = {
+    "Priya Nair": { status: "online", interactions: 98, qaScore: 94, wrapup: "8s" },
+    "Daniel Okafor": { status: "online", interactions: 112, qaScore: 88, wrapup: "11s" },
+    "Grace Thompson": { status: "online", interactions: 87, qaScore: 95, wrapup: "10s" },
+    "Marcus Bennett": { status: "away", interactions: 73, qaScore: 79, wrapup: "15s" },
+    "Olivia Hughes": { status: "online", interactions: 104, qaScore: 90, wrapup: "10s" }
+  };
+
+  function renderMyTeamKpis(members) {
+    var teamEl = document.getElementById("mtp-kpi-team");
+    if (!teamEl) return;
+    var leads = members.filter(function (u) { return u.role === "teamlead"; }).length;
+    var agents = members.length - leads;
+    teamEl.textContent = members.length;
+    document.getElementById("mtp-kpi-team-sub").textContent =
+      leads + " team lead" + (leads === 1 ? "" : "s") + " · " + agents + " agent" + (agents === 1 ? "" : "s");
+
+    var stats = members.map(function (u) { return TEAM_PERFORMANCE_STATS[u.name]; }).filter(Boolean);
+    var online = stats.filter(function (s) { return s.status === "online"; }).length;
+    var away = stats.filter(function (s) { return s.status === "away"; }).length;
+    var offline = stats.filter(function (s) { return s.status === "offline"; }).length;
+    document.getElementById("mtp-kpi-online").innerHTML = online + '<span class="muted" style="font-size:18px;">/' + members.length + '</span>';
+    document.getElementById("mtp-kpi-online-sub").textContent = away + " away · " + offline + " offline";
+
+    var interactions = stats.map(function (s) { return s.interactions; }).filter(function (v) { return typeof v === "number"; });
+    document.getElementById("mtp-kpi-interactions").textContent = interactions.length ? interactions.reduce(function (a, b) { return a + b; }, 0) : "–";
+
+    var qaScores = stats.map(function (s) { return s.qaScore; }).filter(function (v) { return typeof v === "number"; });
+    document.getElementById("mtp-kpi-qa").textContent = qaScores.length ? Math.round(qaScores.reduce(function (a, b) { return a + b; }, 0) / qaScores.length) : "–";
+
+    var wrapSecs = stats.map(function (s) { return parseInt(s.wrapup, 10); }).filter(function (v) { return !isNaN(v); });
+    document.getElementById("mtp-kpi-wrapup").textContent = wrapSecs.length ? Math.round(wrapSecs.reduce(function (a, b) { return a + b; }, 0) / wrapSecs.length) + "s" : "–";
+  }
+
+  function renderMyTeamRoster() {
+    var tbody = document.querySelector("[data-team-roster]");
+    if (!tbody) return;
+    var lead = currentTeamLeadName();
+    var names = teamLeadRosterNames(lead);
+    var members = getUsers().filter(function (u) { return names.indexOf(u.name) !== -1; });
+    members.sort(function (a) { return a.name === lead ? -1 : 0; });
+    renderMyTeamKpis(members);
+    if (!members.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No team members assigned yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = members.map(function (u) {
+      var stats = TEAM_PERFORMANCE_STATS[u.name] || { status: "online", interactions: "–", qaScore: "–", wrapup: "–" };
+      var statusLabel = stats.status === "online" ? "Online" : stats.status === "away" ? "Away" : "Offline";
+      return '<tr class="clickable" data-open-drawer="agent-drawer" data-name="' + u.name + '">' +
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
+        '<td><span class="tag">' + (ROLE_LABELS[u.role] || u.role) + '</span></td>' +
+        '<td><span class="status-dot ' + stats.status + '">' + statusLabel + '</span></td>' +
+        '<td class="cell-mono">' + stats.interactions + '</td>' +
+        '<td class="cell-mono">' + stats.qaScore + '</td>' +
+        '<td class="cell-mono">' + stats.wrapup + '</td>' +
+        '</tr>';
+    }).join("");
+    wireDrawerTriggers();
+  }
+
+  /* The other "My Team ..." pages (Interaction Stats, QA Review, All
+     scored calls) keep their existing per-interaction demo rows, but
+     hide any row for an agent no longer on this team lead's roster —
+     gated to data-page="my-team-performance" so it never touches the
+     full company roster on users.html. */
+  function scopeTeamRowsToLead() {
+    if (document.body.getAttribute("data-page") !== "my-team-performance") return;
+    var names = teamLeadRosterNames(currentTeamLeadName());
+    document.querySelectorAll("table.data tbody tr[data-name]").forEach(function (row) {
+      if (row.closest("[data-team-roster]")) return; // already scoped by renderMyTeamRoster()
+      row.style.display = names.indexOf(row.getAttribute("data-name")) !== -1 ? "" : "none";
+    });
   }
 
   function wireRoleSwitch() {
@@ -1244,6 +1348,7 @@
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
+    seedUsers();
     wireRoleSwitch();
     seedTrainingPackages();
     renderTrainingQueue();
@@ -1256,7 +1361,6 @@
     renderGuideRequestsAlert();
     renderTeamGuideRequests();
     wireGuideRequestForm();
-    seedUsers();
     renderUsersRoster();
     // wireDrawers() must run after renderUsersRoster() — it wires up
     // every current [data-open-drawer] element, and the roster rows
