@@ -50,11 +50,11 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `my-training-development.html` | An agent's own assigned training — guide, expected action-by date, sign off (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail |
 | `analytics.html` | Reporting & inline-SVG charts |
-| `agents.html` | Team / agents (invite modal, detail drawer) |
+| `users.html` | Users (Admin/Manager) — add/remove accounts, and per-user drawer settings: change role, assign an agent's team lead, and grant/revoke individual page-access overrides beyond the role's default (e.g. give one Team lead access to Templates) |
 | `templates.html` | Response template library |
 | `simulations.html` | Customer Simulations — rehearse inbound/outbound calls with simulated personas (Trainer role and above) |
 | `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
-| `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide (Trainer role and above) |
+| `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide. Admin/Manager/Trainer see the company-wide queue; Team lead sees their own team's packages and a read-only view of their team's training requests |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
 | `billing.html` | Plan, usage & invoices |
 | `settings.html` | Account / integrations / numbers / branding / security / roles |
@@ -82,11 +82,13 @@ fallback to `assets/logo.svg`).
 
 - Drives the **"Viewing as" role switch** in the topbar (Admin / Manager / Team lead / Trainer /
   Agent): filters any `[data-roles]` element to match — sidebar links and account-menu items
-  everywhere, plus a few pages that also filter their own content (e.g. `agents.html` shows only
+  everywhere, plus a few pages that also filter their own content (e.g. `users.html` shows only
   Admin/Manager the full roster — a Team lead's own team roster lives on `my-team-performance.html`
-  instead, with a separate KPI row for that scoped view). Persists the choice in `localStorage` so
-  it carries across pages. Still purely visual, matching this prototype's "no real RBAC" stance —
-  nothing is actually access-controlled server-side.
+  instead, with a separate KPI row for that scoped view). The role switch also has named sub-options
+  under a role (e.g. "Team lead → Priya Nair") that apply that person's individual page-access
+  overrides on top of the role's defaults — see `users.html` below. Persists the choice in
+  `localStorage` so it carries across pages. Still purely visual, matching this prototype's
+  "no real RBAC" stance — nothing is actually access-controlled server-side.
 
 - Drives the **rolling announcement banner** at the top of every admin page: auto-rotates
   through short messages every 6s (with dot navigation), and lets Team lead and above post new
@@ -104,10 +106,21 @@ fallback to `assets/logo.svg`).
   `my-training-development.html` (Agent role only) lists the agent's own assignments — guide link,
   action-by date (colour-coded once due soon or overdue), and a "Sign off" action; `my-performance
   .html` shows a compact summary of the same data. `agent-guides.html` supports a `?open=guide-id`
-  deep link so assignment links land straight on the right guide.
+  deep link so assignment links land straight on the right guide. Team lead sees the same package
+  data filtered to their own roster, plus a read-only view of their team's guide requests (the
+  "Request a guide" flow on `agent-guides.html`, owned end-to-end by Trainers).
+
+- Drives **user management** (`users.html`, Admin/Manager role): every account lives in a
+  `d360-users` localStorage record (name, role, status, stats, and — for Agents — which Team lead
+  they report to). Add/Remove act directly on that list; clicking a row opens a settings drawer
+  where an Admin/Manager can change the person's role, (re)assign an Agent's Team lead, and grant
+  or revoke individual page-access overrides beyond their role's default (stored in
+  `d360-user-overrides`, keyed by name) — e.g. letting one specific Team lead see Templates without
+  opening it up to Team leads generally.
 
 No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
-submissions, training packages); filters and other form controls are otherwise decorative.
+submissions, training packages, guide requests, users and their access overrides); filters and
+other form controls are otherwise decorative.
 
 ## Branding
 

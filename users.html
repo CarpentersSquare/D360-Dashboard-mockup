@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agents · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — team, roles and agent performance (prototype)." />
+  <title>Users · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — manage user accounts, roles and team assignments (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="agents">
+<body data-page="users">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -78,9 +78,9 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="11" width="3" height="6"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg>
           <span class="nav-item__label">Analytics</span>
         </a>
-        <a class="nav-item" data-nav="agents" href="agents.html" data-roles="admin,manager">
+        <a class="nav-item" data-nav="users" href="users.html" data-roles="admin,manager">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span class="nav-item__label">Agents</span>
+          <span class="nav-item__label">Users</span>
         </a>
         <a class="nav-item" data-nav="templates" href="templates.html" data-roles="admin,manager,trainer">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
@@ -145,6 +145,10 @@
             <span>Team lead</span>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
           </button>
+          <button type="button" class="role-switch__option role-switch__option--sub" data-role="teamlead" data-employee="Priya Nair" role="menuitem">
+            <span>&#8618; Priya Nair <span class="role-switch__hint muted"></span></span>
+            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
           <button type="button" class="role-switch__option" data-role="trainer" role="menuitem">
             <span>Trainer</span>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
@@ -186,157 +190,63 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>Agents</h1>
-          <div class="sub">Manage your team, roles and performance</div>
+          <h1>Users</h1>
+          <div class="sub">Manage user accounts, roles and team assignments</div>
         </div>
         <div class="page-head__actions">
-          <button class="btn btn--primary" data-open-modal="invite-modal">
+          <button class="btn btn--primary" data-open-modal="add-user-modal">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
-            Invite agent
+            Add user
           </button>
         </div>
       </div>
 
-      <!-- KPI / summary row (Admin / Manager — company-wide) -->
-      <div class="grid grid--kpi mb-18" data-roles="admin,manager">
+      <!-- KPI / summary row -->
+      <div class="grid grid--kpi mb-18">
         <div class="kpi">
-          <div class="kpi__label">Total agents</div>
-          <div class="kpi__value">9</div>
-          <div class="kpi__sub">1 admin · 1 team lead · 7 agents</div>
+          <div class="kpi__label">Total users</div>
+          <div class="kpi__value" id="users-kpi-total">–</div>
+          <div class="kpi__sub" id="users-kpi-breakdown">–</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Online now</div>
-          <div class="kpi__value">7<span class="muted" style="font-size:18px;">/9</span></div>
-          <div class="kpi__sub">2 away · 0 offline</div>
+          <div class="kpi__value" id="users-kpi-online">–</div>
+          <div class="kpi__sub" id="users-kpi-online-sub">–</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value">86</div>
-          <div class="kpi__delta up">▲ 1.4 pts this week</div>
+          <div class="kpi__value" id="users-kpi-qa">–</div>
+          <div class="kpi__sub">across users with scores</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value">11s</div>
-          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
-        </div>
-      </div>
-
-      <!-- KPI / summary row (Team lead — their allocated team only) -->
-      <div class="grid grid--kpi mb-18" data-roles="teamlead">
-        <div class="kpi">
-          <div class="kpi__label">My team</div>
-          <div class="kpi__value">5</div>
-          <div class="kpi__sub">1 team lead · 4 agents</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Online now</div>
-          <div class="kpi__value">4<span class="muted" style="font-size:18px;">/5</span></div>
-          <div class="kpi__sub">1 away · 0 offline</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value">89</div>
-          <div class="kpi__delta up">▲ 2.3 pts this week</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value">11s</div>
-          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
+          <div class="kpi__value" id="users-kpi-wrapup">–</div>
+          <div class="kpi__sub">across users with data</div>
         </div>
       </div>
 
       <!-- Roster table -->
       <div class="card">
         <div class="card__head">
-          <h3>Team roster</h3>
-          <span class="tag" data-roles="admin,manager">Labels only · no real RBAC</span>
-          <span class="tag" data-roles="teamlead">Showing your allocated team only</span>
+          <h3>User roster</h3>
+          <span class="tag">Labels only · no real RBAC</span>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Agent</th>
+                <th>User</th>
                 <th>Role</th>
+                <th>Team lead</th>
                 <th>Status</th>
                 <th>Interactions handled <span class="muted">(this week)</span></th>
                 <th>Avg QA score</th>
                 <th>Avg wrap-up</th>
+                <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Rob Ashton" data-agent-role="admin" data-roles="admin,manager">
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span><span class="cell-strong">Rob Ashton</span></span></td>
-                <td><span class="tag">Admin</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">64</td>
-                <td class="cell-mono">92</td>
-                <td class="cell-mono">9s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Priya Nair" data-agent-role="teamlead" data-roles="admin,manager,teamlead">
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span><span class="cell-strong">Priya Nair</span></span></td>
-                <td><span class="tag">Team lead</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">98</td>
-                <td class="cell-mono">94</td>
-                <td class="cell-mono">8s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Daniel Okafor" data-agent-role="agent" data-roles="admin,manager,teamlead">
-                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span><span class="cell-strong">Daniel Okafor</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">112</td>
-                <td class="cell-mono">88</td>
-                <td class="cell-mono">11s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Grace Thompson" data-agent-role="agent" data-roles="admin,manager,teamlead">
-                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span><span class="cell-strong">Grace Thompson</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">87</td>
-                <td class="cell-mono">95</td>
-                <td class="cell-mono">10s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Marcus Bennett" data-agent-role="agent" data-roles="admin,manager,teamlead">
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span><span class="cell-strong">Marcus Bennett</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot away">Away</span></td>
-                <td class="cell-mono">73</td>
-                <td class="cell-mono">79</td>
-                <td class="cell-mono">15s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Olivia Hughes" data-agent-role="agent" data-roles="admin,manager,teamlead">
-                <td><span class="cell-user"><span class="avatar avatar--sm">OH</span><span class="cell-strong">Olivia Hughes</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">104</td>
-                <td class="cell-mono">90</td>
-                <td class="cell-mono">10s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Charlotte Reid" data-agent-role="agent" data-roles="admin,manager">
-                <td><span class="cell-user"><span class="avatar avatar--sm">CR</span><span class="cell-strong">Charlotte Reid</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">91</td>
-                <td class="cell-mono">85</td>
-                <td class="cell-mono">12s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="James Whitmore" data-agent-role="agent" data-roles="admin,manager">
-                <td><span class="cell-user"><span class="avatar avatar--sm">JW</span><span class="cell-strong">James Whitmore</span></span></td>
-                <td><span class="tag">Agent</span></td>
-                <td><span class="status-dot online">Online</span></td>
-                <td class="cell-mono">56</td>
-                <td class="cell-mono">83</td>
-                <td class="cell-mono">13s</td>
-              </tr>
-              <tr class="clickable" data-open-drawer="agent-drawer" data-name="Hannah Price" data-agent-role="trainer" data-roles="admin,manager">
-                <td><span class="cell-user"><span class="avatar avatar--sm">HP</span><span class="cell-strong">Hannah Price</span></span></td>
-                <td><span class="tag">Trainer</span></td>
-                <td><span class="status-dot away">Away</span></td>
-                <td class="cell-mono">38</td>
-                <td class="cell-mono">81</td>
-                <td class="cell-mono">16s</td>
-              </tr>
+            <tbody data-users-roster>
+              <tr><td colspan="8" class="muted" style="padding:16px;">Loading users…</td></tr>
             </tbody>
           </table>
         </div>
@@ -347,10 +257,10 @@
 
   <!-- ===== Agent detail drawer ===== -->
   <div class="drawer-overlay" id="agent-drawer-overlay"></div>
-  <div class="drawer" id="agent-drawer" aria-label="Agent details">
+  <div class="drawer" id="agent-drawer" aria-label="User settings">
     <div class="drawer__head">
-      <h3 data-drawer-name>Agent</h3>
-      <button class="icon-btn" data-close-drawer aria-label="Close agent details">
+      <h3 data-drawer-name>User</h3>
+      <button class="icon-btn" data-close-drawer aria-label="Close user settings">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
@@ -359,140 +269,94 @@
       <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
         <span class="avatar avatar--lg" aria-hidden="true">AG</span>
         <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
             <span class="tag" data-drawer-role>Agent</span>
-            <span class="status-dot online">Online</span>
+            <span class="status-dot online" data-drawer-status>Online</span>
           </div>
-          <div class="muted small">Team · Customer Support · joined Mar 2025</div>
         </div>
       </div>
 
-      <!-- Individual access overrides — Manager/Admin only, shown for Trainer role -->
-      <div class="card mb-18" id="drawer-access-section" style="display:none;box-shadow:none;">
-        <div class="card__head"><h3 style="font-size:14px;">Individual access</h3></div>
+      <!-- Role & team — change this user's role and, for Agents, who they report to -->
+      <div class="card mb-18" id="drawer-role-section" style="box-shadow:none;">
+        <div class="card__head"><h3 style="font-size:14px;">Role &amp; team</h3></div>
+        <div class="card__body">
+          <div class="form-row">
+            <label for="drawer-role-select">Role</label>
+            <select id="drawer-role-select">
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="teamlead">Team lead</option>
+              <option value="trainer">Trainer</option>
+              <option value="agent">Agent</option>
+            </select>
+          </div>
+          <div class="form-row" id="drawer-teamlead-row">
+            <label for="drawer-teamlead-select">Team lead</label>
+            <select id="drawer-teamlead-select">
+              <option value="">— None —</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn--primary btn--sm" id="drawer-save-role" style="margin-top:4px;">Save changes</button>
+          <div class="small" id="drawer-role-note" style="display:none;margin-top:8px;color:var(--success);font-weight:600;">Saved.</div>
+        </div>
+      </div>
+
+      <!-- Additional page access — per-user overrides beyond the role's default access -->
+      <div class="card" id="drawer-access-section" style="box-shadow:none;">
+        <div class="card__head"><h3 style="font-size:14px;">Additional page access</h3></div>
         <div class="card__body">
           <p class="small muted" style="margin-top:0;">
-            Grant this Trainer extra tabs beyond the role's default access. Visual only — not enforced.
+            Grant this user access to pages beyond their role's defaults, on a case-by-case basis — e.g. a Team
+            lead who doesn't normally see Templates, but should for this person. Visual only — not enforced.
           </p>
-          <div class="stack" style="gap:8px;">
-            <label class="row" style="gap:8px;align-items:center;font-size:13.5px;">
-              <input type="checkbox" data-access-override="analytics" /> Analytics
-            </label>
-            <label class="row" style="gap:8px;align-items:center;font-size:13.5px;">
-              <input type="checkbox" data-access-override="interactions" /> Interactions
-            </label>
-            <label class="row" style="gap:8px;align-items:center;font-size:13.5px;">
-              <input type="checkbox" data-access-override="complaints" /> Complaints
-            </label>
-          </div>
+          <div class="stack" style="gap:8px;" data-access-override-list></div>
           <button type="button" class="btn btn--primary btn--sm" id="drawer-save-access" style="margin-top:14px;">Save access</button>
           <div class="small" id="drawer-access-note" style="display:none;margin-top:8px;color:var(--success);font-weight:600;">Saved.</div>
         </div>
       </div>
 
-      <p class="section-title">This week</p>
-      <div class="row" style="gap:12px;margin-bottom:6px;">
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Interactions handled</div>
-          <div class="kpi__value" style="font-size:24px;">91</div>
-          <div class="kpi__delta up">▲ 6 vs last week</div>
-        </div>
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value" style="font-size:24px;">87</div>
-          <div class="kpi__sub">team avg 86</div>
-        </div>
-      </div>
-      <div class="row" style="gap:12px;margin-bottom:18px;">
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value" style="font-size:24px;">11s</div>
-          <div class="kpi__sub">down from 2.5 min</div>
-        </div>
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">QA pass rate</div>
-          <div class="kpi__value" style="font-size:24px;">89%</div>
-          <div class="kpi__delta up">▲ 2.1 pts</div>
-        </div>
-      </div>
-
-      <p class="section-title">QA score trend — last 8 weeks</p>
-      <svg viewBox="0 0 320 90" class="chart-svg" role="img" aria-label="QA score trend over the last 8 weeks, rising from about 80 to 89" style="margin-bottom:20px;">
-        <g stroke="#EBEBEB" stroke-width="1">
-          <line x1="0" y1="20" x2="320" y2="20"/>
-          <line x1="0" y1="50" x2="320" y2="50"/>
-          <line x1="0" y1="80" x2="320" y2="80"/>
-        </g>
-        <polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
-          points="6,58 50,52 94,60 138,44 182,48 226,34 270,38 314,26"/>
-        <circle cx="314" cy="26" r="4" fill="#7976F3"/>
-      </svg>
-
-      <p class="section-title">Recent interactions</p>
-      <div class="table-wrap" style="margin-bottom:18px;">
-        <table class="data">
-          <tbody>
-            <tr class="clickable" data-href="interaction.html">
-              <td class="cell-mono">29 Jun</td>
-              <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-              <td><span class="pill pill--info">Resolved</span></td>
-            </tr>
-            <tr class="clickable" data-href="interaction.html">
-              <td class="cell-mono">29 Jun</td>
-              <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
-              <td><span class="pill pill--info">Sale</span></td>
-            </tr>
-            <tr class="clickable" data-href="interaction.html">
-              <td class="cell-mono">28 Jun</td>
-              <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
-              <td><span class="pill pill--info">Callback booked</span></td>
-            </tr>
-            <tr class="clickable" data-href="interaction.html">
-              <td class="cell-mono">27 Jun</td>
-              <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-              <td><span class="pill pill--muted">Escalated</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <a class="btn btn--sm" href="interactions.html">View all interactions</a>
     </div>
   </div>
 
-  <!-- ===== Invite agent modal ===== -->
-  <div class="modal-overlay" id="invite-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="invite-modal-title">
+  <!-- ===== Add user modal ===== -->
+  <div class="modal-overlay" id="add-user-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-user-modal-title">
       <div class="modal__head">
-        <h3 id="invite-modal-title">Invite agent</h3>
-        <button class="icon-btn" data-close-modal aria-label="Close invite dialog">
+        <h3 id="add-user-modal-title">Add user</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close add user dialog">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
       <div class="modal__body">
         <div class="form-row">
-          <label for="invite-name">Full name</label>
-          <input type="text" id="invite-name" placeholder="e.g. Nadia Hussain" />
+          <label for="add-user-name">Full name</label>
+          <input type="text" id="add-user-name" placeholder="e.g. Nadia Hussain" />
         </div>
         <div class="form-row">
-          <label for="invite-email">Work email</label>
-          <input type="email" id="invite-email" placeholder="name@company.co.uk" />
+          <label for="add-user-email">Work email</label>
+          <input type="email" id="add-user-email" placeholder="name@company.co.uk" />
         </div>
         <div class="form-row">
-          <label for="invite-role">Role</label>
-          <select id="invite-role">
-            <option>Agent</option>
-            <option>Trainer</option>
-            <option>Team lead</option>
-            <option>Manager</option>
-            <option>Admin</option>
+          <label for="add-user-role">Role</label>
+          <select id="add-user-role">
+            <option value="agent">Agent</option>
+            <option value="trainer">Trainer</option>
+            <option value="teamlead">Team lead</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-row" id="add-user-teamlead-row">
+          <label for="add-user-teamlead">Team lead</label>
+          <select id="add-user-teamlead">
+            <option value="">— None —</option>
           </select>
         </div>
         <p class="muted small" style="margin:0;">Roles are labels in this prototype — no real access control is applied.</p>
       </div>
       <div class="modal__foot">
         <button class="btn btn--ghost" data-close-modal>Cancel</button>
-        <button class="btn btn--primary">Send invite</button>
+        <button type="button" class="btn btn--primary" id="add-user-submit">Add user</button>
       </div>
     </div>
   </div>

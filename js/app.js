@@ -99,8 +99,34 @@
     trainer: "Trainer", agent: "Agent"
   };
   var drawerOpenAgentName = null;
+  var drawerOpenUserId = null;
 
-  function wireDrawers() {
+  /* Fills the "Additional page access" checkbox list with every nav
+     page the user's current role *doesn't* already get by default. */
+  function renderAccessOverrideOptions(section, role, name) {
+    var listEl = section.querySelector("[data-access-override-list]");
+    if (!listEl) return;
+    var granted = getUserOverrides()[name] || [];
+    var extras = Object.keys(NAV_DEFAULT_ROLES).filter(function (key) {
+      return NAV_DEFAULT_ROLES[key].indexOf(role) === -1;
+    });
+    if (!extras.length) {
+      listEl.innerHTML = '<p class="small muted" style="margin:0;">This role already has access to every page.</p>';
+      return;
+    }
+    listEl.innerHTML = extras.map(function (key) {
+      var checked = granted.indexOf(key) !== -1 ? " checked" : "";
+      return '<label class="row" style="gap:8px;align-items:center;font-size:13.5px;">' +
+        '<input type="checkbox" data-access-override="' + key + '"' + checked + ' /> ' + NAV_LABELS[key] + '</label>';
+    }).join("");
+  }
+
+  /* Binds the open-drawer click behavior to every [data-open-drawer]
+     element currently in the page. Called once by wireDrawers() at
+     load, and again by renderUsersRoster() after each re-render —
+     that tbody is rebuilt from scratch on every add/remove/edit, so
+     its rows need fresh listeners each time. */
+  function wireDrawerTriggers() {
     document.querySelectorAll("[data-open-drawer]").forEach(function (trigger) {
       trigger.addEventListener("click", function () {
         var id = trigger.getAttribute("data-open-drawer");
@@ -115,31 +141,54 @@
           if (t) t.textContent = name;
         }
 
-        // Individual access section (agents.html roster drawer only):
-        // shows the clicked agent's actual role and, for Trainers,
-        // lets a Manager/Admin grant extra tabs. See "Individual
-        // access overrides" in the Role switch section below.
+        // User settings sections (users.html roster drawer only): role
+        // tag/status, the "Role & team" editor, and "Additional page
+        // access" — see the User management section further below.
         var agentRole = trigger.getAttribute("data-agent-role");
+        var userId = trigger.getAttribute("data-user-id");
         var roleTag = d && d.querySelector("[data-drawer-role]");
         if (roleTag && agentRole) roleTag.textContent = AGENT_ROLE_LABELS[agentRole] || agentRole;
+        var statusTag = d && d.querySelector("[data-drawer-status]");
+        if (statusTag && userId) {
+          var su = getUsers().filter(function (u) { return u.id === userId; })[0];
+          if (su) {
+            var sLabel = su.status === "online" ? "Online" : su.status === "away" ? "Away" : "Offline";
+            statusTag.className = "status-dot " + su.status;
+            statusTag.textContent = sLabel;
+          }
+        }
+
+        var roleSection = d && d.querySelector("#drawer-role-section");
+        if (roleSection && userId) {
+          drawerOpenUserId = userId;
+          var ru = getUsers().filter(function (u) { return u.id === userId; })[0];
+          if (ru) {
+            var roleSelect = roleSection.querySelector("#drawer-role-select");
+            var teamleadRow = roleSection.querySelector("#drawer-teamlead-row");
+            var teamleadSelect = roleSection.querySelector("#drawer-teamlead-select");
+            if (roleSelect) roleSelect.value = ru.role;
+            populateTeamLeadOptions(teamleadSelect, ru.teamLead, ru.id);
+            if (teamleadRow) teamleadRow.style.display = ru.role === "agent" ? "" : "none";
+          }
+          var roleNote = roleSection.querySelector("#drawer-role-note");
+          if (roleNote) roleNote.style.display = "none";
+        }
 
         var accessSection = d && d.querySelector("#drawer-access-section");
         if (accessSection) {
           drawerOpenAgentName = name;
-          if (agentRole === "trainer" && name) {
-            accessSection.style.display = "";
-            var granted = (getUserOverrides()[name] || []);
-            accessSection.querySelectorAll("[data-access-override]").forEach(function (cb) {
-              cb.checked = granted.indexOf(cb.getAttribute("data-access-override")) !== -1;
-            });
-            var note = accessSection.querySelector("#drawer-access-note");
-            if (note) note.style.display = "none";
-          } else {
-            accessSection.style.display = "none";
+          if (agentRole && name) {
+            renderAccessOverrideOptions(accessSection, agentRole, name);
           }
+          var note = accessSection.querySelector("#drawer-access-note");
+          if (note) note.style.display = "none";
         }
       });
     });
+  }
+
+  function wireDrawers() {
+    wireDrawerTriggers();
     function closeAll() {
       document.querySelectorAll(".drawer.open").forEach(function (d) { d.classList.remove("open"); });
       document.querySelectorAll(".drawer-overlay.open").forEach(function (o) { o.classList.remove("open"); });
@@ -147,6 +196,40 @@
     document.querySelectorAll(".drawer-overlay, [data-close-drawer]").forEach(function (el) {
       el.addEventListener("click", closeAll);
     });
+
+    var drawerRoleSelect = document.getElementById("drawer-role-select");
+    var drawerTeamleadRow = document.getElementById("drawer-teamlead-row");
+    var drawerTeamleadSelect = document.getElementById("drawer-teamlead-select");
+    if (drawerRoleSelect) {
+      drawerRoleSelect.addEventListener("change", function () {
+        populateTeamLeadOptions(drawerTeamleadSelect, drawerTeamleadSelect.value, drawerOpenUserId);
+        drawerTeamleadRow.style.display = drawerRoleSelect.value === "agent" ? "" : "none";
+      });
+    }
+    var saveRoleBtn = document.getElementById("drawer-save-role");
+    if (saveRoleBtn) {
+      saveRoleBtn.addEventListener("click", function () {
+        if (!drawerOpenUserId) return;
+        var list = getUsers();
+        var user = list.filter(function (u) { return u.id === drawerOpenUserId; })[0];
+        if (!user) return;
+        var previousName = user.name;
+        var newRole = drawerRoleSelect.value;
+        user.role = newRole;
+        user.teamLead = newRole === "agent" ? (drawerTeamleadSelect.value || null) : null;
+        if (newRole !== "teamlead") {
+          list.forEach(function (u) { if (u.id !== user.id && u.teamLead === previousName) u.teamLead = null; });
+        }
+        saveUsers(list);
+        renderUsersRoster();
+        var roleTagEl = document.querySelector("#agent-drawer [data-drawer-role]");
+        if (roleTagEl) roleTagEl.textContent = AGENT_ROLE_LABELS[newRole] || newRole;
+        var accessSection = document.getElementById("drawer-access-section");
+        if (accessSection && user.name) renderAccessOverrideOptions(accessSection, newRole, user.name);
+        var roleNote = document.getElementById("drawer-role-note");
+        if (roleNote) roleNote.style.display = "block";
+      });
+    }
 
     var saveAccessBtn = document.getElementById("drawer-save-access");
     if (saveAccessBtn) {
@@ -423,14 +506,14 @@
      role label. Persisted in localStorage so it carries across pages.
      No real RBAC enforcement — page content itself is unrestricted.
 
-     Individual access overrides: a Manager/Admin can grant a named
-     employee extra tabs beyond their role's default access (see the
-     "Individual access" section in an agent's drawer on agents.html).
-     Overrides are keyed by employee name and store the [data-nav]
-     values of the extra pages granted — e.g. Hannah Price (Trainer)
-     might be granted "analytics". The role-switch menu's named
-     sub-options (e.g. "Trainer — Hannah Price") apply the role's
-     normal permissions *plus* that employee's overrides. */
+     Individual access overrides: an Admin/Manager can grant a named
+     user access to pages beyond their role's default access (see
+     "Additional page access" in a user's drawer on users.html) — e.g.
+     a Team lead who doesn't normally see Templates, but should for
+     this one person. Overrides are keyed by user name and store the
+     [data-nav] values of the extra pages granted. The role-switch
+     menu's named sub-options (e.g. "Trainer — Hannah Price") apply the
+     role's normal permissions *plus* that person's overrides. */
   var ROLE_KEY = "d360-role";
   var EMPLOYEE_KEY = "d360-role-employee";
   var OVERRIDES_KEY = "d360-user-overrides";
@@ -438,7 +521,39 @@
     admin: "Admin", manager: "Manager", teamlead: "Team lead",
     trainer: "Trainer", agent: "Agent"
   };
-  var OVERRIDE_LABELS = { analytics: "Analytics", interactions: "Interactions", complaints: "Complaints" };
+
+  /* Every individually-toggleable nav page and the roles that get it by
+     default — the single source of truth the "Additional page access"
+     drawer section and the employee-option hints both read from.
+     ("My Team Performance" is a nav-group, not an individual item with
+     its own [data-roles], so it isn't offered as a grantable extra.) */
+  var NAV_DEFAULT_ROLES = {
+    newsfeed: ["admin", "manager", "teamlead", "trainer", "agent"],
+    overview: ["admin", "manager"],
+    "call-centre-dashboard": ["admin", "manager", "teamlead"],
+    "my-performance": ["agent"],
+    qa: ["admin", "manager", "trainer"],
+    complaints: ["admin", "manager", "teamlead"],
+    "my-qa": ["agent"],
+    analytics: ["admin", "manager"],
+    users: ["admin", "manager"],
+    templates: ["admin", "manager", "trainer"],
+    simulations: ["admin", "manager", "teamlead", "trainer"],
+    "colin-scorecard": ["admin", "manager", "teamlead", "trainer"],
+    "training-development": ["admin", "manager", "teamlead", "trainer", "agent"],
+    "agent-guides": ["admin", "manager", "teamlead", "trainer", "agent"],
+    billing: ["admin", "manager"],
+    settings: ["admin"],
+    interactions: ["admin", "manager", "teamlead"]
+  };
+  var NAV_LABELS = {
+    newsfeed: "Newsfeed", overview: "Overview", "call-centre-dashboard": "Call Centre Dashboard",
+    "my-performance": "My Performance", qa: "QA Review", complaints: "Complaints",
+    "my-qa": "My QA", analytics: "Analytics", users: "Users", templates: "Templates",
+    simulations: "Customer Simulations", "colin-scorecard": "Colin Scorecard",
+    "training-development": "Training & Development", "agent-guides": "Agent Guides",
+    billing: "Billing", settings: "Settings", interactions: "Interactions"
+  };
 
   function getUserOverrides() {
     try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
@@ -452,7 +567,7 @@
       if (!name) return;
       var hint = opt.querySelector(".role-switch__hint");
       if (!hint) return;
-      var extra = (overrides[name] || []).map(function (k) { return OVERRIDE_LABELS[k] || k; });
+      var extra = (overrides[name] || []).map(function (k) { return NAV_LABELS[k] || k; });
       hint.textContent = extra.length ? "+ " + extra.join(", ") : "";
     });
   }
@@ -967,13 +1082,199 @@
     });
   }
 
+  /* ---- 15. User management (users.html, prototype only) ----
+     users.html lists every account — Admin, Manager, Team lead,
+     Trainer and Agent — and lets an Admin/Manager add or remove a
+     user, change their role, and assign an agent to a team lead
+     (role change and team-lead assignment happen from the roster
+     drawer's "Role & team" section — see the Drawers section above).
+     Everything lives in localStorage; there's no real backend or
+     RBAC. Team lead assignment is stored as the team lead's name on
+     the agent's own record (the same "match by name" convention used
+     for training packages and banner authorship elsewhere in this
+     file). */
+  var USERS_KEY = "d360-users";
+
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveUsers(list) { localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
+
+  function seedUsers() {
+    if (localStorage.getItem(USERS_KEY)) return;
+    saveUsers([
+      { id: "u1", name: "Rob Ashton", role: "admin", teamLead: null, status: "online", interactions: 64, qaScore: 92, wrapup: "9s" },
+      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null, status: "online", interactions: 98, qaScore: 94, wrapup: "8s" },
+      { id: "u3", name: "Daniel Okafor", role: "agent", teamLead: "Priya Nair", status: "online", interactions: 112, qaScore: 88, wrapup: "11s" },
+      { id: "u4", name: "Grace Thompson", role: "agent", teamLead: "Priya Nair", status: "online", interactions: 87, qaScore: 95, wrapup: "10s" },
+      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair", status: "away", interactions: 73, qaScore: 79, wrapup: "15s" },
+      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair", status: "online", interactions: 104, qaScore: 90, wrapup: "10s" },
+      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null, status: "online", interactions: 91, qaScore: 85, wrapup: "12s" },
+      { id: "u8", name: "James Whitmore", role: "agent", teamLead: null, status: "online", interactions: 56, qaScore: 83, wrapup: "13s" },
+      { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null, status: "away", interactions: 38, qaScore: 81, wrapup: "16s" }
+    ]);
+  }
+
+  function userInitials(name) {
+    var parts = String(name).trim().split(/\s+/);
+    var first = parts[0] ? parts[0][0] : "";
+    var last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+    return (first + last).toUpperCase();
+  }
+
+  function parseWrapupSeconds(w) {
+    var m = typeof w === "string" ? w.match(/^(\d+)s$/) : null;
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  function renderUsersKpis(list) {
+    var totalEl = document.getElementById("users-kpi-total");
+    if (!totalEl) return;
+    var breakdownEl = document.getElementById("users-kpi-breakdown");
+    var onlineEl = document.getElementById("users-kpi-online");
+    var onlineSubEl = document.getElementById("users-kpi-online-sub");
+    var qaEl = document.getElementById("users-kpi-qa");
+    var wrapupEl = document.getElementById("users-kpi-wrapup");
+
+    var ROLE_ORDER = ["admin", "manager", "teamlead", "trainer", "agent"];
+    var ROLE_SINGULAR = { admin: "admin", manager: "manager", teamlead: "team lead", trainer: "trainer", agent: "agent" };
+    var counts = {};
+    list.forEach(function (u) { counts[u.role] = (counts[u.role] || 0) + 1; });
+    totalEl.textContent = list.length;
+    var parts = ROLE_ORDER.filter(function (r) { return counts[r]; }).map(function (r) {
+      return counts[r] + " " + ROLE_SINGULAR[r] + (counts[r] === 1 ? "" : "s");
+    });
+    breakdownEl.textContent = parts.length ? parts.join(" · ") : "—";
+
+    var online = list.filter(function (u) { return u.status === "online"; }).length;
+    var away = list.filter(function (u) { return u.status === "away"; }).length;
+    var offline = list.filter(function (u) { return u.status === "offline"; }).length;
+    onlineEl.innerHTML = online + '<span class="muted" style="font-size:18px;">/' + list.length + '</span>';
+    onlineSubEl.textContent = away + " away · " + offline + " offline";
+
+    var qaScores = list.map(function (u) { return u.qaScore; }).filter(function (v) { return typeof v === "number"; });
+    qaEl.textContent = qaScores.length ? Math.round(qaScores.reduce(function (a, b) { return a + b; }, 0) / qaScores.length) : "–";
+
+    var wrapSecs = list.map(function (u) { return parseWrapupSeconds(u.wrapup); }).filter(function (v) { return v !== null; });
+    wrapupEl.textContent = wrapSecs.length ? Math.round(wrapSecs.reduce(function (a, b) { return a + b; }, 0) / wrapSecs.length) + "s" : "–";
+  }
+
+  /* Builds a team lead <select>'s options from every current Team lead,
+     excluding the user being edited (an agent can't be their own lead)
+     and preselecting selectedValue if it's still a valid team lead. */
+  function populateTeamLeadOptions(selectEl, selectedValue, excludeId) {
+    if (!selectEl) return;
+    var leads = getUsers().filter(function (u) { return u.role === "teamlead" && u.id !== excludeId; });
+    selectEl.innerHTML = '<option value="">— None —</option>' + leads.map(function (u) {
+      return '<option value="' + u.name + '"' + (u.name === selectedValue ? " selected" : "") + '>' + u.name + '</option>';
+    }).join("");
+  }
+
+  function removeUser(id) {
+    var list = getUsers();
+    var user = list.filter(function (u) { return u.id === id; })[0];
+    if (!user) return;
+    list = list.filter(function (u) { return u.id !== id; });
+    if (user.role === "teamlead") {
+      list.forEach(function (u) { if (u.teamLead === user.name) u.teamLead = null; });
+    }
+    saveUsers(list);
+    renderUsersRoster();
+  }
+
+  function renderUsersRoster() {
+    var tbody = document.querySelector("[data-users-roster]");
+    var list = getUsers();
+    renderUsersKpis(list);
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="muted" style="padding:16px;">No users yet.</td></tr>';
+      return;
+    }
+    list.forEach(function (u) {
+      var row = document.createElement("tr");
+      row.className = "clickable";
+      row.setAttribute("data-open-drawer", "agent-drawer");
+      row.setAttribute("data-name", u.name);
+      row.setAttribute("data-agent-role", u.role);
+      row.setAttribute("data-user-id", u.id);
+      var teamLeadCell = u.role === "agent" && u.teamLead ? u.teamLead : '<span class="muted">—</span>';
+      var statusLabel = u.status === "online" ? "Online" : u.status === "away" ? "Away" : "Offline";
+      row.innerHTML =
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
+        '<td><span class="tag">' + (ROLE_LABELS[u.role] || u.role) + '</span></td>' +
+        '<td>' + teamLeadCell + '</td>' +
+        '<td><span class="status-dot ' + u.status + '">' + statusLabel + '</span></td>' +
+        '<td class="cell-mono">' + u.interactions + '</td>' +
+        '<td class="cell-mono">' + u.qaScore + '</td>' +
+        '<td class="cell-mono">' + u.wrapup + '</td>' +
+        '<td><button type="button" class="btn btn--sm btn--ghost" data-remove-user="' + u.id + '">Remove</button></td>';
+      tbody.appendChild(row);
+    });
+    tbody.querySelectorAll("[data-remove-user]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var id = btn.getAttribute("data-remove-user");
+        var user = getUsers().filter(function (u) { return u.id === id; })[0];
+        if (!user) return;
+        if (window.confirm("Remove " + user.name + "? This can't be undone in this prototype session.")) removeUser(id);
+      });
+    });
+    wireDrawerTriggers();
+  }
+
+  function wireAddUserModal() {
+    var roleSelect = document.getElementById("add-user-role");
+    var teamleadRow = document.getElementById("add-user-teamlead-row");
+    var teamleadSelect = document.getElementById("add-user-teamlead");
+    var nameInput = document.getElementById("add-user-name");
+    var emailInput = document.getElementById("add-user-email");
+    var submitBtn = document.getElementById("add-user-submit");
+    if (!roleSelect || !submitBtn) return;
+
+    function sync() {
+      populateTeamLeadOptions(teamleadSelect, teamleadSelect.value, null);
+      teamleadRow.style.display = roleSelect.value === "agent" ? "" : "none";
+    }
+    roleSelect.addEventListener("change", sync);
+    document.querySelectorAll('[data-open-modal="add-user-modal"]').forEach(function (trigger) {
+      trigger.addEventListener("click", sync);
+    });
+    sync();
+
+    submitBtn.addEventListener("click", function () {
+      var name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      var role = roleSelect.value;
+      var list = getUsers();
+      list.push({
+        id: "u-" + Date.now(),
+        name: name,
+        role: role,
+        teamLead: role === "agent" ? (teamleadSelect.value || null) : null,
+        status: "online",
+        interactions: 0,
+        qaScore: "–",
+        wrapup: "–"
+      });
+      saveUsers(list);
+      nameInput.value = "";
+      if (emailInput) emailInput.value = "";
+      roleSelect.value = "agent";
+      sync();
+      renderUsersRoster();
+      var modal = document.getElementById("add-user-modal");
+      if (modal) modal.classList.remove("open");
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
     wireAccountMenu();
     wireTabs();
     wireModals();
-    wireDrawers();
     wireEsc();
     wireRowLinks();
     wireTemplateCopy();
@@ -994,6 +1295,14 @@
     renderGuideRequestsAlert();
     renderTeamGuideRequests();
     wireGuideRequestForm();
+    seedUsers();
+    renderUsersRoster();
+    // wireDrawers() must run after renderUsersRoster() — it wires up
+    // every current [data-open-drawer] element, and the roster rows
+    // above are built dynamically from localStorage rather than
+    // present in the page's static HTML.
+    wireDrawers();
+    wireAddUserModal();
   });
 
   window.D360 = window.D360 || {};
