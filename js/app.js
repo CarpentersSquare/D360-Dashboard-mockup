@@ -420,7 +420,37 @@
     });
   }
 
-  /* ---- 12. Date-range pickers ----
+  /* ---- 12. Colin scorecard queue (prototype only) ----
+     colin-scorecard.html stores submitted AI-marked evaluations in
+     localStorage (there's no real backend). Any page with a
+     [data-colin-queue] tbody — the QA Review flagged table — renders
+     them at the top of the queue, tagged "Colin". */
+  var COLIN_KEY = "d360-colin-submissions";
+
+  function renderColinQueue() {
+    var tbody = document.querySelector("[data-colin-queue]");
+    if (!tbody) return;
+    var submissions = [];
+    try { submissions = JSON.parse(localStorage.getItem(COLIN_KEY)) || []; } catch (e) { submissions = []; }
+    if (!submissions.length) return;
+
+    submissions.forEach(function (r) {
+      var row = document.createElement("tr");
+      var statusPill = r.score >= 70 ? '<span class="pill pill--pass">Resolved</span>' : '<span class="pill pill--flag">Needs review</span>';
+      var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
+      row.innerHTML =
+        '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
+        '<td class="cell-strong">' + r.customerName + '</td>' +
+        '<td><span class="cell-user">' + r.agentName + '</span></td>' +
+        '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
+        '<td>' + r.topFailReason + '</td>' +
+        '<td>' + statusPill + '</td>' +
+        '<td class="muted">Colin (AI-assisted)</td>';
+      tbody.insertBefore(row, tbody.firstChild);
+    });
+  }
+
+  /* ---- 13. Date-range pickers ----
      A <select data-range-select> with a "Custom range" option reveals a
      sibling [data-range-custom] pair of date inputs when that option is
      chosen. Visual only — no filtering happens in this prototype. */
@@ -447,6 +477,7 @@
     wireRowLinks();
     wireTemplateCopy();
     wireRangePickers();
+    renderColinQueue();
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
