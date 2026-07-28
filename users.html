@@ -200,36 +200,13 @@
       <div class="sim-access-note">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <div>
-          <strong>Manager role and above.</strong> Users is the full company roster of every active user — Managers
-          and Admins use it to review status and performance, add new users, and set or amend a user's role level
-          (Agent, Trainer, Team lead, Manager, Admin) along with any individual access overrides from their profile
-          drawer. Team leads get their own scoped roster on My Team Performance; hidden here, along with Trainer and
-          Agent roles, in the sidebar's "Viewing as" switcher. Not enforced — this prototype has no real
-          authentication or RBAC; see <a href="settings.html#roles">Team roles</a> for the role definitions.
-        </div>
-      </div>
-
-      <!-- KPI / summary row -->
-      <div class="grid grid--kpi mb-18">
-        <div class="kpi">
-          <div class="kpi__label">Total users</div>
-          <div class="kpi__value" id="users-kpi-total">–</div>
-          <div class="kpi__sub" id="users-kpi-breakdown">–</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Online now</div>
-          <div class="kpi__value" id="users-kpi-online">–</div>
-          <div class="kpi__sub" id="users-kpi-online-sub">–</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value" id="users-kpi-qa">–</div>
-          <div class="kpi__sub">across users with scores</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value" id="users-kpi-wrapup">–</div>
-          <div class="kpi__sub">across users with data</div>
+          <strong>Manager role and above.</strong> Users is the full company roster of every active user account —
+          Managers and Admins use it to add new users, and set or amend a user's role level (Agent, Trainer, Team
+          lead, Manager, Admin) along with any individual access overrides from their profile drawer. Live status
+          and performance data lives on the Call Centre Dashboard, QA Review and My Team Performance instead. Team
+          leads get their own scoped roster on My Team Performance; hidden here, along with Trainer and Agent
+          roles, in the sidebar's "Viewing as" switcher. Not enforced — this prototype has no real authentication
+          or RBAC; see <a href="settings.html#roles">Team roles</a> for the role definitions.
         </div>
       </div>
 
@@ -237,6 +214,9 @@
       <div class="card">
         <div class="card__head">
           <h3>User roster</h3>
+          <span class="sub" style="margin-right:auto;margin-left:12px;">
+            <span id="users-kpi-total">–</span> users · <span id="users-kpi-breakdown">–</span>
+          </span>
           <span class="tag">Labels only · no real RBAC</span>
         </div>
         <div class="table-wrap">
@@ -246,15 +226,11 @@
                 <th>User</th>
                 <th>Role</th>
                 <th>Team lead</th>
-                <th>Status</th>
-                <th>Interactions handled <span class="muted">(this week)</span></th>
-                <th>Avg QA score</th>
-                <th>Avg wrap-up</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody data-users-roster>
-              <tr><td colspan="8" class="muted" style="padding:16px;">Loading users…</td></tr>
+              <tr><td colspan="4" class="muted" style="padding:16px;">Loading users…</td></tr>
             </tbody>
           </table>
         </div>
@@ -279,7 +255,6 @@
         <div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="tag" data-drawer-role>Agent</span>
-            <span class="status-dot online" data-drawer-status>Online</span>
           </div>
         </div>
       </div>
