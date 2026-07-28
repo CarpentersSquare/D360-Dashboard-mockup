@@ -94,6 +94,12 @@
 
   /* ---- 6. Drawers ----
      [data-open-drawer="id"] opens; overlay or [data-close-drawer] closes. */
+  var AGENT_ROLE_LABELS = {
+    admin: "Admin", manager: "Manager", teamlead: "Team lead",
+    trainer: "Trainer", agent: "Agent"
+  };
+  var drawerOpenAgentName = null;
+
   function wireDrawers() {
     document.querySelectorAll("[data-open-drawer]").forEach(function (trigger) {
       trigger.addEventListener("click", function () {
@@ -108,6 +114,30 @@
           var t = d.querySelector("[data-drawer-name]");
           if (t) t.textContent = name;
         }
+
+        // Individual access section (agents.html roster drawer only):
+        // shows the clicked agent's actual role and, for Trainers,
+        // lets a Manager/Admin grant extra tabs. See "Individual
+        // access overrides" in the Role switch section below.
+        var agentRole = trigger.getAttribute("data-agent-role");
+        var roleTag = d && d.querySelector("[data-drawer-role]");
+        if (roleTag && agentRole) roleTag.textContent = AGENT_ROLE_LABELS[agentRole] || agentRole;
+
+        var accessSection = d && d.querySelector("#drawer-access-section");
+        if (accessSection) {
+          drawerOpenAgentName = name;
+          if (agentRole === "trainer" && name) {
+            accessSection.style.display = "";
+            var granted = (getUserOverrides()[name] || []);
+            accessSection.querySelectorAll("[data-access-override]").forEach(function (cb) {
+              cb.checked = granted.indexOf(cb.getAttribute("data-access-override")) !== -1;
+            });
+            var note = accessSection.querySelector("#drawer-access-note");
+            if (note) note.style.display = "none";
+          } else {
+            accessSection.style.display = "none";
+          }
+        }
       });
     });
     function closeAll() {
@@ -117,6 +147,25 @@
     document.querySelectorAll(".drawer-overlay, [data-close-drawer]").forEach(function (el) {
       el.addEventListener("click", closeAll);
     });
+
+    var saveAccessBtn = document.getElementById("drawer-save-access");
+    if (saveAccessBtn) {
+      saveAccessBtn.addEventListener("click", function () {
+        if (!drawerOpenAgentName) return;
+        var section = document.getElementById("drawer-access-section");
+        var granted = [];
+        section.querySelectorAll("[data-access-override]").forEach(function (cb) {
+          if (cb.checked) granted.push(cb.getAttribute("data-access-override"));
+        });
+        var overrides = getUserOverrides();
+        if (granted.length) overrides[drawerOpenAgentName] = granted;
+        else delete overrides[drawerOpenAgentName];
+        saveUserOverrides(overrides);
+        refreshEmployeeOptionHints();
+        var note = section.querySelector("#drawer-access-note");
+        if (note) note.style.display = "block";
+      });
+    }
   }
 
   /* ---- 7. Esc closes overlays ---- */
@@ -372,26 +421,63 @@
      Topbar dropdown filters [data-roles] elements (nav items, account
      menu links) to what that role can see, and updates the account
      role label. Persisted in localStorage so it carries across pages.
-     No real RBAC enforcement — page content itself is unrestricted. */
+     No real RBAC enforcement — page content itself is unrestricted.
+
+     Individual access overrides: a Manager/Admin can grant a named
+     employee extra tabs beyond their role's default access (see the
+     "Individual access" section in an agent's drawer on agents.html).
+     Overrides are keyed by employee name and store the [data-nav]
+     values of the extra pages granted — e.g. Hannah Price (Trainer)
+     might be granted "analytics". The role-switch menu's named
+     sub-options (e.g. "Trainer — Hannah Price") apply the role's
+     normal permissions *plus* that employee's overrides. */
   var ROLE_KEY = "d360-role";
+  var EMPLOYEE_KEY = "d360-role-employee";
+  var OVERRIDES_KEY = "d360-user-overrides";
   var ROLE_LABELS = {
     admin: "Admin", manager: "Manager", teamlead: "Team lead",
     trainer: "Trainer", agent: "Agent"
   };
+  var OVERRIDE_LABELS = { analytics: "Analytics", interactions: "Interactions", complaints: "Complaints" };
 
-  function applyRole(role) {
+  function getUserOverrides() {
+    try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveUserOverrides(map) { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(map)); }
+
+  function refreshEmployeeOptionHints() {
+    var overrides = getUserOverrides();
+    document.querySelectorAll(".role-switch__option[data-employee]").forEach(function (opt) {
+      var name = opt.getAttribute("data-employee");
+      if (!name) return;
+      var hint = opt.querySelector(".role-switch__hint");
+      if (!hint) return;
+      var extra = (overrides[name] || []).map(function (k) { return OVERRIDE_LABELS[k] || k; });
+      hint.textContent = extra.length ? "+ " + extra.join(", ") : "";
+    });
+  }
+
+  function applyRole(role, employee) {
+    employee = employee || "";
     document.querySelectorAll(".role-switch__option").forEach(function (opt) {
-      opt.classList.toggle("active", opt.getAttribute("data-role") === role);
+      var matches = opt.getAttribute("data-role") === role && (opt.getAttribute("data-employee") || "") === employee;
+      opt.classList.toggle("active", matches);
     });
+    var label = ROLE_LABELS[role] || ROLE_LABELS.admin;
+    var displayLabel = employee ? employee : label;
     document.querySelectorAll(".role-switch__current-role").forEach(function (el) {
-      el.textContent = ROLE_LABELS[role] || ROLE_LABELS.admin;
+      el.textContent = displayLabel;
     });
+    var overrides = employee ? (getUserOverrides()[employee] || []) : [];
     document.querySelectorAll("[data-roles]").forEach(function (el) {
       var allowed = el.getAttribute("data-roles").split(",");
-      el.style.display = allowed.indexOf(role) === -1 ? "none" : "";
+      var navKey = el.getAttribute("data-nav");
+      var ok = allowed.indexOf(role) !== -1 || (navKey && overrides.indexOf(navKey) !== -1);
+      el.style.display = ok ? "" : "none";
     });
     var roleLabel = document.querySelector(".account__role");
-    if (roleLabel) roleLabel.textContent = ROLE_LABELS[role] || ROLE_LABELS.admin;
+    if (roleLabel) roleLabel.textContent = displayLabel;
+    refreshEmployeeOptionHints();
     renderBanner(role);
   }
 
@@ -401,7 +487,8 @@
     var trigger = wrap.querySelector(".role-switch__trigger");
     var menu = wrap.querySelector(".role-switch__menu");
     var role = localStorage.getItem(ROLE_KEY) || "admin";
-    applyRole(role);
+    var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
+    applyRole(role, employee);
 
     trigger.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -413,8 +500,10 @@
     menu.querySelectorAll(".role-switch__option").forEach(function (opt) {
       opt.addEventListener("click", function () {
         role = opt.getAttribute("data-role");
+        employee = opt.getAttribute("data-employee") || "";
         localStorage.setItem(ROLE_KEY, role);
-        applyRole(role);
+        localStorage.setItem(EMPLOYEE_KEY, employee);
+        applyRole(role, employee);
         menu.classList.remove("open");
       });
     });
