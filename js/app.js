@@ -77,10 +77,13 @@
   /* ---- 5. Modals ----
      [data-open-modal="id"] opens, [data-close-modal] / overlay click closes. */
   function wireModals() {
+    var onGuidesPage = document.body.getAttribute("data-page") === "agent-guides";
     document.querySelectorAll("[data-open-modal]").forEach(function (trigger) {
       trigger.addEventListener("click", function () {
-        var m = document.getElementById(trigger.getAttribute("data-open-modal"));
+        var id = trigger.getAttribute("data-open-modal");
+        var m = document.getElementById(id);
         if (m) m.classList.add("open");
+        if (onGuidesPage && id.indexOf("guide-") === 0) recordGuideRead(id);
       });
     });
     document.querySelectorAll(".modal-overlay").forEach(function (overlay) {
@@ -776,8 +779,22 @@
     return GUIDE_MAP[String(reason).trim().toLowerCase()] || null;
   }
 
+  /* Repairs packages saved by an older version of this prototype that
+     didn't set dueAt (or set it from a bad assignedAt) — without this,
+     those packages render "Action by Invalid Date" forever, since
+     dueAt is only ever computed once, at assignment time. */
   function getTrainingPackages() {
-    try { return JSON.parse(localStorage.getItem(TRAINING_KEY)) || []; } catch (e) { return []; }
+    var list;
+    try { list = JSON.parse(localStorage.getItem(TRAINING_KEY)) || []; } catch (e) { return []; }
+    var repaired = false;
+    list.forEach(function (p) {
+      if (!p.dueAt || isNaN(new Date(p.dueAt).getTime())) {
+        p.dueAt = addDays(p.assignedAt && !isNaN(new Date(p.assignedAt).getTime()) ? p.assignedAt : new Date().toISOString(), DUE_WINDOW_DAYS);
+        repaired = true;
+      }
+    });
+    if (repaired) saveTrainingPackages(list);
+    return list;
   }
   function saveTrainingPackages(list) { localStorage.setItem(TRAINING_KEY, JSON.stringify(list)); }
 
@@ -891,6 +908,7 @@
   function trainingItemRow(p, opts) {
     var done = p.status === "completed";
     var due = dueInfo(p);
+    var canSignOff = !!p.readAt;
     return '<div data-training-id="' + p.id + '" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border-soft);">' +
       '<div>' +
       '<div class="checklist__title">' + p.guideTitle + '</div>' +
@@ -899,8 +917,10 @@
       '</div>' +
       '<div class="row" style="gap:8px;align-items:center;">' +
       '<span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span>' +
-      (opts && opts.compact ? '' : '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '">Read guide</a>') +
-      (done ? '' : '<button type="button" class="btn btn--primary btn--sm" data-sign-off-training="' + p.id + '">Sign off</button>') +
+      (opts && opts.compact ? '' : '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '&mine=1">Read guide</a>') +
+      (done ? '' : canSignOff
+        ? '<button type="button" class="btn btn--primary btn--sm" data-sign-off-training="' + p.id + '">Sign off</button>'
+        : (opts && opts.compact ? '' : '<span class="small muted">Read the guide to unlock sign-off</span>')) +
       '</div></div>';
   }
 
@@ -914,6 +934,62 @@
         onDone();
       });
     });
+  }
+
+  /* ---- 13b. Guide read acknowledgments (prototype only) ----
+     Records every time the current agent (always "Rob Ashton" in this
+     single-user prototype, same convention as My QA / My Performance)
+     opens a guide on agent-guides.html — both a running history for
+     Trainers/Admins/Managers ("Guide read history" on Training &
+     Development) and the gate that unlocks Sign off on a matching
+     open training package: trainingItemRow() only shows Sign off once
+     p.readAt is set. */
+  var GUIDE_READS_KEY = "d360-guide-reads";
+  var CURRENT_AGENT_NAME = "Rob Ashton";
+
+  function getGuideReads() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_READS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveGuideReads(list) { localStorage.setItem(GUIDE_READS_KEY, JSON.stringify(list)); }
+
+  function recordGuideRead(guideId) {
+    var titleEl = document.getElementById(guideId + "-title");
+    var title = titleEl ? titleEl.textContent : guideId;
+    var readAt = new Date().toISOString();
+
+    var reads = getGuideReads();
+    reads.unshift({ agentName: CURRENT_AGENT_NAME, guideId: guideId, guideTitle: title, readAt: readAt });
+    saveGuideReads(reads);
+
+    var packages = getTrainingPackages();
+    var changed = false;
+    packages.forEach(function (p) {
+      if (p.agentName === CURRENT_AGENT_NAME && p.guideId === guideId && p.status !== "completed" && !p.readAt) {
+        p.readAt = readAt;
+        changed = true;
+      }
+    });
+    if (changed) saveTrainingPackages(packages);
+    renderGuideReadHistory();
+  }
+
+  /* Trainer/Admin/Manager-facing log — training-development.html's
+     "Guide read history" card. Most recent acknowledgment first. */
+  function renderGuideReadHistory() {
+    var tbody = document.querySelector("[data-guide-read-history]");
+    if (!tbody) return;
+    var reads = getGuideReads();
+    if (!reads.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="muted" style="padding:16px;">No guides have been read yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = reads.map(function (r) {
+      return '<tr>' +
+        '<td class="cell-strong">' + r.agentName + '</td>' +
+        '<td><a href="agent-guides.html?open=' + r.guideId + '">' + r.guideTitle + '</a></td>' +
+        '<td class="muted">' + new Date(r.readAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + '</td>' +
+        '</tr>';
+    }).join("");
   }
 
   /* Full list — my-training-development.html (the Agent's own "My
@@ -966,6 +1042,11 @@
     if (!id) return;
     var modal = document.getElementById(id);
     if (modal) modal.classList.add("open");
+    // &mine=1 only appears on the agent's own "Read guide" links (My
+    // Training & Development) — the Trainer queue's guide-title link
+    // omits it, since a Trainer opening a guide to review it isn't the
+    // agent acknowledging they've read it.
+    if (params.get("mine") === "1") recordGuideRead(id);
   }
 
   /* ---- 14b. Guide requests (prototype only) ----
@@ -1352,6 +1433,7 @@
     wireRoleSwitch();
     seedTrainingPackages();
     renderTrainingQueue();
+    renderGuideReadHistory();
     renderTeamTraining();
     renderMyTraining();
     renderMyTrainingSummary();
