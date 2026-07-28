@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Call Centre Dashboard · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — live floor view of queue, agents and service level (prototype)." />
+  <title>Training &amp; Development · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — auto-generated agent training packages from QA scorecards (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="call-centre-dashboard">
+<body data-page="training-development">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -182,194 +182,74 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>Call Centre Dashboard</h1>
-          <div class="sub">Live view of the floor right now · updates every few seconds</div>
+          <h1>Training &amp; Development</h1>
+          <div class="sub">Training packages are generated automatically from QA scorecard failures</div>
         </div>
         <div class="page-head__actions">
-          <a class="btn" href="analytics.html">View analytics</a>
-          <a class="btn btn--primary" href="agents.html">Manage agents</a>
+          <a class="btn btn--ghost" href="agent-guides.html">Agent guides library</a>
+          <a class="btn btn--primary" href="colin-scorecard.html">Mark a scorecard</a>
         </div>
       </div>
 
-      <!-- Live queue board -->
-      <div class="queue-grid mb-18">
-
-        <!-- Inbound Calls -->
-        <div class="queue-card" style="--queue-accent:#66BB6A;">
-          <div class="queue-card__head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Inbound Calls
-          </div>
-          <div class="queue-card__stats">
-            <div class="queue-card__stat">
-              <div class="queue-card__stat-value">3</div>
-              <div class="queue-card__stat-label">In Progress</div>
-            </div>
-            <div class="queue-card__stat">
-              <div class="queue-card__stat-value">4</div>
-              <div class="queue-card__stat-label">Queuing</div>
-            </div>
-          </div>
-          <div class="queue-card__foot">
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>1:48</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>96</span>
-            <span class="warn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m14.5 9.5-5 5M9.5 9.5l5 5"/></svg>3</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>4m 02s</span>
+      <!-- How it works -->
+      <div class="banner banner--pass mb-18" style="align-items:flex-start;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;color:var(--success);"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <div>
+          <div style="font-weight:700;">How training packages are built</div>
+          <div class="small" style="font-weight:500;margin-top:2px;">
+            Whenever a scorecard fails a tracked criterion — in QA Review or QA Colin (SDL) — it's matched to the
+            relevant Agent Guide and assigned to that agent as required reading. E.g. a <strong>DPA not completed</strong>
+            fail assigns the <strong>DPA Verification</strong> guide; a <strong>Tone</strong> fail assigns
+            <strong>Tone &amp; De-escalation</strong>. Agents see their assigned training on My Performance and mark it
+            complete once read.
           </div>
         </div>
-
-        <!-- Outbound Calls -->
-        <div class="queue-card" style="--queue-accent:#7976F3;">
-          <div class="queue-card__head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Outbound Calls
-          </div>
-          <div class="queue-card__stats">
-            <div class="queue-card__stat" style="flex:1;">
-              <div class="queue-card__stat-value">2</div>
-              <div class="queue-card__stat-label">In Progress</div>
-            </div>
-          </div>
-          <div class="queue-card__foot">
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>0s</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>214</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m14.5 9.5-5 5M9.5 9.5l5 5"/></svg>0</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>2s</span>
-          </div>
-        </div>
-
-        <!-- Live Chat -->
-        <div class="queue-card" style="--queue-accent:#F481F1;">
-          <div class="queue-card__head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Live Chat
-          </div>
-          <div class="queue-card__stats">
-            <div class="queue-card__stat">
-              <div class="queue-card__stat-value">3</div>
-              <div class="queue-card__stat-label">In Progress</div>
-            </div>
-            <div class="queue-card__stat">
-              <div class="queue-card__stat-value">2</div>
-              <div class="queue-card__stat-label">Queuing</div>
-            </div>
-          </div>
-          <div class="queue-card__foot">
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>45s</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>72</span>
-            <span class="warn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m14.5 9.5-5 5M9.5 9.5l5 5"/></svg>1</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>6m 40s</span>
-          </div>
-        </div>
-
-        <!-- Dialer -->
-        <div class="queue-card" style="--queue-accent:#7976F3;">
-          <div class="queue-card__head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Dialer
-          </div>
-          <div class="queue-card__progress">
-            <div class="queue-card__progress-value">66.9%</div>
-            <div class="queue-card__progress-sub">Q3_Renewals_CallList.csv</div>
-            <div class="queue-card__progress-bar"><span style="width:66.9%;"></span></div>
-          </div>
-          <div class="queue-card__foot">
-            <span class="on"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>ON</span>
-            <span>14% connect</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>3</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>214 of 320</span>
-          </div>
-        </div>
-
-        <!-- Email -->
-        <div class="queue-card queue-card--span2" style="--queue-accent:#ED6C02;">
-          <div class="queue-card__head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-            Email
-          </div>
-          <div class="queue-card__stats">
-            <div class="queue-card__stat">
-              <div class="queue-card__stat-value">2</div>
-              <div class="queue-card__stat-label">In Progress</div>
-            </div>
-            <div class="queue-card__stat">
-              <div class="queue-card__stat-value">5</div>
-              <div class="queue-card__stat-label">Queuing</div>
-            </div>
-          </div>
-          <div class="queue-card__foot">
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>1h 40m</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>34</span>
-            <span class="warn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m14.5 9.5-5 5M9.5 9.5l5 5"/></svg>1</span>
-            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>5m 10s</span>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Agent status board -->
+      <!-- Summary tiles -->
+      <div class="grid grid--kpi mb-18">
+        <div class="kpi">
+          <div class="kpi__label">Open training packages</div>
+          <div class="kpi__value" id="td-kpi-open">–</div>
+          <div class="kpi__sub">not started or in progress</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Completed this week</div>
+          <div class="kpi__value" id="td-kpi-completed">–</div>
+          <div class="kpi__delta up">Marked complete by the agent</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Most assigned guide</div>
+          <div class="kpi__value" id="td-kpi-top-guide" style="font-size:20px;">–</div>
+          <div class="kpi__sub">across all open packages</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">Guides in the library</div>
+          <div class="kpi__value">9</div>
+          <div class="kpi__sub"><a href="agent-guides.html">View library</a></div>
+        </div>
+      </div>
+
+      <!-- Training queue -->
       <div class="card">
         <div class="card__head">
-          <h3>Agent status board</h3>
-          <a class="btn btn--sm" href="agents.html">View all agents</a>
+          <h3>Training packages</h3>
+          <span class="tag">Newest first</span>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Agent</th><th>Status</th><th>Channel</th><th>Duration</th><th>Calls today</th>
+                <th>Agent</th>
+                <th>Source scorecard</th>
+                <th>Failed criterion</th>
+                <th>Assigned guide</th>
+                <th>Status</th>
+                <th>Assigned</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="cell-strong">Priya Nair</td>
-                <td><span class="pill pill--pass">On call</span></td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-mono">4:12</td>
-                <td>21</td>
-              </tr>
-              <tr>
-                <td class="cell-strong">Daniel Okafor</td>
-                <td><span class="pill pill--pass">On call</span></td>
-                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
-                <td class="cell-mono">1:35</td>
-                <td>17</td>
-              </tr>
-              <tr>
-                <td class="cell-strong">Grace Thompson</td>
-                <td><span class="pill pill--info">Available</span></td>
-                <td>—</td>
-                <td class="cell-mono">—</td>
-                <td>19</td>
-              </tr>
-              <tr>
-                <td class="cell-strong">Marcus Bennett</td>
-                <td><span class="pill pill--flag">Break</span></td>
-                <td>—</td>
-                <td class="cell-mono">6:40</td>
-                <td>14</td>
-              </tr>
-              <tr>
-                <td class="cell-strong">Olivia Hughes</td>
-                <td><span class="pill pill--info">Available</span></td>
-                <td>—</td>
-                <td class="cell-mono">—</td>
-                <td>16</td>
-              </tr>
-              <tr>
-                <td class="cell-strong">Sophie Clarke</td>
-                <td><span class="pill pill--pass">On call</span></td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-mono">0:52</td>
-                <td>23</td>
-              </tr>
-              <tr>
-                <td class="cell-strong">Rob Ashton</td>
-                <td><span class="pill pill--info">Available</span></td>
-                <td>—</td>
-                <td class="cell-mono">—</td>
-                <td>8</td>
-              </tr>
+            <tbody data-training-queue>
+              <tr><td colspan="6" class="muted" style="padding:16px;">Loading training packages…</td></tr>
             </tbody>
           </table>
         </div>
