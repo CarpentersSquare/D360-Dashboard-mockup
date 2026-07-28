@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Simulations · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — rehearse inbound and outbound calls with simulated customer personas (prototype). Trainer role and above." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<!--
+  DUMMY DATA CONVENTION (shared across all pages):
+  - Agents: ~9 UK names (Rob Ashton/Admin, Priya Nair/Team lead, etc.)
+  - Customers: plausible UK names + companies
+  - Channels: call / email / chat
+  - Outcomes: Resolved, Callback booked, Escalated, Sale, No answer
+  - QA: pass-rate ~88%; flags: "DPA not completed", "Compliance phrase missing", "Tone"
+  - Phone: +44 format · Dates: relative to "today"
+  All content is hard-coded and illustrative. No backend.
+
+  ACCESS NOTE: Customer Simulations is restricted to the Trainer role and
+  above (Trainer, Team lead, Admin) — see the "Team roles" tab on
+  settings.html. There is no real authentication or RBAC in this
+  prototype, so the restriction is documented here and on that page
+  rather than enforced.
+-->
+<body data-page="simulations" class="sim-page">
+  <div data-tabs>
+
+    <!-- ===== Tool header (standalone, no admin sidebar) ===== -->
+    <header class="sim-header">
+      <a class="sim-header__brand" href="dashboard.html" title="Back to Dial360 Admin">
+        <span class="sim-header__logo">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </span>
+        <span>
+          <span class="sim-header__title">Customer Simulations</span>
+          <span class="sim-header__version">v1.2.0</span>
+        </span>
+      </a>
+
+      <div class="sim-header__spacer"></div>
+      <div class="sim-segmented" role="tablist" aria-label="Simulation direction">
+        <button class="tab active" data-tab="inbound">Inbound</button>
+        <button class="tab" data-tab="outbound">Outbound</button>
+      </div>
+      <div class="sim-header__spacer"></div>
+
+      <span class="env-badge" title="This is a non-production prototype">Prototype</span>
+      <button class="sim-env" type="button" title="Environment">
+        <span class="dot-live"></span> Sandbox
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </header>
+
+    <main class="sim-main">
+
+      <!-- Restricted-access notice (visual only — no real RBAC in this prototype) -->
+      <div class="sim-access-note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <strong>Trainer role and above.</strong> Customer Simulations lets Trainers, Team leads, Managers and Admins
+          rehearse tricky inbound and outbound scenarios with agents using simulated customer personas before they go
+          live — hidden from the Agent role in the sidebar's "Viewing as" switcher. Not enforced here — this prototype
+          has no real authentication or RBAC; see <a href="settings.html#roles">Team roles</a> for the role definitions.
+        </div>
+      </div>
+
+      <!-- ===== Inbound panel ===== -->
+      <div class="tab-panel active" data-panel="inbound">
+        <div class="sim-page-head">
+          <div>
+            <h1>Inbound Agents</h1>
+            <div class="sub">16 profiles · Sandbox</div>
+          </div>
+          <div class="sim-search-add">
+            <div class="sim-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Search by name, company…" aria-label="Search inbound personas" />
+            </div>
+            <button class="btn btn--dark" data-open-modal="add-agent-modal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Add Agent
+            </button>
+          </div>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#1D2E5C;">JW</span>
+              <div><div class="sim-card__name">Jenny Warner</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#9C1E6E;">MS</span>
+              <div><div class="sim-card__name">Matty Spencer</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#16B8A6;">VM</span>
+              <div><div class="sim-card__name">Veronica Miller</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#17181A;">MS</span>
+              <div><div class="sim-card__name">Mack Smith</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#8A7B1E;">DJ</span>
+              <div><div class="sim-card__name">Daisy Johnson</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#24405C;">FW</span>
+              <div><div class="sim-card__name">Frankie Williams</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#2F4F4C;">CB</span>
+              <div><div class="sim-card__name">Charlie Brown</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#6B5A22;">RG</span>
+              <div><div class="sim-card__name">Ronald Garcia</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#8C6FC9;">MS</span>
+              <div><div class="sim-card__name">Mary Scott</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#8E2E8A;">ND</span>
+              <div><div class="sim-card__name">Nancy Davis</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#5C7A99;">AW</span>
+              <div><div class="sim-card__name">Ann Wilson</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#3D4FA8;">DA</span>
+              <div><div class="sim-card__name">Danny Anderson</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#3FAE58;">HM</span>
+              <div><div class="sim-card__name">Harriet Martinez</div><div class="sim-card__sub">Standard scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#8B8F5E;">AC</span>
+              <div><div class="sim-card__name">Angry Customer</div><div class="sim-card__sub">Escalation scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#A9611D;">UC</span>
+              <div><div class="sim-card__name">Unhappy Customer</div><div class="sim-card__sub">Frustrated, low patience</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#4A7C8C;">CC</span>
+              <div><div class="sim-card__name">Confused Customer</div><div class="sim-card__sub">Needs extra guidance</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Outbound panel ===== -->
+      <div class="tab-panel" data-panel="outbound">
+        <div class="sim-page-head">
+          <div>
+            <h1>Outbound Agents</h1>
+            <div class="sub">6 profiles · Sandbox</div>
+          </div>
+          <div class="sim-search-add">
+            <div class="sim-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Search by name, company…" aria-label="Search outbound personas" />
+            </div>
+            <button class="btn btn--dark" data-open-modal="add-agent-modal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Add Agent
+            </button>
+          </div>
+        </div>
+
+        <div class="sim-grid">
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#2E9E5B;">IP</span>
+              <div><div class="sim-card__name">Interested Prospect</div><div class="sim-card__sub">Warm lead scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#B8860B;">SP</span>
+              <div><div class="sim-card__name">Skeptical Prospect</div><div class="sim-card__sub">Objection-handling scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#455A64;">BE</span>
+              <div><div class="sim-card__name">Busy Executive</div><div class="sim-card__sub">Short-window scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#8C6FC9;">PS</span>
+              <div><div class="sim-card__name">Price Shopper</div><div class="sim-card__sub">Negotiation scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:#16B8A6;">RC</span>
+              <div><div class="sim-card__name">Returning Customer</div><div class="sim-card__sub">Upsell scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+          <div class="sim-card">
+            <div class="sim-card__top">
+              <span class="sim-card__avatar" style="background:var(--danger);">DC</span>
+              <div><div class="sim-card__name">Do Not Call Request</div><div class="sim-card__sub">Compliance scenario</div></div>
+            </div>
+            <button class="sim-call-btn" data-open-modal="call-modal">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Add persona modal (decorative — no data is created) -->
+  <div class="modal-overlay" id="add-agent-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="add-agent-modal-title">
+      <div class="modal__head">
+        <h3 id="add-agent-modal-title">Add simulated persona</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-row">
+          <label for="sim-name">Persona name</label>
+          <input type="text" id="sim-name" placeholder="e.g. Impatient Customer" />
+        </div>
+        <div class="form-row">
+          <label for="sim-direction">Direction</label>
+          <select id="sim-direction">
+            <option>Inbound</option>
+            <option>Outbound</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="sim-tone">Temperament</label>
+          <select id="sim-tone">
+            <option>Neutral</option>
+            <option>Frustrated</option>
+            <option>Confused</option>
+            <option>Angry</option>
+            <option>Skeptical</option>
+          </select>
+        </div>
+        <p class="muted small" style="margin:0;">Personas are simulated by an AI voice model in the live Hub app — nothing is created in this prototype.</p>
+      </div>
+      <div class="modal__foot">
+        <button class="btn btn--ghost" data-close-modal>Cancel</button>
+        <button class="btn btn--primary">Add persona</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call modal (decorative — the real call happens in the separate Hub app) -->
+  <div class="modal-overlay" id="call-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="call-modal-title">
+      <div class="modal__head">
+        <h3 id="call-modal-title">Start simulated call</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p>This would place a simulated call to this persona in the live Dial360 Hub, so an agent can rehearse the scenario in real time.</p>
+        <p class="muted">Decorative only in this prototype — no call is placed and no audio is generated.</p>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
