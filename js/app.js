@@ -571,14 +571,23 @@
   }
   function saveTrainingPackages(list) { localStorage.setItem(TRAINING_KEY, JSON.stringify(list)); }
 
+  var DUE_WINDOW_DAYS = 7;
+  function addDays(iso, days) {
+    var d = new Date(iso);
+    d.setDate(d.getDate() + days);
+    return d.toISOString();
+  }
+
   function seedTrainingPackages() {
     if (localStorage.getItem(TRAINING_KEY)) return;
-    saveTrainingPackages([
+    var seed = [
       { id: "tp1", agentName: "Marcus Bennett", ref: "INT-10477", failReason: "Tone", guideId: "guide-tone", guideTitle: "Tone & De-escalation", status: "not-started", assignedAt: "2026-07-24T09:00:00.000Z" },
       { id: "tp2", agentName: "Daniel Okafor", ref: "INT-10461", failReason: "DPA not completed", guideId: "guide-dpa", guideTitle: "DPA Verification", status: "in-progress", assignedAt: "2026-07-23T09:00:00.000Z" },
       { id: "tp3", agentName: "Hannah Price", ref: "INT-10454", failReason: "Compliance phrase missing", guideId: "guide-dispute-rights", guideTitle: "Dispute Rights & Validation Notice", status: "not-started", assignedAt: "2026-07-22T09:00:00.000Z" },
       { id: "tp4", agentName: "Rob Ashton", ref: "INT-10408", failReason: "DPA not completed", guideId: "guide-dpa", guideTitle: "DPA Verification", status: "not-started", assignedAt: "2026-07-21T09:00:00.000Z" }
-    ]);
+    ];
+    seed.forEach(function (p) { p.dueAt = addDays(p.assignedAt, DUE_WINDOW_DAYS); });
+    saveTrainingPackages(seed);
   }
 
   /* Called after a scorecard is submitted elsewhere (e.g. colin.js) with
@@ -591,11 +600,12 @@
     var list = getTrainingPackages();
     var exists = list.some(function (p) { return p.ref === ref && p.guideId === guide.id; });
     if (exists) return null;
+    var assignedAt = new Date().toISOString();
     var pkg = {
       id: "tp-" + ref + "-" + guide.id + "-" + Date.now(),
       agentName: agentName, ref: ref, failReason: failReason,
       guideId: guide.id, guideTitle: guide.title,
-      status: "not-started", assignedAt: new Date().toISOString()
+      status: "not-started", assignedAt: assignedAt, dueAt: addDays(assignedAt, DUE_WINDOW_DAYS)
     };
     list.unshift(pkg);
     saveTrainingPackages(list);
@@ -603,10 +613,26 @@
   }
 
   function statusLabel(status) {
-    return status === "completed" ? "Completed" : status === "in-progress" ? "In progress" : "Not started";
+    return status === "completed" ? "Signed off" : status === "in-progress" ? "In progress" : "Not started";
   }
   function statusPillClass(status) {
     return status === "completed" ? "pill--pass" : status === "in-progress" ? "pill--info" : "pill--flag";
+  }
+  function fmtShortDate(iso) {
+    return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  }
+  /* Expected-timeframe messaging for the "action by" date: overdue and
+     due-today/tomorrow render in warning colours so an agent (or their
+     Trainer) can see at a glance what needs attention first. */
+  function dueInfo(pkg) {
+    if (pkg.status === "completed") {
+      return { text: "Signed off " + fmtShortDate(pkg.completedAt || pkg.dueAt), cls: "muted" };
+    }
+    var days = Math.ceil((new Date(pkg.dueAt) - new Date()) / 86400000);
+    if (days < 0) return { text: "Overdue — was due " + fmtShortDate(pkg.dueAt), cls: "danger", urgent: true };
+    if (days === 0) return { text: "Action by today", cls: "danger", urgent: true };
+    if (days <= 2) return { text: "Action by " + fmtShortDate(pkg.dueAt), cls: "warning", urgent: true };
+    return { text: "Action by " + fmtShortDate(pkg.dueAt), cls: "muted" };
   }
 
   function renderTrainingKpis(list) {
@@ -634,53 +660,91 @@
     if (!tbody) return;
     tbody.innerHTML = "";
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No training packages assigned yet.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="muted" style="padding:16px;">No training packages assigned yet.</td></tr>';
       return;
     }
     list.forEach(function (p) {
       var row = document.createElement("tr");
+      var due = dueInfo(p);
       row.innerHTML =
         '<td class="cell-strong">' + p.agentName + '</td>' +
         '<td class="cell-mono">' + p.ref + '</td>' +
         '<td>' + p.failReason + '</td>' +
         '<td><a href="agent-guides.html?open=' + p.guideId + '">' + p.guideTitle + '</a></td>' +
         '<td><span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span></td>' +
-        '<td class="muted">' + new Date(p.assignedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</td>';
+        '<td class="muted">' + fmtShortDate(p.assignedAt) + '</td>' +
+        '<td style="color:var(--' + due.cls + ');' + (due.urgent ? 'font-weight:700;' : '') + '">' + due.text + '</td>';
       tbody.appendChild(row);
     });
   }
 
+  function trainingItemRow(p, opts) {
+    var done = p.status === "completed";
+    var due = dueInfo(p);
+    return '<div data-training-id="' + p.id + '" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border-soft);">' +
+      '<div>' +
+      '<div class="checklist__title">' + p.guideTitle + '</div>' +
+      '<div class="checklist__desc">From ' + p.ref + ' — flagged for “' + p.failReason + '”</div>' +
+      '<div class="small" style="margin-top:3px;color:var(--' + due.cls + ');' + (due.urgent ? 'font-weight:700;' : '') + '">' + due.text + '</div>' +
+      '</div>' +
+      '<div class="row" style="gap:8px;align-items:center;">' +
+      '<span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span>' +
+      (opts && opts.compact ? '' : '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '">Read guide</a>') +
+      (done ? '' : '<button type="button" class="btn btn--primary btn--sm" data-sign-off-training="' + p.id + '">Sign off</button>') +
+      '</div></div>';
+  }
+
+  function wireSignOffButtons(root, onDone) {
+    root.querySelectorAll("[data-sign-off-training]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-sign-off-training");
+        var list = getTrainingPackages();
+        list.forEach(function (p) { if (p.id === id) { p.status = "completed"; p.completedAt = new Date().toISOString(); } });
+        saveTrainingPackages(list);
+        onDone();
+      });
+    });
+  }
+
+  /* Full list — my-training-development.html (the Agent's own "My
+     Training & Development" tab): every guide assigned to them, with
+     the expected action-by date and a Sign off action once read. */
   function renderMyTraining() {
     var root = document.getElementById("my-training-list");
     if (!root) return;
     var mine = getTrainingPackages().filter(function (p) { return p.agentName === "Rob Ashton"; });
+
+    var openEl = document.getElementById("mytd-kpi-open");
+    var overdueEl = document.getElementById("mytd-kpi-overdue");
+    var signedOffEl = document.getElementById("mytd-kpi-signed-off");
+    if (openEl) openEl.textContent = mine.filter(function (p) { return p.status !== "completed"; }).length;
+    if (overdueEl) overdueEl.textContent = mine.filter(function (p) { return p.status !== "completed" && new Date(p.dueAt) - new Date() <= 86400000; }).length;
+    if (signedOffEl) signedOffEl.textContent = mine.filter(function (p) { return p.status === "completed"; }).length;
+
     if (!mine.length) {
       root.innerHTML = '<p class="muted" style="margin:0;">No training assigned right now — nice work.</p>';
       return;
     }
-    root.innerHTML = mine.map(function (p) {
-      var done = p.status === "completed";
-      return '<div data-training-id="' + p.id + '" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft);">' +
-        '<div>' +
-        '<div class="checklist__title">' + p.guideTitle + '</div>' +
-        '<div class="checklist__desc">From ' + p.ref + ' — flagged for “' + p.failReason + '”</div>' +
-        '</div>' +
-        '<div class="row" style="gap:8px;align-items:center;">' +
-        '<span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span>' +
-        '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '">Read guide</a>' +
-        (done ? '' : '<button type="button" class="btn btn--primary btn--sm" data-complete-training="' + p.id + '">Mark complete</button>') +
-        '</div></div>';
-    }).join("");
+    root.innerHTML = mine.map(function (p) { return trainingItemRow(p); }).join("");
+    wireSignOffButtons(root, renderMyTraining);
+  }
 
-    root.querySelectorAll("[data-complete-training]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var id = btn.getAttribute("data-complete-training");
-        var list = getTrainingPackages();
-        list.forEach(function (p) { if (p.id === id) { p.status = "completed"; p.completedAt = new Date().toISOString(); } });
-        saveTrainingPackages(list);
-        renderMyTraining();
-      });
-    });
+  /* Compact summary — the "My Training & Development" card on
+     my-performance.html: just the count + nearest due date, linking
+     through to the full my-training-development.html page. */
+  function renderMyTrainingSummary() {
+    var root = document.getElementById("my-training-summary");
+    if (!root) return;
+    var mine = getTrainingPackages().filter(function (p) { return p.agentName === "Rob Ashton" && p.status !== "completed"; });
+    if (!mine.length) {
+      root.innerHTML = '<p class="muted" style="margin:0;">Nothing assigned right now — nice work.</p>';
+      return;
+    }
+    mine.sort(function (a, b) { return new Date(a.dueAt) - new Date(b.dueAt); });
+    var next = dueInfo(mine[0]);
+    root.innerHTML =
+      '<p style="margin:0 0 4px;">You have <strong>' + mine.length + '</strong> guide' + (mine.length === 1 ? "" : "s") + ' to read and sign off.</p>' +
+      '<p class="small" style="margin:0;color:var(--' + next.cls + ');' + (next.urgent ? "font-weight:700;" : "") + '">Next: ' + mine[0].guideTitle + ' — ' + next.text + '</p>';
   }
 
   /* Deep-link support: agent-guides.html?open=guide-xxx auto-opens that
@@ -692,6 +756,129 @@
     if (!id) return;
     var modal = document.getElementById(id);
     if (modal) modal.classList.add("open");
+  }
+
+  /* ---- 14b. Guide requests (prototype only) ----
+     "Request a guide" on agent-guides.html lets anyone (typically an
+     Agent) ask for a new process guide on a given subject. Requests
+     are stored in localStorage and rendered two places: the "Guide
+     requests" queue on agent-guides.html itself (Trainer role and
+     above — the guide authors), and a to-do alert card on the
+     Newsfeed landing page so Trainers see it the moment they sign in. */
+  var GUIDE_REQUESTS_KEY = "d360-guide-requests";
+
+  function getGuideRequests() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_REQUESTS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveGuideRequests(list) { localStorage.setItem(GUIDE_REQUESTS_KEY, JSON.stringify(list)); }
+
+  function seedGuideRequests() {
+    if (localStorage.getItem(GUIDE_REQUESTS_KEY)) return;
+    saveGuideRequests([
+      {
+        id: "gr1", subject: "Handling angry customers on outbound calls",
+        details: "We keep getting escalations on outbound collections calls specifically — could use scripted de-escalation lines for that context.",
+        requestedBy: "Grace Thompson", requestedAt: "2026-07-25T09:12:00.000Z", status: "pending"
+      },
+      {
+        id: "gr2", subject: "Processing a partial refund",
+        details: "Full refunds are covered but not partial/goodwill refunds — several agents have asked.",
+        requestedBy: "James Whitmore", requestedAt: "2026-07-27T14:30:00.000Z", status: "pending"
+      }
+    ]);
+  }
+
+  function guideRequestStatusPill(status) {
+    if (status === "done") return '<span class="pill pill--pass">Done</span>';
+    if (status === "in-progress") return '<span class="pill pill--info">In progress</span>';
+    return '<span class="pill pill--flag">Pending</span>';
+  }
+
+  function renderGuideRequestsQueue() {
+    var tbody = document.querySelector("[data-guide-requests-queue]");
+    if (!tbody) return;
+    var list = getGuideRequests();
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No guide requests right now.</td></tr>';
+      return;
+    }
+    list.forEach(function (r) {
+      var row = document.createElement("tr");
+      var nextStatus = r.status === "pending" ? "in-progress" : r.status === "in-progress" ? "done" : null;
+      var actionLabel = r.status === "pending" ? "Start" : r.status === "in-progress" ? "Mark done" : "";
+      row.innerHTML =
+        '<td class="cell-strong">' + r.subject + '</td>' +
+        '<td>' + r.requestedBy + '</td>' +
+        '<td class="cell-snippet" title="' + (r.details || "").replace(/"/g, "&quot;") + '">' + (r.details || "—") + '</td>' +
+        '<td class="muted">' + new Date(r.requestedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</td>' +
+        '<td>' + guideRequestStatusPill(r.status) + '</td>' +
+        '<td>' + (nextStatus ? '<button type="button" class="btn btn--sm" data-advance-request="' + r.id + '">' + actionLabel + '</button>' : "") + '</td>';
+      tbody.appendChild(row);
+    });
+
+    tbody.querySelectorAll("[data-advance-request]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-advance-request");
+        var list2 = getGuideRequests();
+        list2.forEach(function (r) {
+          if (r.id === id) r.status = r.status === "pending" ? "in-progress" : "done";
+        });
+        saveGuideRequests(list2);
+        renderGuideRequestsQueue();
+        renderGuideRequestsAlert();
+      });
+    });
+  }
+
+  function renderGuideRequestsAlert() {
+    var card = document.getElementById("guide-requests-alert");
+    if (!card) return;
+    var pending = getGuideRequests().filter(function (r) { return r.status !== "done"; });
+    if (!pending.length) {
+      card.style.display = "none";
+      return;
+    }
+    card.style.display = "";
+    var countEl = card.querySelector("[data-guide-requests-count]");
+    if (countEl) countEl.textContent = pending.length;
+    var list = card.querySelector("[data-guide-requests-list]");
+    if (list) {
+      list.innerHTML = pending.slice(0, 4).map(function (r) {
+        return '<li><div class="checklist__main"><div class="checklist__title">' + r.subject + '</div>' +
+          '<div class="checklist__desc">Requested by ' + r.requestedBy + ' · ' +
+          new Date(r.requestedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</div></div>' +
+          guideRequestStatusPill(r.status) + '</li>';
+      }).join("");
+    }
+  }
+
+  function wireGuideRequestForm() {
+    var submitBtn = document.getElementById("request-guide-submit");
+    if (!submitBtn) return;
+    submitBtn.addEventListener("click", function () {
+      var subjectEl = document.getElementById("request-guide-subject");
+      var detailsEl = document.getElementById("request-guide-details");
+      var nameEl = document.getElementById("request-guide-name");
+      var subject = (subjectEl.value || "").trim();
+      if (!subject) { subjectEl.focus(); return; }
+
+      var list = getGuideRequests();
+      list.unshift({
+        id: "gr" + Date.now(),
+        subject: subject,
+        details: (detailsEl.value || "").trim(),
+        requestedBy: (nameEl.value || "").trim() || "Anonymous agent",
+        requestedAt: new Date().toISOString(),
+        status: "pending"
+      });
+      saveGuideRequests(list);
+      renderGuideRequestsQueue();
+
+      subjectEl.value = ""; detailsEl.value = ""; nameEl.value = "";
+      var modal = document.getElementById("request-guide-modal");
+      if (modal) modal.classList.remove("open");
+    });
   }
 
   /* ---- 14. Date-range pickers ----
@@ -729,7 +916,12 @@
     seedTrainingPackages();
     renderTrainingQueue();
     renderMyTraining();
+    renderMyTrainingSummary();
     openGuideFromQuery();
+    seedGuideRequests();
+    renderGuideRequestsQueue();
+    renderGuideRequestsAlert();
+    wireGuideRequestForm();
   });
 
   window.D360 = window.D360 || {};

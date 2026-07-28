@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QA Review · My Team Performance · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — a team lead's team QA performance and comparison against other teams (prototype)." />
+  <title>My Training &amp; Development · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — an agent's own assigned training, linked to the Agent Guide to read and a sign-off action (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="my-team-performance" data-subpage="my-team-qa">
+<body data-page="my-training-development">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -188,153 +188,43 @@
 
     <!-- ===== Main ===== -->
     <main class="main">
-      <div class="breadcrumb">
-        <a href="my-team-performance.html">My Team Performance</a> / QA Review
-      </div>
-
       <div class="page-head">
         <div>
-          <h1>QA Review</h1>
-          <div class="sub">Team Priya's QA performance, and how you compare to other teams</div>
+          <h1>My Training &amp; Development</h1>
+          <div class="sub">Guides assigned to you from QA scorecards — read the guide, then sign off by the date shown</div>
         </div>
         <div class="page-head__actions">
-          <a class="btn btn--ghost" href="my-team-performance.html">My team roster</a>
-          <a class="btn btn--primary" href="my-team-qa-reviews.html">View all reviews</a>
+          <a class="btn btn--ghost" href="my-performance.html">My performance</a>
+          <a class="btn btn--primary" href="agent-guides.html">Browse all guides</a>
         </div>
       </div>
 
       <!-- Summary tiles -->
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
-          <div class="kpi__label">Team QA pass rate</div>
-          <div class="kpi__value">90.5%</div>
-          <div class="kpi__delta up">▲ 1.9 pts this week</div>
+          <div class="kpi__label">Open assignments</div>
+          <div class="kpi__value" id="mytd-kpi-open">–</div>
+          <div class="kpi__sub">not yet signed off</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Calls scored this week</div>
-          <div class="kpi__value">62</div>
-          <div class="kpi__sub">across 4 agents</div>
+          <div class="kpi__label">Due today or overdue</div>
+          <div class="kpi__value" id="mytd-kpi-overdue" style="color:var(--danger);">–</div>
+          <div class="kpi__sub">action these first</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Flagged for review</div>
-          <div class="kpi__value" style="color:var(--warning);">5</div>
-          <div class="kpi__delta warn">3 still unassigned</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg score</div>
-          <div class="kpi__value">89<span class="muted" style="font-size:18px;">/100</span></div>
-          <div class="kpi__sub">team avg · company avg 86</div>
+          <div class="kpi__label">Signed off this month</div>
+          <div class="kpi__value" id="mytd-kpi-signed-off">–</div>
+          <div class="kpi__sub">nice work</div>
         </div>
       </div>
 
-      <!-- Team vs other teams -->
-      <div class="card mb-18">
-        <div class="card__head">
-          <h3>Team Priya vs other teams — QA pass rate</h3>
-          <span class="tag">This month</span>
-        </div>
-        <div class="card__body">
-          <div class="stack">
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Team Priya <span class="tag" style="margin-left:6px;">Yours</span></span>
-                <span class="small cell-strong">90.5%</span>
-              </div>
-              <div class="bar" aria-label="Team Priya QA pass rate 90.5%"><span style="width:90.5%;"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Team B</span>
-                <span class="small muted">85.2%</span>
-              </div>
-              <div class="bar" aria-label="Team B QA pass rate 85.2%"><span style="width:85.2%;background:var(--muted);"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Team C</span>
-                <span class="small muted">88.9%</span>
-              </div>
-              <div class="bar" aria-label="Team C QA pass rate 88.9%"><span style="width:88.9%;background:var(--muted);"></span></div>
-            </div>
-            <div>
-              <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:6px;">
-                <span class="kpi__label" style="margin:0;">Company average</span>
-                <span class="small muted">88.6%</span>
-              </div>
-              <div class="bar bar--warn" aria-label="Company average QA pass rate 88.6%"><span style="width:88.6%;"></span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Flagged queue — team only -->
+      <!-- Assigned training -->
       <div class="card">
         <div class="card__head">
-          <h3>Flagged for review — Team Priya</h3>
-          <span class="tag">Sorted by lowest score</span>
+          <h3>Assigned to you</h3>
+          <span class="tag" title="Auto-assigned when a scorecard fails a tracked criterion">From QA Review &amp; QA Colin</span>
         </div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead>
-              <tr>
-                <th>Interaction</th>
-                <th>Customer</th>
-                <th>Agent</th>
-                <th>Score</th>
-                <th>Top failure reason</th>
-                <th>Status</th>
-                <th>Assigned reviewer</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10461</td>
-                <td class="cell-strong">Tom Beresford</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">52/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10448</td>
-                <td class="cell-strong">Nadia Hussain</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10442</td>
-                <td class="cell-strong">George Hamilton</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
-                <td><span class="cell-strong" style="color:var(--danger);">61/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--info">In review</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10402</td>
-                <td class="cell-strong">Yusuf Demir</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">73/100</span></td>
-                <td>Tone</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-              <tr class="clickable" data-href="scorecard.html">
-                <td class="cell-mono">INT-10367</td>
-                <td class="cell-strong">Nathan Cole</td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
-                <td><span class="cell-strong" style="color:var(--warning);">84/100</span></td>
-                <td>DPA not completed</td>
-                <td><span class="pill pill--flag">Needs review</span></td>
-                <td class="muted">Unassigned</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="card__body" id="my-training-list"></div>
       </div>
 
     </main>
