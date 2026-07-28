@@ -534,8 +534,7 @@
     "training-development": ["admin", "manager", "teamlead", "trainer"],
     "agent-guides": ["admin", "manager", "teamlead", "trainer", "agent"],
     billing: ["admin"],
-    settings: ["admin"],
-    interactions: ["admin", "manager", "teamlead"]
+    settings: ["admin"]
   };
   var NAV_LABELS = {
     newsfeed: "Newsfeed", overview: "Overview", "call-centre-dashboard": "Call Centre Dashboard",
@@ -544,7 +543,7 @@
     analytics: "Analytics", users: "Users", templates: "Templates",
     simulations: "Customer Simulations", "colin-scorecard": "Colin Scorecard",
     "training-development": "Training & Development", "agent-guides": "Agent Guides",
-    billing: "Billing", settings: "Settings", interactions: "Interactions"
+    billing: "Billing", settings: "Settings"
   };
 
   function getUserOverrides() {
