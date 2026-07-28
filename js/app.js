@@ -521,6 +521,8 @@
     newsfeed: ["admin", "manager", "teamlead", "trainer", "agent"],
     overview: ["admin", "manager"],
     "call-centre-dashboard": ["admin", "manager", "teamlead"],
+    "scheduled-dialler": ["admin", "manager", "teamlead"],
+    "scheduled-dialler-upload": ["admin", "manager"],
     "my-performance": ["agent"],
     qa: ["admin", "manager", "trainer"],
     complaints: ["admin", "manager", "teamlead"],
@@ -538,6 +540,7 @@
   };
   var NAV_LABELS = {
     newsfeed: "Newsfeed", overview: "Overview", "call-centre-dashboard": "Call Centre Dashboard",
+    "scheduled-dialler": "Scheduled Dialler", "scheduled-dialler-upload": "Scheduled Dialler – Upload",
     "my-performance": "My Performance", qa: "QA Review", complaints: "Complaints",
     "my-qa": "My QA", "my-training-development": "My Training & Development",
     analytics: "Analytics", users: "Users", templates: "Templates",
