@@ -141,10 +141,6 @@
             <span>Team lead</span>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
           </button>
-          <button type="button" class="role-switch__option role-switch__option--sub" data-role="teamlead" data-employee="Priya Nair" role="menuitem">
-            <span>&#8618; Priya Nair <span class="role-switch__hint muted"></span></span>
-            <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-          </button>
           <button type="button" class="role-switch__option" data-role="trainer" role="menuitem">
             <span>Trainer</span>
             <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
@@ -332,8 +328,8 @@
         <!-- ===== SIDEBAR COLUMN ===== -->
         <div class="stack">
 
-          <!-- Reviewer actions -->
-          <div class="card">
+          <!-- Reviewer actions — not shown to Agents viewing their own scorecard -->
+          <div class="card" data-roles="admin,manager,teamlead,trainer">
             <div class="card__head"><h3>Reviewer actions</h3></div>
             <div class="card__body">
               <div class="stack" style="gap:10px;">

@@ -528,7 +528,7 @@
     "my-training-development": ["agent"],
     analytics: ["admin", "manager"],
     users: ["admin", "manager"],
-    templates: ["admin", "manager", "trainer"],
+    templates: ["admin", "manager", "teamlead", "trainer"],
     simulations: ["admin", "manager", "teamlead", "trainer"],
     "colin-scorecard": ["admin", "manager", "teamlead", "trainer"],
     "training-development": ["admin", "manager", "teamlead", "trainer"],
