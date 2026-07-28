@@ -3,25 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — operational overview (prototype)." />
+  <title>My Performance · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — an agent's own performance overview (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<!--
-  DUMMY DATA CONVENTION (shared across all pages):
-  - Agents: ~9 UK names (Rob Ashton/Admin, Priya Nair/Team lead, etc.)
-  - Customers: plausible UK names + companies
-  - Channels: call / email / chat
-  - Outcomes: Resolved, Callback booked, Escalated, Sale, No answer
-  - QA: pass-rate ~88%; flags: "DPA not completed", "Compliance phrase missing", "Tone"
-  - Phone: +44 format · Dates: relative to "today"
-  All content is hard-coded and illustrative. No backend.
--->
-<body data-page="overview">
+<body data-page="my-performance">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -180,63 +170,62 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>Good morning, Rob</h1>
-          <div class="sub">Here's how the operation is performing today · Tuesday 30 June 2026</div>
+          <h1>My Performance</h1>
+          <div class="sub">Your stats today · Tuesday 30 June 2026</div>
         </div>
         <div class="page-head__actions">
-          <a class="btn" href="analytics.html">View analytics</a>
-          <a class="btn btn--primary" href="qa.html">Review QA queue</a>
+          <a class="btn" href="my-qa.html">My QA</a>
+          <a class="btn btn--primary" href="agent-guides.html">Agent guides</a>
         </div>
       </div>
 
-      <!-- KPI tiles -->
+      <!-- Personal KPI tiles -->
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
-          <div class="kpi__label">Interactions today</div>
-          <div class="kpi__value">342</div>
-          <div class="kpi__delta up">▲ 8.4% vs yesterday</div>
+          <div class="kpi__label">Interactions handled yesterday</div>
+          <div class="kpi__value">23</div>
+          <div class="kpi__delta up">▲ 3 vs day before</div>
         </div>
         <div class="kpi">
           <div class="kpi__label">Avg wrap-up time</div>
-          <div class="kpi__value">11s</div>
+          <div class="kpi__value">9s</div>
           <div class="kpi__delta up">▼ from 2.5 min baseline</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">QA pass rate</div>
-          <div class="kpi__value">88.6%</div>
-          <div class="kpi__delta up">▲ 1.2 pts this week</div>
+          <div class="kpi__label">My QA pass rate</div>
+          <div class="kpi__value">92.4%</div>
+          <div class="kpi__delta up">▲ 2.1 pts this week</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">SLA — answered in target</div>
-          <div class="kpi__value">94.1%</div>
-          <div class="kpi__delta warn">target 95%</div>
+          <div class="kpi__label">Customer sentiment</div>
+          <div class="kpi__value">4.6<span class="muted" style="font-size:18px;">/5</span></div>
+          <div class="kpi__sub">based on 18 rated calls</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Agents online</div>
-          <div class="kpi__value">7<span class="muted" style="font-size:18px;">/9</span></div>
-          <div class="kpi__sub">2 away · 0 offline</div>
+          <div class="kpi__label">Rank on team</div>
+          <div class="kpi__value">2<span class="muted" style="font-size:18px;">/9</span></div>
+          <div class="kpi__sub">by QA pass rate this month</div>
         </div>
       </div>
 
-      <!-- Channel split + Volume trend -->
+      <!-- Performance trend + QA breakdown -->
       <div class="grid grid--1-2 mb-18">
         <div class="card">
-          <div class="card__head"><h3>Channel split — today</h3></div>
+          <div class="card__head"><h3>My QA outcomes — this week</h3></div>
           <div class="card__body">
             <div class="donut-wrap">
-              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="Channel split donut: calls 58%, email 27%, chat 15%">
+              <svg width="150" height="150" viewBox="0 0 150 150" class="chart-svg" style="width:150px;flex:none;" role="img" aria-label="My QA outcomes donut: pass 84%, flagged 12%, fail 4%">
                 <circle cx="75" cy="75" r="55" fill="none" stroke="#EBEBEB" stroke-width="20"/>
-                <!-- circ = 2*pi*55 ≈ 345.6 -->
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#7976F3" stroke-width="20" stroke-dasharray="200.4 345.6" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#A177DA" stroke-width="20" stroke-dasharray="93.3 345.6" stroke-dashoffset="-200.4" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#F481F1" stroke-width="20" stroke-dasharray="51.8 345.6" stroke-dashoffset="-293.7" transform="rotate(-90 75 75)"/>
-                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">342</text>
-                <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">interactions</text>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#2E7D32" stroke-width="20" stroke-dasharray="290.3 345.6" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#ED6C02" stroke-width="20" stroke-dasharray="41.5 345.6" stroke-dashoffset="-290.3" transform="rotate(-90 75 75)"/>
+                <circle cx="75" cy="75" r="55" fill="none" stroke="#C62828" stroke-width="20" stroke-dasharray="13.8 345.6" stroke-dashoffset="-331.8" transform="rotate(-90 75 75)"/>
+                <text x="75" y="71" text-anchor="middle" font-size="24" font-weight="800" fill="#263238">25</text>
+                <text x="75" y="90" text-anchor="middle" font-size="11" fill="#455A64">calls QA'd</text>
               </svg>
               <div class="legend" style="flex-direction:column;gap:10px;">
-                <span><i style="background:#7976F3"></i> Calls — 198 (58%)</span>
-                <span><i style="background:#A177DA"></i> Email — 92 (27%)</span>
-                <span><i style="background:#F481F1"></i> Live chat — 52 (15%)</span>
+                <span><i style="background:#2E7D32"></i> Pass — 21 (84%)</span>
+                <span><i style="background:#ED6C02"></i> Flagged — 3 (12%)</span>
+                <span><i style="background:#C62828"></i> Fail — 1 (4%)</span>
               </div>
             </div>
           </div>
@@ -244,18 +233,17 @@
 
         <div class="card">
           <div class="card__head">
-            <h3>Interaction volume — last 14 days</h3>
+            <h3>Interactions handled — last 14 days</h3>
             <span class="tag">Daily total</span>
           </div>
           <div class="card__body">
-            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="Interaction volume over the last 14 days, trending upward from about 250 to 342">
+            <svg viewBox="0 0 640 220" class="chart-svg" role="img" aria-label="My interactions handled over the last 14 days, trending upward from about 16 to 23">
               <defs>
-                <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="my-area" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stop-color="#7976F3" stop-opacity="0.28"/>
                   <stop offset="1" stop-color="#7976F3" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <!-- gridlines -->
               <g stroke="#EBEBEB" stroke-width="1">
                 <line x1="40" y1="30" x2="620" y2="30"/>
                 <line x1="40" y1="80" x2="620" y2="80"/>
@@ -263,12 +251,12 @@
                 <line x1="40" y1="180" x2="620" y2="180"/>
               </g>
               <g fill="#90A4AE" font-size="10" text-anchor="end">
-                <text x="34" y="34">400</text><text x="34" y="84">300</text><text x="34" y="134">200</text><text x="34" y="184">100</text>
+                <text x="34" y="34">30</text><text x="34" y="84">22</text><text x="34" y="134">14</text><text x="34" y="184">6</text>
               </g>
-              <path d="M40,150 L84,140 L128,158 L172,128 L216,135 L260,110 L304,120 L348,96 L392,104 L436,82 L480,90 L524,70 L568,76 L620,52 L620,180 L40,180 Z" fill="url(#area)"/>
+              <path d="M40,150 L84,145 L128,155 L172,130 L216,138 L260,120 L304,125 L348,105 L392,112 L436,95 L480,100 L524,85 L568,90 L620,70 L620,180 L40,180 Z" fill="url(#my-area)"/>
               <polyline fill="none" stroke="#7976F3" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"
-                points="40,150 84,140 128,158 172,128 216,135 260,110 304,120 348,96 392,104 436,82 480,90 524,70 568,76 620,52"/>
-              <circle cx="620" cy="52" r="4" fill="#7976F3"/>
+                points="40,150 84,145 128,155 172,130 216,138 260,120 304,125 348,105 392,112 436,95 480,100 524,85 568,90 620,70"/>
+              <circle cx="620" cy="70" r="4" fill="#7976F3"/>
               <g fill="#90A4AE" font-size="10" text-anchor="middle">
                 <text x="40" y="200">17 Jun</text><text x="216" y="200">21 Jun</text><text x="392" y="200">25 Jun</text><text x="568" y="200">29 Jun</text>
               </g>
@@ -277,113 +265,12 @@
         </div>
       </div>
 
-      <!-- QA snapshot + Wrap-up callout -->
-      <div class="grid grid--2-1 mb-18">
-        <div class="card">
-          <div class="card__head">
-            <h3>QA snapshot — this week</h3>
-            <a class="btn btn--sm" href="qa.html">Open QA Review</a>
-          </div>
-          <div class="card__body">
-            <div class="row">
-              <div class="kpi" style="flex:1;box-shadow:none;border-color:var(--border-soft);">
-                <div class="kpi__label">Auto-QA'd</div>
-                <div class="kpi__value" style="font-size:24px;">1,284</div>
-                <div class="kpi__sub">calls scored automatically</div>
-              </div>
-              <div class="kpi" style="flex:1;box-shadow:none;border-color:var(--border-soft);">
-                <div class="kpi__label">Flagged for review</div>
-                <div class="kpi__value" style="font-size:24px;color:var(--warning);">23</div>
-                <div class="kpi__sub">awaiting a manager</div>
-              </div>
-              <div class="kpi" style="flex:1;box-shadow:none;border-color:var(--border-soft);">
-                <div class="kpi__label">Top failure reason</div>
-                <div class="kpi__value" style="font-size:18px;margin-top:14px;">DPA not completed</div>
-                <div class="kpi__sub">9 of 23 flags</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="callout">
-          <div class="callout__big">~10s</div>
-          <div>
-            <h3>AI wrap-up is saving your team time</h3>
-            <p>Average after-call work is down from a 2.5&nbsp;min baseline — roughly <strong>43 hours</strong> saved across the team this week.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent interactions -->
-      <div class="card">
-        <div class="card__head">
-          <h3>Recent interactions</h3>
-          <a class="btn btn--sm" href="interactions.html">View all</a>
-        </div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead>
-              <tr>
-                <th>Time</th><th>Channel</th><th>Customer</th><th>Agent</th><th>Outcome</th><th>QA</th><th>AI summary</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="clickable" data-href="interaction.html">
-                <td class="cell-mono">09:41</td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-strong">Margaret Whitfield</td>
-                <td>Priya Nair</td>
-                <td><span class="pill pill--info">Resolved</span></td>
-                <td><span class="pill pill--pass">Pass</span></td>
-                <td class="cell-snippet">Billing query on April invoice resolved; refund of £42 issued.</td>
-              </tr>
-              <tr class="clickable" data-href="interaction.html">
-                <td class="cell-mono">09:38</td>
-                <td><span class="chan chan--chat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</span></td>
-                <td class="cell-strong">Tom Beresford</td>
-                <td>Daniel Okafor</td>
-                <td><span class="pill pill--info">Callback booked</span></td>
-                <td><span class="pill pill--flag">Flagged</span></td>
-                <td class="cell-snippet">Customer asked to verify identity; DPA step not completed.</td>
-              </tr>
-              <tr class="clickable" data-href="interaction.html">
-                <td class="cell-mono">09:32</td>
-                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
-                <td class="cell-strong">Aisha Rahman</td>
-                <td>Grace Thompson</td>
-                <td><span class="pill pill--info">Sale</span></td>
-                <td><span class="pill pill--pass">Pass</span></td>
-                <td class="cell-snippet">Upgraded to Pro plan; sent confirmation and onboarding link.</td>
-              </tr>
-              <tr class="clickable" data-href="interaction.html">
-                <td class="cell-mono">09:26</td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-strong">Liam Foster</td>
-                <td>Marcus Bennett</td>
-                <td><span class="pill pill--muted">Escalated</span></td>
-                <td><span class="pill pill--fail">Fail</span></td>
-                <td class="cell-snippet">Complaint about delivery; escalated to team lead, tone flagged.</td>
-              </tr>
-              <tr class="clickable" data-href="interaction.html">
-                <td class="cell-mono">09:19</td>
-                <td><span class="chan chan--call"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</span></td>
-                <td class="cell-strong">Sophie Clarke</td>
-                <td>Priya Nair</td>
-                <td><span class="pill pill--info">Resolved</span></td>
-                <td><span class="pill pill--pass">Pass</span></td>
-                <td class="cell-snippet">Password reset and account unlocked; confirmed security questions.</td>
-              </tr>
-              <tr class="clickable" data-href="interaction.html">
-                <td class="cell-mono">09:11</td>
-                <td><span class="chan chan--email"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Email</span></td>
-                <td class="cell-strong">Henry Walsh</td>
-                <td>Olivia Hughes</td>
-                <td><span class="pill pill--muted">No answer</span></td>
-                <td><span class="pill pill--muted">N/A</span></td>
-                <td class="cell-snippet">Auto-reply sent; awaiting customer response on quote.</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Coaching callout -->
+      <div class="callout mb-18">
+        <div class="callout__big">92.4%</div>
+        <div>
+          <h3>You're ahead of the team average</h3>
+          <p>Team QA pass rate is 88.6% this week — keep flagging DPA steps early to stay on top.</p>
         </div>
       </div>
 
