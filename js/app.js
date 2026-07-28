@@ -1693,6 +1693,31 @@
     wireDrawerTriggers();
   }
 
+  /* Scheduled Dialler's Agents page — the "Not available" worker list
+     mirrors the Users roster exactly (same people, plain names) rather
+     than a separate hardcoded list, so editing Users keeps this page
+     in sync. Skills are illustrative Twilio worker attributes with no
+     backing data of their own, so they're assigned by rotating a fixed
+     list rather than stored per user. */
+  var DIALLER_SKILLS = ["Collections", "Sales", "Email Support", "Complaints", "Technical Support"];
+  function renderDiallerAgents() {
+    var tbody = document.getElementById("dialler-agents-body");
+    if (!tbody) return;
+    var list = getUsers();
+    document.querySelectorAll("#dialler-agents-count").forEach(function (el) { el.textContent = list.length; });
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:22px;">None.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(function (u, i) {
+      var skill = DIALLER_SKILLS[i % DIALLER_SKILLS.length];
+      return '<tr>' +
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
+        '<td><span class="pill pill--info">' + skill + '</span></td>' +
+        '</tr>';
+    }).join("");
+  }
+
   function wireAddUserModal() {
     var roleSelect = document.getElementById("add-user-role");
     var teamleadRow = document.getElementById("add-user-teamlead-row");
@@ -1753,6 +1778,7 @@
     renderBanner(currentBannerRole());
     wireBannerEditor();
     seedUsers();
+    renderDiallerAgents();
     renderUpcomingBirthdays();
     wireRoleSwitch();
     seedTrainingPackages();
