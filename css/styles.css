@@ -641,6 +641,51 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .chart-tooltip__value { font-weight: 700; white-space: nowrap; }
 
 /* ============================================================
+   Queue cards (Call Centre Dashboard — live skill/queue board)
+   ============================================================ */
+.queue-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.queue-card {
+  background: #131722;
+  border: 1px solid rgba(255,255,255,.07);
+  border-left: 3px solid var(--queue-accent, var(--indigo));
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  color: #fff;
+}
+.queue-card--span2 { grid-column: 1 / -1; }
+.queue-card__head {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 14px; color: #fff;
+  margin-bottom: 14px;
+}
+.queue-card__head svg { color: var(--queue-accent, var(--indigo)); flex: none; }
+.queue-card__stats { display: flex; gap: 12px; margin-bottom: 14px; }
+.queue-card__stat {
+  flex: 1; background: rgba(255,255,255,.05); border-radius: var(--radius-sm);
+  padding: 14px; text-align: center;
+}
+.queue-card__stat-value { font-size: 26px; font-weight: 800; color: #fff; line-height: 1.1; }
+.queue-card__stat-label { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 4px; }
+.queue-card__progress {
+  background: rgba(255,255,255,.05); border-radius: var(--radius-sm);
+  padding: 16px; text-align: center; margin-bottom: 14px;
+}
+.queue-card__progress-value { font-size: 26px; font-weight: 800; color: #fff; }
+.queue-card__progress-sub { font-size: 11px; color: rgba(255,255,255,.5); margin: 4px 0 12px; }
+.queue-card__progress-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; }
+.queue-card__progress-bar span { display: block; height: 100%; background: var(--queue-accent, var(--indigo)); border-radius: 999px; }
+.queue-card__foot {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  border-top: 1px solid rgba(255,255,255,.08); padding-top: 10px;
+  font-size: 12px; color: rgba(255,255,255,.75); font-weight: 600;
+}
+.queue-card__foot span { display: inline-flex; align-items: center; gap: 4px; }
+.queue-card__foot svg { flex: none; color: rgba(255,255,255,.4); }
+.queue-card__foot .warn { color: #FF8A65; }
+.queue-card__foot .warn svg { color: #FF8A65; }
+.queue-card__foot .on { color: #66BB6A; }
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 1200px) {
@@ -653,7 +698,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
   .nav-item__label { display: none; }
   .nav-item { justify-content: center; padding: 12px; }
   .sidebar__footer { display: none; }
-  .grid--2-1, .grid--1-2, .grid--2, .grid--3 { grid-template-columns: 1fr; }
+  .grid--2-1, .grid--1-2, .grid--2, .grid--3, .queue-grid { grid-template-columns: 1fr; }
   .account__name, .account__role { display: none; }
   .main { padding: 22px; }
 }
