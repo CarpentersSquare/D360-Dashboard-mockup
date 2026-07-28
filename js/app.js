@@ -535,21 +535,23 @@
     qa: ["admin", "manager", "trainer"],
     complaints: ["admin", "manager", "teamlead"],
     "my-qa": ["agent"],
+    "my-training-development": ["agent"],
     analytics: ["admin", "manager"],
     users: ["admin", "manager"],
     templates: ["admin", "manager", "trainer"],
     simulations: ["admin", "manager", "teamlead", "trainer"],
     "colin-scorecard": ["admin", "manager", "teamlead", "trainer"],
-    "training-development": ["admin", "manager", "teamlead", "trainer", "agent"],
+    "training-development": ["admin", "manager", "teamlead", "trainer"],
     "agent-guides": ["admin", "manager", "teamlead", "trainer", "agent"],
-    billing: ["admin", "manager"],
+    billing: ["admin"],
     settings: ["admin"],
     interactions: ["admin", "manager", "teamlead"]
   };
   var NAV_LABELS = {
     newsfeed: "Newsfeed", overview: "Overview", "call-centre-dashboard": "Call Centre Dashboard",
     "my-performance": "My Performance", qa: "QA Review", complaints: "Complaints",
-    "my-qa": "My QA", analytics: "Analytics", users: "Users", templates: "Templates",
+    "my-qa": "My QA", "my-training-development": "My Training & Development",
+    analytics: "Analytics", users: "Users", templates: "Templates",
     simulations: "Customer Simulations", "colin-scorecard": "Colin Scorecard",
     "training-development": "Training & Development", "agent-guides": "Agent Guides",
     billing: "Billing", settings: "Settings", interactions: "Interactions"
