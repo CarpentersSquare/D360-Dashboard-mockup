@@ -210,53 +210,128 @@
         </div>
       </div>
 
-      <!-- Summary tiles -->
-      <div class="grid grid--kpi mb-18">
-        <div class="kpi">
-          <div class="kpi__label">Open training packages</div>
-          <div class="kpi__value" id="td-kpi-open">–</div>
-          <div class="kpi__sub">not started or in progress</div>
+      <!-- ===== Admin / Manager / Trainer: company-wide view ===== -->
+      <div data-roles="admin,manager,trainer">
+        <div class="grid grid--kpi mb-18">
+          <div class="kpi">
+            <div class="kpi__label">Open training packages</div>
+            <div class="kpi__value" id="td-kpi-open">–</div>
+            <div class="kpi__sub">not started or in progress</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Signed off this week</div>
+            <div class="kpi__value" id="td-kpi-completed">–</div>
+            <div class="kpi__delta up">Marked complete by the agent</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Most assigned guide</div>
+            <div class="kpi__value" id="td-kpi-top-guide" style="font-size:20px;">–</div>
+            <div class="kpi__sub">across all open packages</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Guides in the library</div>
+            <div class="kpi__value">9</div>
+            <div class="kpi__sub"><a href="agent-guides.html">View library</a></div>
+          </div>
         </div>
-        <div class="kpi">
-          <div class="kpi__label">Signed off this week</div>
-          <div class="kpi__value" id="td-kpi-completed">–</div>
-          <div class="kpi__delta up">Marked complete by the agent</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Most assigned guide</div>
-          <div class="kpi__value" id="td-kpi-top-guide" style="font-size:20px;">–</div>
-          <div class="kpi__sub">across all open packages</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Guides in the library</div>
-          <div class="kpi__value">9</div>
-          <div class="kpi__sub"><a href="agent-guides.html">View library</a></div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Training packages</h3>
+            <span class="tag">Newest first</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Source scorecard</th>
+                  <th>Failed criterion</th>
+                  <th>Assigned guide</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th>Action by</th>
+                </tr>
+              </thead>
+              <tbody data-training-queue>
+                <tr><td colspan="7" class="muted" style="padding:16px;">Loading training packages…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Training queue -->
-      <div class="card">
-        <div class="card__head">
-          <h3>Training packages</h3>
-          <span class="tag">Newest first</span>
+      <!-- ===== Team lead: Team Priya-scoped view ===== -->
+      <div data-roles="teamlead">
+        <div class="grid grid--kpi mb-18">
+          <div class="kpi">
+            <div class="kpi__label">Open training packages</div>
+            <div class="kpi__value" id="td-kpi-open-team">–</div>
+            <div class="kpi__sub">not started or in progress, your team</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Signed off this week</div>
+            <div class="kpi__value" id="td-kpi-completed-team">–</div>
+            <div class="kpi__delta up">Marked complete by the agent</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Most assigned guide</div>
+            <div class="kpi__value" id="td-kpi-top-guide-team" style="font-size:20px;">–</div>
+            <div class="kpi__sub">across your team's open packages</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Guides in the library</div>
+            <div class="kpi__value">9</div>
+            <div class="kpi__sub"><a href="agent-guides.html">View library</a></div>
+          </div>
         </div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead>
-              <tr>
-                <th>Agent</th>
-                <th>Source scorecard</th>
-                <th>Failed criterion</th>
-                <th>Assigned guide</th>
-                <th>Status</th>
-                <th>Assigned</th>
-                <th>Action by</th>
-              </tr>
-            </thead>
-            <tbody data-training-queue>
-              <tr><td colspan="7" class="muted" style="padding:16px;">Loading training packages…</td></tr>
-            </tbody>
-          </table>
+
+        <div class="card mb-18">
+          <div class="card__head">
+            <h3>Your team's training packages</h3>
+            <span class="tag">Team Priya</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Source scorecard</th>
+                  <th>Failed criterion</th>
+                  <th>Assigned guide</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th>Action by</th>
+                </tr>
+              </thead>
+              <tbody data-training-queue-team>
+                <tr><td colspan="7" class="muted" style="padding:16px;">Loading training packages…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Your team's training requests</h3>
+            <span class="tag" title="Submitted via the Request a guide button on Agent Guides">Team Priya</span>
+          </div>
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Requested by</th>
+                  <th>Details</th>
+                  <th>Requested</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody data-guide-requests-team>
+                <tr><td colspan="5" class="muted" style="padding:16px;">Loading training requests…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

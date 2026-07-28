@@ -878,6 +878,76 @@
       subjectEl.value = ""; detailsEl.value = ""; nameEl.value = "";
       var modal = document.getElementById("request-guide-modal");
       if (modal) modal.classList.remove("open");
+      renderTeamGuideRequests();
+    });
+  }
+
+  /* ---- 14c. Team lead training view (prototype only) ----
+     training-development.html (Team lead role) shows the same
+     training-package and guide-request data as the company-wide view
+     above, filtered to the team lead's own roster — Team Priya is the
+     only named team in this prototype's dummy data. Requests are
+     read-only here (Trainers own working them via agent-guides.html);
+     team leads just need visibility into what their team has asked for. */
+  var TEAM_PRIYA_ROSTER = ["Priya Nair", "Daniel Okafor", "Grace Thompson", "Marcus Bennett", "Olivia Hughes"];
+
+  function renderTeamTraining() {
+    var tbody = document.querySelector("[data-training-queue-team]");
+    var list = getTrainingPackages().filter(function (p) { return TEAM_PRIYA_ROSTER.indexOf(p.agentName) !== -1; });
+    var openEl = document.getElementById("td-kpi-open-team");
+    var completedEl = document.getElementById("td-kpi-completed-team");
+    var topGuideEl = document.getElementById("td-kpi-top-guide-team");
+    if (openEl || completedEl || topGuideEl) {
+      var open = list.filter(function (p) { return p.status !== "completed"; });
+      var completed = list.filter(function (p) { return p.status === "completed"; });
+      if (openEl) openEl.textContent = open.length;
+      if (completedEl) completedEl.textContent = completed.length;
+      if (topGuideEl) {
+        var counts = {};
+        open.forEach(function (p) { counts[p.guideTitle] = (counts[p.guideTitle] || 0) + 1; });
+        var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
+        topGuideEl.textContent = top || "—";
+      }
+    }
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="muted" style="padding:16px;">No training packages assigned to your team yet.</td></tr>';
+      return;
+    }
+    list.forEach(function (p) {
+      var row = document.createElement("tr");
+      var due = dueInfo(p);
+      row.innerHTML =
+        '<td class="cell-strong">' + p.agentName + '</td>' +
+        '<td class="cell-mono">' + p.ref + '</td>' +
+        '<td>' + p.failReason + '</td>' +
+        '<td><a href="agent-guides.html?open=' + p.guideId + '">' + p.guideTitle + '</a></td>' +
+        '<td><span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span></td>' +
+        '<td class="muted">' + fmtShortDate(p.assignedAt) + '</td>' +
+        '<td style="color:var(--' + due.cls + ');' + (due.urgent ? "font-weight:700;" : "") + '">' + due.text + '</td>';
+      tbody.appendChild(row);
+    });
+  }
+
+  function renderTeamGuideRequests() {
+    var tbody = document.querySelector("[data-guide-requests-team]");
+    if (!tbody) return;
+    var list = getGuideRequests().filter(function (r) { return TEAM_PRIYA_ROSTER.indexOf(r.requestedBy) !== -1; });
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="muted" style="padding:16px;">No training requests from your team yet.</td></tr>';
+      return;
+    }
+    list.forEach(function (r) {
+      var row = document.createElement("tr");
+      row.innerHTML =
+        '<td class="cell-strong">' + r.subject + '</td>' +
+        '<td>' + r.requestedBy + '</td>' +
+        '<td class="cell-snippet" title="' + (r.details || "").replace(/"/g, "&quot;") + '">' + (r.details || "—") + '</td>' +
+        '<td class="muted">' + fmtShortDate(r.requestedAt) + '</td>' +
+        '<td>' + guideRequestStatusPill(r.status) + '</td>';
+      tbody.appendChild(row);
     });
   }
 
@@ -915,12 +985,14 @@
     wireRoleSwitch();
     seedTrainingPackages();
     renderTrainingQueue();
+    renderTeamTraining();
     renderMyTraining();
     renderMyTrainingSummary();
     openGuideFromQuery();
     seedGuideRequests();
     renderGuideRequestsQueue();
     renderGuideRequestsAlert();
+    renderTeamGuideRequests();
     wireGuideRequestForm();
   });
 
