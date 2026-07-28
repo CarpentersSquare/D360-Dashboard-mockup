@@ -450,7 +450,162 @@
     });
   }
 
-  /* ---- 13. Date-range pickers ----
+  /* ---- 13. Training & Development (prototype only) ----
+     Auto-generates a "training package" whenever a scorecard fails a
+     tracked criterion: the failure reason is matched to an Agent
+     Guide, and a record is stored in localStorage. training-development
+     .html (Trainer role and above) lists every open package; the
+     agent's own My Performance page lists just theirs, with a "Mark
+     as complete" action. Both read/write the same store — there's no
+     real backend, so this is how the two views stay in sync. */
+  var TRAINING_KEY = "d360-training-packages";
+  var GUIDE_MAP = {
+    "dpa not completed": { id: "guide-dpa", title: "DPA Verification" },
+    "applicant or authorised 3rd party provided full name & 2 acceptable forms of identification": { id: "guide-dpa", title: "DPA Verification" },
+    "compliance phrase missing": { id: "guide-dispute-rights", title: "Dispute Rights & Validation Notice" },
+    "dispute rights & validation notice provided where required": { id: "guide-dispute-rights", title: "Dispute Rights & Validation Notice" },
+    "tone": { id: "guide-tone", title: "Tone & De-escalation" },
+    "no threatening, profane or misleading language used": { id: "guide-tone", title: "Tone & De-escalation" },
+    "agent did not disclose information to an unauthorised third party": { id: "guide-confidentiality", title: "Confidentiality & Third-Party Disclosure" },
+    "company’s confidentiality agreement maintained": { id: "guide-confidentiality", title: "Confidentiality & Third-Party Disclosure" },
+    "call recording disclosure given at the start of the call": { id: "guide-call-recording", title: "Call Recording Disclosure" },
+    "call outcome documented accurately in system notes": { id: "guide-wrapup", title: "Call Wrap-up Checklist" }
+  };
+
+  function guideForReason(reason) {
+    if (!reason) return null;
+    return GUIDE_MAP[String(reason).trim().toLowerCase()] || null;
+  }
+
+  function getTrainingPackages() {
+    try { return JSON.parse(localStorage.getItem(TRAINING_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveTrainingPackages(list) { localStorage.setItem(TRAINING_KEY, JSON.stringify(list)); }
+
+  function seedTrainingPackages() {
+    if (localStorage.getItem(TRAINING_KEY)) return;
+    saveTrainingPackages([
+      { id: "tp1", agentName: "Marcus Bennett", ref: "INT-10477", failReason: "Tone", guideId: "guide-tone", guideTitle: "Tone & De-escalation", status: "not-started", assignedAt: "2026-07-24T09:00:00.000Z" },
+      { id: "tp2", agentName: "Daniel Okafor", ref: "INT-10461", failReason: "DPA not completed", guideId: "guide-dpa", guideTitle: "DPA Verification", status: "in-progress", assignedAt: "2026-07-23T09:00:00.000Z" },
+      { id: "tp3", agentName: "Hannah Price", ref: "INT-10454", failReason: "Compliance phrase missing", guideId: "guide-dispute-rights", guideTitle: "Dispute Rights & Validation Notice", status: "not-started", assignedAt: "2026-07-22T09:00:00.000Z" },
+      { id: "tp4", agentName: "Rob Ashton", ref: "INT-10408", failReason: "DPA not completed", guideId: "guide-dpa", guideTitle: "DPA Verification", status: "not-started", assignedAt: "2026-07-21T09:00:00.000Z" }
+    ]);
+  }
+
+  /* Called after a scorecard is submitted elsewhere (e.g. colin.js) with
+     the agent's name, the interaction ref, and the top failure reason.
+     No-ops if the reason has no matching guide, or a package already
+     exists for this exact ref + guide. */
+  function assignTraining(agentName, ref, failReason) {
+    var guide = guideForReason(failReason);
+    if (!guide) return null;
+    var list = getTrainingPackages();
+    var exists = list.some(function (p) { return p.ref === ref && p.guideId === guide.id; });
+    if (exists) return null;
+    var pkg = {
+      id: "tp-" + ref + "-" + guide.id + "-" + Date.now(),
+      agentName: agentName, ref: ref, failReason: failReason,
+      guideId: guide.id, guideTitle: guide.title,
+      status: "not-started", assignedAt: new Date().toISOString()
+    };
+    list.unshift(pkg);
+    saveTrainingPackages(list);
+    return pkg;
+  }
+
+  function statusLabel(status) {
+    return status === "completed" ? "Completed" : status === "in-progress" ? "In progress" : "Not started";
+  }
+  function statusPillClass(status) {
+    return status === "completed" ? "pill--pass" : status === "in-progress" ? "pill--info" : "pill--flag";
+  }
+
+  function renderTrainingKpis(list) {
+    var openEl = document.getElementById("td-kpi-open");
+    var completedEl = document.getElementById("td-kpi-completed");
+    var topGuideEl = document.getElementById("td-kpi-top-guide");
+    if (!openEl && !completedEl && !topGuideEl) return;
+
+    var open = list.filter(function (p) { return p.status !== "completed"; });
+    var completed = list.filter(function (p) { return p.status === "completed"; });
+    if (openEl) openEl.textContent = open.length;
+    if (completedEl) completedEl.textContent = completed.length;
+    if (topGuideEl) {
+      var counts = {};
+      open.forEach(function (p) { counts[p.guideTitle] = (counts[p.guideTitle] || 0) + 1; });
+      var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
+      topGuideEl.textContent = top || "—";
+    }
+  }
+
+  function renderTrainingQueue() {
+    var tbody = document.querySelector("[data-training-queue]");
+    var list = getTrainingPackages();
+    renderTrainingKpis(list);
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No training packages assigned yet.</td></tr>';
+      return;
+    }
+    list.forEach(function (p) {
+      var row = document.createElement("tr");
+      row.innerHTML =
+        '<td class="cell-strong">' + p.agentName + '</td>' +
+        '<td class="cell-mono">' + p.ref + '</td>' +
+        '<td>' + p.failReason + '</td>' +
+        '<td><a href="agent-guides.html?open=' + p.guideId + '">' + p.guideTitle + '</a></td>' +
+        '<td><span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span></td>' +
+        '<td class="muted">' + new Date(p.assignedAt).toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</td>';
+      tbody.appendChild(row);
+    });
+  }
+
+  function renderMyTraining() {
+    var root = document.getElementById("my-training-list");
+    if (!root) return;
+    var mine = getTrainingPackages().filter(function (p) { return p.agentName === "Rob Ashton"; });
+    if (!mine.length) {
+      root.innerHTML = '<p class="muted" style="margin:0;">No training assigned right now — nice work.</p>';
+      return;
+    }
+    root.innerHTML = mine.map(function (p) {
+      var done = p.status === "completed";
+      return '<div data-training-id="' + p.id + '" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft);">' +
+        '<div>' +
+        '<div class="checklist__title">' + p.guideTitle + '</div>' +
+        '<div class="checklist__desc">From ' + p.ref + ' — flagged for “' + p.failReason + '”</div>' +
+        '</div>' +
+        '<div class="row" style="gap:8px;align-items:center;">' +
+        '<span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span>' +
+        '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '">Read guide</a>' +
+        (done ? '' : '<button type="button" class="btn btn--primary btn--sm" data-complete-training="' + p.id + '">Mark complete</button>') +
+        '</div></div>';
+    }).join("");
+
+    root.querySelectorAll("[data-complete-training]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-complete-training");
+        var list = getTrainingPackages();
+        list.forEach(function (p) { if (p.id === id) { p.status = "completed"; p.completedAt = new Date().toISOString(); } });
+        saveTrainingPackages(list);
+        renderMyTraining();
+      });
+    });
+  }
+
+  /* Deep-link support: agent-guides.html?open=guide-xxx auto-opens that
+     guide's modal, so links from the training queue / my training list
+     land directly on the right guide. */
+  function openGuideFromQuery() {
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get("open");
+    if (!id) return;
+    var modal = document.getElementById(id);
+    if (modal) modal.classList.add("open");
+  }
+
+  /* ---- 14. Date-range pickers ----
      A <select data-range-select> with a "Custom range" option reveals a
      sibling [data-range-custom] pair of date inputs when that option is
      chosen. Visual only — no filtering happens in this prototype. */
@@ -482,5 +637,12 @@
     renderBanner(currentBannerRole());
     wireBannerEditor();
     wireRoleSwitch();
+    seedTrainingPackages();
+    renderTrainingQueue();
+    renderMyTraining();
+    openGuideFromQuery();
   });
+
+  window.D360 = window.D360 || {};
+  window.D360.assignTraining = assignTraining;
 })();

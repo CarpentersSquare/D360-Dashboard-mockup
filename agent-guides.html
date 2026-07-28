@@ -90,6 +90,10 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
           <span class="nav-item__label">Colin Scorecard</span>
         </a>
+        <a class="nav-item" data-nav="training-development" href="training-development.html" data-roles="admin,manager,teamlead,trainer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/><path d="m9 11 2 2 4-4"/></svg>
+          <span class="nav-item__label">Training &amp; Development</span>
+        </a>
         <a class="nav-item" data-nav="agent-guides" href="agent-guides.html" data-roles="admin,manager,teamlead,trainer,agent">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           <span class="nav-item__label">Agent Guides</span>
@@ -242,11 +246,75 @@
           </div>
         </div>
 
+        <div class="card">
+          <div class="card__head">
+            <h3>Dispute Rights &amp; Validation Notice</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Compliance</span><span class="tag">Collections</span>
+            </div>
+            <p class="muted" style="margin:0;">The required wording for dispute rights and validation notices, and when it must be given.</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 14 Jul</span>
+            <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-dispute-rights">Open guide</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Confidentiality &amp; Third-Party Disclosure</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Compliance</span><span class="tag">Privacy</span>
+            </div>
+            <p class="muted" style="margin:0;">What you can and can't share with a third party, and how the Confidentiality Agreement applies on every call.</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 14 Jul</span>
+            <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-confidentiality">Open guide</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Call Recording Disclosure</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Compliance</span><span class="tag">Every call</span>
+            </div>
+            <p class="muted" style="margin:0;">The exact wording to use, and when in the call it must be given, so the customer knows the call is recorded.</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 14 Jul</span>
+            <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-call-recording">Open guide</button>
+          </div>
+        </div>
+
       </div>
 
       <!-- ===== Call Handling ===== -->
       <h2 class="section-title">Call Handling</h2>
       <div class="grid grid--3 mb-24">
+
+        <div class="card">
+          <div class="card__head">
+            <h3>Tone &amp; De-escalation</h3>
+          </div>
+          <div class="card__body">
+            <div class="row" style="gap:6px;margin-bottom:12px;">
+              <span class="tag">Soft skills</span><span class="tag">QA</span>
+            </div>
+            <p class="muted" style="margin:0;">How to keep tone professional under pressure, and the phrases to avoid on a difficult call.</p>
+          </div>
+          <div class="card__foot row" style="justify-content:space-between;align-items:center;">
+            <span class="small muted">Updated 14 Jul</span>
+            <button class="btn btn--primary btn--sm" type="button" data-open-modal="guide-tone">Open guide</button>
+          </div>
+        </div>
 
         <div class="card">
           <div class="card__head">
@@ -391,6 +459,158 @@
           <div class="guide-pill">Send the reset link to the verified email address already on file — never a new or updated email.</div>
           <div class="guide-connector"></div>
           <div class="guide-pill"><strong>Confirm receipt with the customer before ending the interaction.</strong></div>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Guide modal: Dispute Rights & Validation Notice ===== -->
+  <div class="modal-overlay" id="guide-dispute-rights">
+    <div class="modal modal--guide" role="dialog" aria-modal="true" aria-labelledby="guide-dispute-rights-title">
+      <div class="modal__head">
+        <h3 id="guide-dispute-rights-title">Dispute Rights &amp; Validation Notice</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="guide-flow">
+          <div class="guide-pill"><strong>Customer is discussing an outstanding balance or repayment</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--warn"><strong>The dispute rights &amp; validation notice must be given before the call ends.</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-panel">
+            <div class="guide-panel__head">Internal Information Only</div>
+            <div class="guide-panel__body">
+              <p>Read the notice using the approved wording — do not paraphrase:</p>
+              <ul>
+                <li>The debt will be assumed valid unless disputed within 30 days</li>
+                <li>The customer can request the name and address of the original creditor</li>
+                <li>Any dispute must be provided in writing</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--danger">
+            <strong>Missing this notice is a <u>mandatory compliance fail</u> regardless of the rest of the call.</strong>
+            <span class="fail-note">Compliance fail if you do!</span>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill"><strong>Log that the notice was given in the call notes before wrap-up.</strong></div>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Guide modal: Confidentiality & Third-Party Disclosure ===== -->
+  <div class="modal-overlay" id="guide-confidentiality">
+    <div class="modal modal--guide" role="dialog" aria-modal="true" aria-labelledby="guide-confidentiality-title">
+      <div class="modal__head">
+        <h3 id="guide-confidentiality-title">Confidentiality &amp; Third-Party Disclosure</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="guide-flow">
+          <div class="guide-pill"><strong>Someone other than the account holder is on the line</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--warn"><strong>Confirm they are an authorised 3rd party before discussing anything account-specific.</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-panel">
+            <div class="guide-panel__head">Internal Information Only</div>
+            <div class="guide-panel__body">
+              <p>You are bound by the Company's Confidentiality Agreement on every call:</p>
+              <ul>
+                <li>Never confirm whether someone has an account with us to an unverified caller</li>
+                <li>Never discuss balance, payment history or personal details with an unauthorised 3rd party</li>
+                <li>Authorised 3rd parties must still be verified against the account before any details are shared</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--danger">
+            <strong><u>NEVER</u> disclose account information to an unauthorised third party.</strong>
+            <span class="fail-note">Compliance fail if you do!</span>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill"><strong>If unsure, take a message and arrange a callback to the account holder directly.</strong></div>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Guide modal: Call Recording Disclosure ===== -->
+  <div class="modal-overlay" id="guide-call-recording">
+    <div class="modal modal--guide" role="dialog" aria-modal="true" aria-labelledby="guide-call-recording-title">
+      <div class="modal__head">
+        <h3 id="guide-call-recording-title">Call Recording Disclosure</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="guide-flow">
+          <div class="guide-pill"><strong>Begin the interaction</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--warn"><strong>Recording disclosure must be given in the opening seconds of every call.</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-panel">
+            <div class="guide-panel__head">Internal Information Only</div>
+            <div class="guide-panel__body">
+              <p>Use the approved wording at the start of the call:</p>
+              <div class="guide-quote">"This call may be recorded and monitored for quality and training purposes."</div>
+            </div>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--danger">
+            <strong>Skipping this disclosure is a <u>compliance fail</u>, even if the rest of the call goes well.</strong>
+            <span class="fail-note">Compliance fail if you do!</span>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill"><strong>Continue with the greeting and the reason for the call.</strong></div>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Guide modal: Tone & De-escalation ===== -->
+  <div class="modal-overlay" id="guide-tone">
+    <div class="modal modal--guide" role="dialog" aria-modal="true" aria-labelledby="guide-tone-title">
+      <div class="modal__head">
+        <h3 id="guide-tone-title">Tone &amp; De-escalation</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="guide-flow">
+          <div class="guide-pill"><strong>Customer becomes frustrated, raises their voice, or pushes back</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--warn"><strong>Stay calm, slow your pace, and acknowledge how they feel before you respond.</strong></div>
+          <div class="guide-connector"></div>
+          <div class="guide-panel">
+            <div class="guide-panel__head">Internal Information Only</div>
+            <div class="guide-panel__body">
+              <p>Keep it professional even when the customer isn't:</p>
+              <ul>
+                <li>Never match a raised voice or talk over the customer</li>
+                <li>Never use threatening, profane or misleading language — this is an automatic QA fail</li>
+                <li>Offer a concrete next step rather than an apology alone</li>
+              </ul>
+            </div>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill guide-pill--danger">
+            <strong><u>NEVER</u> raise your voice, use profanity, or mislead a customer to end a call faster.</strong>
+            <span class="fail-note">Compliance fail if you do!</span>
+          </div>
+          <div class="guide-connector"></div>
+          <div class="guide-pill"><strong>If the customer stays escalated, follow the Complaint Handling &amp; Escalation guide.</strong></div>
         </div>
       </div>
       <div class="modal__foot">

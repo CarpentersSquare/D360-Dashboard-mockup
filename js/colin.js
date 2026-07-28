@@ -385,10 +385,16 @@
     all.unshift(record);
     localStorage.setItem(SUBMIT_KEY, JSON.stringify(all));
 
+    var trainingNote = "";
+    if (window.D360 && window.D360.assignTraining) {
+      var pkg = window.D360.assignTraining(agent.name, it.ref, record.topFailReason);
+      if (pkg) trainingNote = ' The <a href="agent-guides.html?open=' + pkg.guideId + '">' + pkg.guideTitle + '</a> guide has been assigned to ' + agent.name + ' for training.';
+    }
+
     var note = $("#colin-submit-note");
     if (note) {
       note.style.display = "block";
-      note.innerHTML = "Scorecard submitted — " + score10 + "/10 sent to <a href=\"qa.html\">QA Review</a>.";
+      note.innerHTML = "Scorecard submitted — " + score10 + "/10 sent to <a href=\"qa.html\">QA Review</a>." + trainingNote;
     }
   }
 
