@@ -816,15 +816,23 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
   background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius);
   box-shadow: var(--shadow); padding: 18px; display: flex; flex-direction: column; gap: 16px;
 }
-.sim-card__top { display: flex; align-items: center; gap: 12px; }
+.sim-card__top { display: flex; align-items: flex-start; gap: 12px; }
 .sim-card__avatar {
   width: 44px; height: 44px; border-radius: 12px; color: #fff; flex: none;
   display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14.5px;
 }
+.sim-card__headline { flex: 1; min-width: 0; }
 .sim-card__name { font-weight: 700; font-size: 15px; color: var(--ink); }
 .sim-card__sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .sim-card__quote { font-size: 12.5px; font-style: italic; color: var(--muted); margin-top: 2px; line-height: 1.4; }
 .sim-card__status { margin-top: 6px; }
+.sim-card__actions { display: flex; gap: 2px; flex: none; margin-left: auto; }
+.sim-card__actions .icon-btn { width: 30px; height: 30px; }
+.sim-card__limit { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.sim-card__limit svg { flex: none; }
+.sim-card__limit strong { color: var(--ink); font-weight: 700; }
+.sim-card__limit.is-exhausted { color: var(--danger); }
+.sim-card__limit.is-exhausted strong { color: var(--danger); }
 .sim-call-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
   border: none; background: var(--indigo); color: #fff;
@@ -832,6 +840,11 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
   padding: 11px; border-radius: 10px; cursor: pointer;
 }
 .sim-call-btn:hover { filter: brightness(1.08); }
+.sim-call-btn:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+
+/* Edit Agent modal's Conversation Controls: 2-column on desktop */
+.sim-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 480px) { .sim-form-grid { grid-template-columns: 1fr; } }
 
 /* Dial row: a quantity stepper joined to the Dial action as one button
    box, plus a separate "more options" button — the stepper controls how

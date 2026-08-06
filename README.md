@@ -52,7 +52,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `analytics.html` | Reporting & inline-SVG charts |
 | `users.html` | Users (Admin/Manager) — add/remove accounts, and per-user drawer settings: change role, assign an agent's team lead, and grant/revoke individual page-access overrides beyond the role's default (e.g. give one Team lead access to Templates) |
 | `templates.html` | Response template library |
-| `simulations.html` | Customer Simulations — card grid of Inbound/Outbound personas, each with a quote and a Dial button whose call-count stepper (default 1) feeds a shared "dialed today" counter (Trainer role and above) |
+| `simulations.html` | Customer Simulations — card grid of Inbound/Outbound AI personas, each editable (Edit Agent modal: name, first message, system prompt, voice, conversation controls, daily dial limit) and deletable, with a Dial button (call-count stepper, default 1) that counts down against that persona's own daily limit as well as a shared "dialed today" total (Trainer role and above) |
 | `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
 | `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide. Admin/Manager/Trainer see the company-wide queue; Team lead sees their own team's packages and a read-only view of their team's training requests |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
@@ -118,14 +118,19 @@ fallback to `assets/logo.svg`).
   `d360-user-overrides`, keyed by name) — e.g. letting one specific Team lead see Templates without
   opening it up to Team leads generally.
 
-- Drives the **Customer Simulations dial counter** (`simulations.html`): each persona card's Dial
-  button is paired with a quantity stepper (min 1, max 20, default 1) — clicking Dial adds that
-  many to a "calls dialed today" counter shown next to both the Inbound and Outbound search boxes,
-  stored in `localStorage` keyed by the current date so it resets on its own each new calendar day.
+- Drives **Customer Simulations personas** (`simulations.html`): every Inbound/Outbound card is a
+  `d360-sim-personas` record (name, first message, system prompt, tags, voice, conversation
+  controls, and its own daily dial limit — default 10). The pencil/trash icons on each card open
+  an "Edit Agent" modal to change any of those fields, or delete the persona outright. Each card's
+  Dial button is paired with a quantity stepper (min 1, max 20, default 1); clicking Dial logs that
+  many dials against the persona in `d360-sim-dial-log` (showing "N of `dailyDialLimit` dials left
+  today," disabling Dial once exhausted) and also adds to a page-wide "calls dialed today" counter
+  next to both search boxes, stored in `d360-sim-dial-count`. Both logs are keyed by the current
+  date, so they reset on their own each new calendar day.
 
 No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
-submissions, training packages, guide requests, users and their access overrides, the daily dial
-counter); filters and
+submissions, training packages, guide requests, users and their access overrides, simulation
+personas and their dial logs); filters and
 other form controls are otherwise decorative.
 
 ## Branding
