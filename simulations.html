@@ -228,10 +228,19 @@
               <div class="sub">16 profiles · Sandbox</div>
             </div>
             <div class="sim-search-add">
+              <div class="sim-dial-counter" title="Total simulated calls sent from Dial buttons today, Inbound and Outbound combined">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span data-sim-dial-count>0</span> dialed today
+              </div>
               <div class="sim-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" placeholder="Search by name, company…" aria-label="Search inbound personas" />
               </div>
+              <select class="sim-sort" aria-label="Sort inbound personas">
+                <option>Sort: First name</option>
+                <option>Sort: Last name</option>
+                <option>Sort: Status</option>
+              </select>
               <button class="btn btn--dark" data-open-modal="add-agent-modal">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 Add Agent
@@ -243,162 +252,403 @@
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#1D2E5C;">JW</span>
-                <div><div class="sim-card__name">Jenny Warner</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Jenny Warner</div>
+                  <div class="sim-card__quote">“Hello, I've applied for a loan but not received any funds into my account”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Jenny Warner">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Jenny Warner">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#9C1E6E;">MS</span>
-                <div><div class="sim-card__name">Matty Spencer</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Matty Spencer</div>
+                  <div class="sim-card__quote">“Hi I am looking for more information about your loan”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Matty Spencer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Matty Spencer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#16B8A6;">VM</span>
-                <div><div class="sim-card__name">Veronica Miller</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Veronica Miller</div>
+                  <div class="sim-card__quote">“Hello, I'd like to check the balance remaining on my loan”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Veronica Miller">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Veronica Miller">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#17181A;">MS</span>
-                <div><div class="sim-card__name">Mack Smith</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Mack Smith</div>
+                  <div class="sim-card__quote">“Hello, I had an email advising I had been denied. Why is this?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Mack Smith">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Mack Smith">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#8A7B1E;">DJ</span>
-                <div><div class="sim-card__name">Daisy Johnson</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Daisy Johnson</div>
+                  <div class="sim-card__quote">“Hello, please can you help me with my loan application?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Daisy Johnson">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Daisy Johnson">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#24405C;">FW</span>
-                <div><div class="sim-card__name">Frankie Williams</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Frankie Williams</div>
+                  <div class="sim-card__quote">“I would like to withdraw my loan application”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Frankie Williams">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Frankie Williams">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#2F4F4C;">CB</span>
-                <div><div class="sim-card__name">Charlie Brown</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Charlie Brown</div>
+                  <div class="sim-card__quote">“Hello, I am requesting a statement to be sent and other information”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Charlie Brown">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Charlie Brown">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#6B5A22;">RG</span>
-                <div><div class="sim-card__name">Ronald Garcia</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Ronald Garcia</div>
+                  <div class="sim-card__quote">“Hi, can you confirm my next repayment date and amount?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Ronald Garcia">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Ronald Garcia">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#8C6FC9;">MS</span>
-                <div><div class="sim-card__name">Mary Scott</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Mary Scott</div>
+                  <div class="sim-card__quote">“Hello, I checked my credit report and seen you have done a credit search”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Mary Scott">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Mary Scott">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#8E2E8A;">ND</span>
-                <div><div class="sim-card__name">Nancy Davis</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Nancy Davis</div>
+                  <div class="sim-card__quote">“I want to reinstate my ACH”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Nancy Davis">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Nancy Davis">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#5C7A99;">AW</span>
-                <div><div class="sim-card__name">Ann Wilson</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Ann Wilson</div>
+                  <div class="sim-card__quote">“Hello, I believe I have a loan with you can you check?”</div>
+                <div class="sim-card__status"><span class="status-dot online">Connected</span></div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Ann Wilson">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Ann Wilson">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#3D4FA8;">DA</span>
-                <div><div class="sim-card__name">Danny Anderson</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Danny Anderson</div>
+                  <div class="sim-card__quote">“Hello, I would like to defer my upcoming payment”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Danny Anderson">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Danny Anderson">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#3FAE58;">HM</span>
-                <div><div class="sim-card__name">Harriet Martinez</div><div class="sim-card__sub">Standard scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Harriet Martinez</div>
+                  <div class="sim-card__quote">“hi, asking about my loan”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Harriet Martinez">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Harriet Martinez">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#8B8F5E;">AC</span>
-                <div><div class="sim-card__name">Angry Customer</div><div class="sim-card__sub">Escalation scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Angry Customer</div>
+                  <div class="sim-card__quote">“This is the third time I've called about this — I want to speak to a manager now”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Angry Customer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Angry Customer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#A9611D;">UC</span>
-                <div><div class="sim-card__name">Unhappy Customer</div><div class="sim-card__sub">Frustrated, low patience</div></div>
+                <div>
+                  <div class="sim-card__name">Unhappy Customer</div>
+                  <div class="sim-card__quote">“I've been on hold for twenty minutes, this is ridiculous”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Unhappy Customer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Unhappy Customer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#4A7C8C;">CC</span>
-                <div><div class="sim-card__name">Confused Customer</div><div class="sim-card__sub">Needs extra guidance</div></div>
+                <div>
+                  <div class="sim-card__name">Confused Customer</div>
+                  <div class="sim-card__quote">“I don't understand this letter you've sent me, can you explain it?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Confused Customer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Confused Customer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -411,10 +661,19 @@
               <div class="sub">6 profiles · Sandbox</div>
             </div>
             <div class="sim-search-add">
+              <div class="sim-dial-counter" title="Total simulated calls sent from Dial buttons today, Inbound and Outbound combined">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span data-sim-dial-count>0</span> dialed today
+              </div>
               <div class="sim-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" placeholder="Search by name, company…" aria-label="Search outbound personas" />
               </div>
+              <select class="sim-sort" aria-label="Sort outbound personas">
+                <option>Sort: First name</option>
+                <option>Sort: Last name</option>
+                <option>Sort: Status</option>
+              </select>
               <button class="btn btn--dark" data-open-modal="add-agent-modal">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 Add Agent
@@ -426,62 +685,152 @@
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#2E9E5B;">IP</span>
-                <div><div class="sim-card__name">Interested Prospect</div><div class="sim-card__sub">Warm lead scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Interested Prospect</div>
+                  <div class="sim-card__quote">“Yes, I'd like to hear more about what you can offer me”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Interested Prospect">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Interested Prospect">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#B8860B;">SP</span>
-                <div><div class="sim-card__name">Skeptical Prospect</div><div class="sim-card__sub">Objection-handling scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Skeptical Prospect</div>
+                  <div class="sim-card__quote">“How do I know this isn't a scam call?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Skeptical Prospect">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Skeptical Prospect">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#455A64;">BE</span>
-                <div><div class="sim-card__name">Busy Executive</div><div class="sim-card__sub">Short-window scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Busy Executive</div>
+                  <div class="sim-card__quote">“I've got two minutes, what do you need?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Busy Executive">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Busy Executive">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#8C6FC9;">PS</span>
-                <div><div class="sim-card__name">Price Shopper</div><div class="sim-card__sub">Negotiation scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Price Shopper</div>
+                  <div class="sim-card__quote">“What's the best rate you can do, I've had other offers”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Price Shopper">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Price Shopper">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:#16B8A6;">RC</span>
-                <div><div class="sim-card__name">Returning Customer</div><div class="sim-card__sub">Upsell scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Returning Customer</div>
+                  <div class="sim-card__quote">“I've used you before, what's changed since then?”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Returning Customer">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Returning Customer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
             <div class="sim-card">
               <div class="sim-card__top">
                 <span class="sim-card__avatar" style="background:var(--danger);">DC</span>
-                <div><div class="sim-card__name">Do Not Call Request</div><div class="sim-card__sub">Compliance scenario</div></div>
+                <div>
+                  <div class="sim-card__name">Do Not Call Request</div>
+                  <div class="sim-card__quote">“Please remove my number, I don't want to be contacted again”</div>
+                </div>
               </div>
-              <button class="sim-call-btn" data-open-modal="call-modal">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Call
-              </button>
+              <div class="sim-dial-row">
+                <div class="sim-dial-group">
+                  <div class="sim-qty-stepper">
+                    <button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>
+                    <input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />
+                    <button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>
+                  </div>
+                  <button type="button" class="sim-call-btn" data-open-modal="call-modal" data-dial-persona="Do Not Call Request">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    Dial
+                  </button>
+                </div>
+                <button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for Do Not Call Request">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -581,7 +930,7 @@
         </button>
       </div>
       <div class="modal__body">
-        <p>This would place a simulated call to this persona in the live Dial360 Hub, so an agent can rehearse the scenario in real time.</p>
+        <p id="call-modal-text">This would place a simulated call to this persona in the live Dial360 Hub, so an agent can rehearse the scenario in real time.</p>
         <p class="muted">Decorative only in this prototype — no call is placed and no audio is generated.</p>
       </div>
       <div class="modal__foot">

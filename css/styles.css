@@ -822,6 +822,8 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 }
 .sim-card__name { font-weight: 700; font-size: 15px; color: var(--ink); }
 .sim-card__sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.sim-card__quote { font-size: 12.5px; font-style: italic; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.sim-card__status { margin-top: 6px; }
 .sim-call-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
   border: none; background: var(--indigo); color: #fff;
@@ -830,11 +832,50 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 }
 .sim-call-btn:hover { filter: brightness(1.08); }
 
+/* Dial row: a quantity stepper joined to the Dial action as one button
+   box, plus a separate "more options" button — the stepper controls how
+   many simulated calls that one click sends (default 1). */
+.sim-dial-row { display: flex; align-items: stretch; gap: 8px; }
+.sim-dial-group {
+  display: flex; align-items: stretch; flex: 1;
+  border-radius: 10px; overflow: hidden; background: var(--indigo);
+}
+.sim-dial-group .sim-call-btn { width: auto; flex: 1; background: transparent; }
+.sim-qty-stepper {
+  display: flex; align-items: center; flex: none;
+  background: rgba(255,255,255,.14); border-right: 1px solid rgba(255,255,255,.2);
+}
+.sim-qty-btn {
+  border: none; background: transparent; color: #fff; font-family: var(--font);
+  font-size: 15px; font-weight: 700; width: 26px; height: 100%; cursor: pointer; line-height: 1;
+}
+.sim-qty-btn:hover { background: rgba(255,255,255,.15); }
+.sim-qty-input {
+  width: 26px; text-align: center; border: none; background: transparent; color: #fff;
+  font-family: var(--font); font-weight: 700; font-size: 13px; -moz-appearance: textfield;
+}
+.sim-qty-input::-webkit-inner-spin-button, .sim-qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.sim-more-btn { flex: none; width: 40px; height: auto; }
+
+.sim-dial-counter {
+  display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff;
+  font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap;
+}
+.sim-dial-counter svg { color: var(--indigo); flex: none; }
+.sim-dial-counter span { color: var(--indigo); font-weight: 800; }
+
+.sim-sort {
+  height: 40px; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px;
+  font-size: 13px; font-family: var(--font); background: #fff; color: var(--ink); cursor: pointer;
+}
+
 @media (max-width: 980px) { .sim-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 620px) {
   .sim-grid { grid-template-columns: 1fr; }
   .sim-search input { width: 100%; }
   .sim-search-add { width: 100%; }
+  .sim-dial-counter { width: 100%; justify-content: center; }
 }
 
 /* ============================================================

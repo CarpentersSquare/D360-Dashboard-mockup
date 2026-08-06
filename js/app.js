@@ -1230,6 +1230,70 @@
     });
   }
 
+  /* ---- 16. Customer Simulations dial counter (prototype only) ----
+     simulations.html: each persona card's Dial button box has a
+     quantity stepper (default 1) so a Trainer can send more than one
+     simulated call in a click. Every dial adds that quantity to a
+     running "calls dialed today" counter shown next to both the
+     Inbound and Outbound search boxes — stored in localStorage keyed
+     by today's date, so it naturally resets at midnight rather than
+     needing an explicit reset. */
+  var SIM_DIAL_KEY = "d360-sim-dial-count";
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function getSimDialCount() {
+    try {
+      var rec = JSON.parse(localStorage.getItem(SIM_DIAL_KEY));
+      if (rec && rec.date === todayKey()) return rec.count;
+    } catch (e) { /* fall through to 0 */ }
+    return 0;
+  }
+  function renderSimDialCount() {
+    var count = getSimDialCount();
+    document.querySelectorAll("[data-sim-dial-count]").forEach(function (el) { el.textContent = count; });
+  }
+  function addSimDialCount(n) {
+    localStorage.setItem(SIM_DIAL_KEY, JSON.stringify({ date: todayKey(), count: getSimDialCount() + n }));
+    renderSimDialCount();
+  }
+
+  function wireSimCards() {
+    renderSimDialCount();
+    document.querySelectorAll(".sim-dial-group").forEach(function (group) {
+      var input = group.querySelector(".sim-qty-input");
+      var decBtn = group.querySelector("[data-qty-dec]");
+      var incBtn = group.querySelector("[data-qty-inc]");
+      var callBtn = group.querySelector(".sim-call-btn");
+      if (!input || !callBtn) return;
+
+      function clamp() {
+        var v = parseInt(input.value, 10);
+        if (!v || v < 1) v = 1;
+        if (v > 20) v = 20;
+        input.value = v;
+        return v;
+      }
+      if (decBtn) decBtn.addEventListener("click", function () { input.value = Math.max(1, (parseInt(input.value, 10) || 1) - 1); });
+      if (incBtn) incBtn.addEventListener("click", function () { input.value = Math.min(20, (parseInt(input.value, 10) || 1) + 1); });
+      input.addEventListener("change", clamp);
+
+      callBtn.addEventListener("click", function () {
+        var qty = clamp();
+        addSimDialCount(qty);
+        var textEl = document.getElementById("call-modal-text");
+        if (textEl) {
+          var persona = callBtn.getAttribute("data-dial-persona") || "this persona";
+          textEl.textContent = "This would place " + qty + " simulated call" + (qty === 1 ? "" : "s") +
+            " to " + persona + " in the live Dial360 Hub, so an agent can rehearse the scenario in real time.";
+        }
+      });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
@@ -1264,6 +1328,7 @@
     // present in the page's static HTML.
     wireDrawers();
     wireAddUserModal();
+    wireSimCards();
   });
 
   window.D360 = window.D360 || {};
