@@ -1820,12 +1820,17 @@
     var today = todayKey();
     var entry = history.filter(function (e) { return e.date === today; })[0];
     if (!entry) {
-      entry = { date: today, total: 0, totalDurationSeconds: 0, perPersona: {} };
+      entry = { date: today, total: 0, totalDurationSeconds: 0, perPersona: {}, perPersonaDuration: {} };
       history.push(entry);
     }
+    if (!entry.perPersonaDuration) entry.perPersonaDuration = {};
     entry.total += qty;
     entry.perPersona[personaId] = (entry.perPersona[personaId] || 0) + qty;
-    for (var i = 0; i < qty; i++) entry.totalDurationSeconds += simRandomCallDurationSeconds();
+    for (var i = 0; i < qty; i++) {
+      var duration = simRandomCallDurationSeconds();
+      entry.totalDurationSeconds += duration;
+      entry.perPersonaDuration[personaId] = (entry.perPersonaDuration[personaId] || 0) + duration;
+    }
     saveSimDialHistory(history);
     renderSimDialCount();
   }
@@ -1891,6 +1896,21 @@
     var entry = getSimDayEntry(todayKey());
     return (entry && entry.total) ? entry.totalDurationSeconds / entry.total : 0;
   }
+  function personaAvgSecondsFromEntries(entries, id) {
+    var duration = 0, count = 0;
+    entries.forEach(function (e) {
+      duration += (e.perPersonaDuration && e.perPersonaDuration[id]) || 0;
+      count += (e.perPersona && e.perPersona[id]) || 0;
+    });
+    return count ? duration / count : 0;
+  }
+  function getPersonaAvgSecondsToday(id) {
+    var entry = getSimDayEntry(todayKey());
+    return entry ? personaAvgSecondsFromEntries([entry], id) : 0;
+  }
+  function getPersonaAvgSecondsAllTime(id) {
+    return personaAvgSecondsFromEntries(getSimDialHistory(), id);
+  }
 
   /* ---- Persona data store ---- */
   function getSimPersonas() {
@@ -1912,6 +1932,9 @@
     var p = {
       id: simPersonaId(), name: name, direction: direction, avatarColor: avatarColor,
       firstMessage: firstMessage, systemPrompt: simDefaultSystemPrompt(name),
+      personality: "Friendly but expects a quick, clear answer; can get slightly impatient if the call drags on.",
+      callGoals: "Get a clear, confident answer to your question and understand the next steps before ending the call.",
+      behaviouralRules: "Stay in character as the customer throughout the call. Do not mention being an AI or break character. End the call naturally once your question has been answered.",
       tags: "Customer, General", voice: "Laura - Enthusiast, Quirky Attitude",
       eagerness: "Normal", turnModel: "turn_v3", silenceSeconds: 3, maxDurationSeconds: 1200,
       speculativeTurn: true, dailyDialLimit: SIM_DEFAULT_DAILY_LIMIT, connected: false
@@ -1960,16 +1983,21 @@
       var d = new Date();
       d.setDate(d.getDate() - i);
       var perPersona = {};
+      var perPersonaDuration = {};
       var total = 0, totalDurationSeconds = 0;
       personas.forEach(function (p) {
         if (Math.random() < 0.6) {
           var n = 1 + Math.floor(Math.random() * 6);
           perPersona[p.id] = n;
           total += n;
-          for (var c = 0; c < n; c++) totalDurationSeconds += simRandomCallDurationSeconds();
+          for (var c = 0; c < n; c++) {
+            var duration = simRandomCallDurationSeconds();
+            totalDurationSeconds += duration;
+            perPersonaDuration[p.id] = (perPersonaDuration[p.id] || 0) + duration;
+          }
         }
       });
-      history.push({ date: simDateKey(d), total: total, totalDurationSeconds: totalDurationSeconds, perPersona: perPersona });
+      history.push({ date: simDateKey(d), total: total, totalDurationSeconds: totalDurationSeconds, perPersona: perPersona, perPersonaDuration: perPersonaDuration });
     }
     saveSimDialHistory(history);
   }
@@ -2097,6 +2125,9 @@
     document.getElementById("edit-persona-name").value = p.name;
     document.getElementById("edit-persona-first-message").value = p.firstMessage;
     document.getElementById("edit-persona-system-prompt").value = p.systemPrompt;
+    document.getElementById("edit-persona-personality").value = p.personality || "";
+    document.getElementById("edit-persona-call-goals").value = p.callGoals || "";
+    document.getElementById("edit-persona-behavioural-rules").value = p.behaviouralRules || "";
     document.getElementById("edit-persona-tags").value = p.tags;
     document.getElementById("edit-persona-voice").value = p.voice;
     document.getElementById("edit-persona-daily-limit").value = p.dailyDialLimit || SIM_DEFAULT_DAILY_LIMIT;
@@ -2120,6 +2151,9 @@
       p.name = document.getElementById("edit-persona-name").value.trim() || p.name;
       p.firstMessage = document.getElementById("edit-persona-first-message").value.trim();
       p.systemPrompt = document.getElementById("edit-persona-system-prompt").value;
+      p.personality = document.getElementById("edit-persona-personality").value;
+      p.callGoals = document.getElementById("edit-persona-call-goals").value;
+      p.behaviouralRules = document.getElementById("edit-persona-behavioural-rules").value;
       p.tags = document.getElementById("edit-persona-tags").value.trim();
       p.voice = document.getElementById("edit-persona-voice").value;
       p.dailyDialLimit = Math.max(1, parseInt(document.getElementById("edit-persona-daily-limit").value, 10) || SIM_DEFAULT_DAILY_LIMIT);
@@ -2173,7 +2207,10 @@
     var tbody = document.querySelector("[data-sim-stats-rows]");
     if (tbody) {
       var rows = getSimPersonas().map(function (p) {
-        return { p: p, today: getPersonaDialsToday(p.id), week: getPersonaDialsThisWeek(p.id) };
+        return {
+          p: p, today: getPersonaDialsToday(p.id), week: getPersonaDialsThisWeek(p.id),
+          avgToday: getPersonaAvgSecondsToday(p.id), avgAllTime: getPersonaAvgSecondsAllTime(p.id)
+        };
       }).sort(function (a, b) { return b.week - a.week; });
       tbody.innerHTML = rows.length ? rows.map(function (row) {
         return (
@@ -2182,9 +2219,11 @@
             '<td><span class="tag">' + (row.p.direction === "inbound" ? "Inbound" : "Outbound") + '</span></td>' +
             '<td class="cell-mono">' + row.today + '</td>' +
             '<td class="cell-mono">' + row.week + '</td>' +
+            '<td class="cell-mono">' + (row.avgToday ? formatDuration(row.avgToday) : "—") + '</td>' +
+            '<td class="cell-mono">' + (row.avgAllTime ? formatDuration(row.avgAllTime) : "—") + '</td>' +
           '</tr>'
         );
-      }).join("") : '<tr><td colspan="4" class="muted">No personas yet.</td></tr>';
+      }).join("") : '<tr><td colspan="6" class="muted">No personas yet.</td></tr>';
     }
   }
 

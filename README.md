@@ -120,20 +120,23 @@ fallback to `assets/logo.svg`).
   opening it up to Team leads generally.
 
 - Drives **Customer Simulations personas** (`simulations.html`): every Inbound/Outbound card is a
-  `d360-sim-personas` record (name, first message, system prompt, tags, voice, conversation
-  controls, and its own daily dial limit — default 10). The pencil/trash icons on each card open
-  an "Edit Agent" modal to change any of those fields, or delete the persona outright. Each card's
-  Dial button is paired with a quantity stepper (min 1, max 20, default 1); clicking Dial logs that
-  many dials — plus a randomly generated call duration per dial — against the persona and the day
-  in `d360-sim-dial-history` (showing "N of `dailyDialLimit` dials left today," disabling Dial once
-  exhausted) and also adds to a page-wide "calls dialed today" counter next to both search boxes.
-  `d360-sim-dial-history` is a single array with one entry per calendar day (`{date, total,
-  totalDurationSeconds, perPersona}`), so both "today" figures and roll-ups across the last 7 days
-  and all time can be read from the same store. Its "Dialling stats" link opens
-  `simulations-stats.html`, which reads that same history to show total dials today/this week,
-  dials today/this week per persona, and average call length today vs all time — flagging in
-  orange when today's calls are running over 10% longer than the all-time average, or green when
-  they're running over 10% shorter. Every dial also draws down a shared daily simulation-credit
+  `d360-sim-personas` record (name, first message, system prompt, personality, call goals,
+  behavioural rules, tags, voice, conversation controls, and its own daily dial limit — default
+  10). The pencil/trash icons on each card open an "Edit Agent" modal to change any of those
+  fields, or delete the persona outright. Each card's Dial button is paired with a quantity
+  stepper (min 1, max 20, default 1); clicking Dial logs that many dials — plus a randomly
+  generated call duration per dial — against the persona and the day in `d360-sim-dial-history`
+  (showing "N of `dailyDialLimit` dials left today," disabling Dial once exhausted) and also adds
+  to a page-wide "calls dialed today" counter next to both search boxes. `d360-sim-dial-history`
+  is a single array with one entry per calendar day (`{date, total, totalDurationSeconds,
+  perPersona, perPersonaDuration}`), so both "today" figures and roll-ups across the last 7 days
+  and all time — per persona as well as overall — can be read from the same store. Its "Dialling
+  stats" link opens `simulations-stats.html`, which reads that same history to show total dials
+  today/this week, and a per-persona table of dials today/this week plus average call length
+  today and all time for each persona. The page-level average call length today vs all time
+  flags in orange when today's calls are running over 10% longer than the all-time average, or
+  green when they're running over 10% shorter. Every dial also draws down a shared daily
+  simulation-credit
   pool (150 credits/day, one credit per dial), shown as a "% credit remaining today" pill next to
   the dial counter (turning orange under 50% remaining, red under 20%). Managing personas (Add
   Agent, and each card's pencil/trash/"⋯" icons, which open the "Edit Agent" modal or delete the
