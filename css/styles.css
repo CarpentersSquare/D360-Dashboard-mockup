@@ -879,6 +879,17 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .sim-dial-counter svg { color: var(--indigo); flex: none; }
 .sim-dial-counter span { color: var(--indigo); font-weight: 800; }
 
+.sim-credit-pill {
+  display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px;
+  border: 1px solid var(--border); border-radius: 10px; background: #fff;
+  font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap;
+}
+.sim-credit-pill svg { flex: none; }
+.sim-credit-pill strong { font-weight: 800; }
+.sim-credit-pill.ok svg, .sim-credit-pill.ok strong { color: var(--success); }
+.sim-credit-pill.warn svg, .sim-credit-pill.warn strong { color: var(--warning); }
+.sim-credit-pill.low svg, .sim-credit-pill.low strong { color: var(--danger); }
+
 .sim-sort {
   height: 40px; border: 1px solid var(--border); border-radius: 10px; padding: 0 12px;
   font-size: 13px; font-family: var(--font); background: #fff; color: var(--ink); cursor: pointer;
@@ -890,6 +901,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
   .sim-search input { width: 100%; }
   .sim-search-add { width: 100%; }
   .sim-dial-counter { width: 100%; justify-content: center; }
+  .sim-credit-pill { width: 100%; justify-content: center; }
 }
 
 /* ============================================================

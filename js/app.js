@@ -1778,6 +1778,7 @@
   var SIM_PERSONAS_KEY = "d360-sim-personas";
   var SIM_DIAL_HISTORY_KEY = "d360-sim-dial-history";
   var SIM_DEFAULT_DAILY_LIMIT = 10;
+  var SIM_DAILY_CREDIT_LIMIT = 150;
   var SIM_CALL_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 
   function todayKey() {
@@ -1837,6 +1838,28 @@
   function renderSimDialCount() {
     var count = getSimDialCount();
     document.querySelectorAll("[data-sim-dial-count]").forEach(function (el) { el.textContent = count; });
+    renderSimCreditPill();
+  }
+
+  /* ---- Shared daily simulation credit (all personas combined) ----
+     A simple prototype stand-in for a real usage-based credit balance:
+     every dial (across every persona) draws down the same shared pool,
+     shown as a "% credit remaining today" pill next to the dial
+     counter. Managers and above get a "Request more credit" action;
+     it's decorative here, but in the live product would notify Billing. */
+  function getSimCreditRemainingPct() {
+    return Math.max(0, Math.round((1 - getSimDialCount() / SIM_DAILY_CREDIT_LIMIT) * 100));
+  }
+  function renderSimCreditPill() {
+    var pct = getSimCreditRemainingPct();
+    var cls = pct > 50 ? "ok" : pct > 20 ? "warn" : "low";
+    document.querySelectorAll("[data-sim-credit-pill]").forEach(function (el) {
+      el.classList.remove("ok", "warn", "low");
+      el.classList.add(cls);
+    });
+    document.querySelectorAll("[data-sim-credit-value], [data-request-credit-remaining]").forEach(function (el) {
+      el.textContent = pct + "%";
+    });
   }
 
   /* ---- Per-persona daily dial log ---- */
@@ -1965,7 +1988,7 @@
             '<div class="sim-card__quote">“' + p.firstMessage + '”</div>' +
             statusHtml +
           '</div>' +
-          '<div class="sim-card__actions">' +
+          '<div class="sim-card__actions" data-roles="admin,manager">' +
             '<button type="button" class="icon-btn sim-edit-btn" data-edit-persona="' + p.id + '" title="Edit agent" aria-label="Edit ' + p.name + '">' +
               '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
             '</button>' +
@@ -1989,7 +2012,7 @@
               SIM_CALL_SVG + 'Dial' +
             '</button>' +
           '</div>' +
-          '<button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for ' + p.name + '">' +
+          '<button type="button" class="btn btn--ghost icon-btn sim-more-btn" data-roles="admin,manager" aria-label="More options for ' + p.name + '">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>' +
           '</button>' +
         '</div>' +
@@ -2211,6 +2234,12 @@
     renderAllSimGrids();
     wireEditPersonaModal();
     renderSimStatsPage();
+    // Re-apply the current role now that the persona cards exist —
+    // wireRoleSwitch() ran earlier and already filtered every [data-roles]
+    // element present in the page's static HTML, but the sim cards (and
+    // their own [data-roles] edit/delete/more-options controls) are only
+    // just built above, so they need a second pass to get hidden/shown correctly.
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
   });
 
   window.D360 = window.D360 || {};
