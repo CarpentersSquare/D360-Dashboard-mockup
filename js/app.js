@@ -1768,15 +1768,15 @@
      d360-sim-personas localStorage list, so each one's "AI agent"
      config (system prompt, voice, conversation controls, and its own
      daily dial limit) can be edited via the Edit Agent modal and
-     persists. Dialling is logged per persona per day in
-     d360-sim-dial-log, so each card can show how many dials it has
-     left today against its own configurable limit (default 10) —
-     separate from the page-wide "calls dialed today" counter, which
-     still totals every dial across all personas. Both logs are keyed
-     by today's date, so they reset on their own each calendar day. */
+     persists. Dialling is logged in d360-sim-dial-history, an array
+     with one entry per calendar day ({date, total, totalDurationSeconds,
+     perPersona: {id: count}}), so each card can show how many dials it
+     has left today against its own configurable limit (default 10),
+     the page-wide "calls dialed today" counter can total every dial
+     across all personas, and simulations-stats.html can roll the same
+     history up into this-week and all-time figures. */
   var SIM_PERSONAS_KEY = "d360-sim-personas";
-  var SIM_DIAL_KEY = "d360-sim-dial-count";
-  var SIM_DIAL_LOG_KEY = "d360-sim-dial-log";
+  var SIM_DIAL_HISTORY_KEY = "d360-sim-dial-history";
   var SIM_DEFAULT_DAILY_LIMIT = 10;
   var SIM_CALL_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 
@@ -1784,40 +1784,89 @@
     var d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
+  function simDateKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function simLastNDates(n) {
+    var dates = [];
+    for (var i = 0; i < n; i++) {
+      var d = new Date();
+      d.setDate(d.getDate() - i);
+      dates.push(simDateKey(d));
+    }
+    return dates;
+  }
+  function simRandomCallDurationSeconds() {
+    return 90 + Math.floor(Math.random() * 181);
+  }
+  function formatDuration(seconds) {
+    seconds = Math.round(seconds || 0);
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    return m + "m " + String(s).padStart(2, "0") + "s";
+  }
+
+  /* ---- Dial history: one entry per calendar day ---- */
+  function getSimDialHistory() {
+    try { return JSON.parse(localStorage.getItem(SIM_DIAL_HISTORY_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveSimDialHistory(list) { localStorage.setItem(SIM_DIAL_HISTORY_KEY, JSON.stringify(list)); }
+  function getSimDayEntry(date) {
+    return getSimDialHistory().filter(function (e) { return e.date === date; })[0] || null;
+  }
+  function logSimDials(personaId, qty) {
+    var history = getSimDialHistory();
+    var today = todayKey();
+    var entry = history.filter(function (e) { return e.date === today; })[0];
+    if (!entry) {
+      entry = { date: today, total: 0, totalDurationSeconds: 0, perPersona: {} };
+      history.push(entry);
+    }
+    entry.total += qty;
+    entry.perPersona[personaId] = (entry.perPersona[personaId] || 0) + qty;
+    for (var i = 0; i < qty; i++) entry.totalDurationSeconds += simRandomCallDurationSeconds();
+    saveSimDialHistory(history);
+    renderSimDialCount();
+  }
 
   /* ---- Page-wide "dialed today" counter (all personas combined) ---- */
   function getSimDialCount() {
-    try {
-      var rec = JSON.parse(localStorage.getItem(SIM_DIAL_KEY));
-      if (rec && rec.date === todayKey()) return rec.count;
-    } catch (e) { /* fall through to 0 */ }
-    return 0;
+    var entry = getSimDayEntry(todayKey());
+    return entry ? entry.total : 0;
   }
   function renderSimDialCount() {
     var count = getSimDialCount();
     document.querySelectorAll("[data-sim-dial-count]").forEach(function (el) { el.textContent = count; });
   }
-  function addSimDialCount(n) {
-    localStorage.setItem(SIM_DIAL_KEY, JSON.stringify({ date: todayKey(), count: getSimDialCount() + n }));
-    renderSimDialCount();
-  }
 
   /* ---- Per-persona daily dial log ---- */
-  function getSimDialLog() {
-    try {
-      var rec = JSON.parse(localStorage.getItem(SIM_DIAL_LOG_KEY));
-      if (rec && rec.date === todayKey()) return rec.counts || {};
-    } catch (e) { /* fall through to {} */ }
-    return {};
-  }
-  function getPersonaDialsToday(id) { return getSimDialLog()[id] || 0; }
-  function addPersonaDial(id, qty) {
-    var counts = getSimDialLog();
-    counts[id] = (counts[id] || 0) + qty;
-    localStorage.setItem(SIM_DIAL_LOG_KEY, JSON.stringify({ date: todayKey(), counts: counts }));
+  function getPersonaDialsToday(id) {
+    var entry = getSimDayEntry(todayKey());
+    return (entry && entry.perPersona[id]) || 0;
   }
   function simRemainingDials(p) {
     return Math.max(0, (p.dailyDialLimit || SIM_DEFAULT_DAILY_LIMIT) - getPersonaDialsToday(p.id));
+  }
+
+  /* ---- This-week / all-time aggregates (for simulations-stats.html) ---- */
+  function getSimWeekEntries() {
+    var dates = simLastNDates(7);
+    return getSimDialHistory().filter(function (e) { return dates.indexOf(e.date) !== -1; });
+  }
+  function getSimWeekTotal() {
+    return getSimWeekEntries().reduce(function (sum, e) { return sum + e.total; }, 0);
+  }
+  function getPersonaDialsThisWeek(id) {
+    return getSimWeekEntries().reduce(function (sum, e) { return sum + (e.perPersona[id] || 0); }, 0);
+  }
+  function getSimAllTimeAvgSeconds() {
+    var totalDuration = 0, totalCalls = 0;
+    getSimDialHistory().forEach(function (e) { totalDuration += e.totalDurationSeconds; totalCalls += e.total; });
+    return totalCalls ? totalDuration / totalCalls : 0;
+  }
+  function getSimTodayAvgSeconds() {
+    var entry = getSimDayEntry(todayKey());
+    return (entry && entry.total) ? entry.totalDurationSeconds / entry.total : 0;
   }
 
   /* ---- Persona data store ---- */
@@ -1874,6 +1923,32 @@
       makeSimPersona("Returning Customer", "outbound", "#16B8A6", "I've used you before, what's changed since then?"),
       makeSimPersona("Do Not Call Request", "outbound", "var(--danger)", "Please remove my number, I don't want to be contacted again")
     ]);
+  }
+
+  /* Seeds two prior weeks of dial history (never touches today) so
+     simulations-stats.html has a meaningful all-time average and a
+     "this week" baseline the first time it's viewed. */
+  function seedSimDialHistory() {
+    if (localStorage.getItem(SIM_DIAL_HISTORY_KEY)) return;
+    var personas = getSimPersonas();
+    if (!personas.length) return;
+    var history = [];
+    for (var i = 13; i >= 1; i--) {
+      var d = new Date();
+      d.setDate(d.getDate() - i);
+      var perPersona = {};
+      var total = 0, totalDurationSeconds = 0;
+      personas.forEach(function (p) {
+        if (Math.random() < 0.6) {
+          var n = 1 + Math.floor(Math.random() * 6);
+          perPersona[p.id] = n;
+          total += n;
+          for (var c = 0; c < n; c++) totalDurationSeconds += simRandomCallDurationSeconds();
+        }
+      });
+      history.push({ date: simDateKey(d), total: total, totalDurationSeconds: totalDurationSeconds, perPersona: perPersona });
+    }
+    saveSimDialHistory(history);
   }
 
   /* ---- Rendering ---- */
@@ -1976,8 +2051,7 @@
         var p = getSimPersonas().filter(function (x) { return x.id === id; })[0];
         var remaining = p ? simRemainingDials(p) : 20;
         var qty = Math.min(clamp(), Math.max(1, remaining));
-        addPersonaDial(id, qty);
-        addSimDialCount(qty);
+        logSimDials(id, qty);
         var textEl = document.getElementById("call-modal-text");
         if (textEl) {
           textEl.textContent = "This would place " + qty + " simulated call" + (qty === 1 ? "" : "s") +
@@ -2039,6 +2113,58 @@
     });
   }
 
+  /* ---- Dialling stats page (simulations-stats.html) ---- */
+  function renderSimStatsPage() {
+    var todayEl = document.querySelector('[data-stat="dials-today"]');
+    if (!todayEl) return; // not on the stats page — no-op elsewhere
+    todayEl.textContent = getSimDialCount();
+    var weekEl = document.querySelector('[data-stat="dials-week"]');
+    if (weekEl) weekEl.textContent = getSimWeekTotal();
+
+    var avgToday = getSimTodayAvgSeconds();
+    var avgAllTime = getSimAllTimeAvgSeconds();
+    var avgTodayEl = document.querySelector('[data-stat="avg-today"]');
+    if (avgTodayEl) avgTodayEl.textContent = avgToday ? formatDuration(avgToday) : "—";
+    var avgAllTimeEl = document.querySelector('[data-stat="avg-alltime"]');
+    if (avgAllTimeEl) avgAllTimeEl.textContent = avgAllTime ? formatDuration(avgAllTime) : "—";
+
+    var deltaEl = document.querySelector('[data-stat="avg-delta"]');
+    if (deltaEl) {
+      deltaEl.classList.remove("up", "down", "warn");
+      if (!avgToday || !avgAllTime) {
+        deltaEl.textContent = "No calls dialled yet today";
+      } else {
+        var pct = ((avgToday - avgAllTime) / avgAllTime) * 100;
+        if (pct > 10) {
+          deltaEl.classList.add("warn");
+          deltaEl.textContent = "▲ " + Math.round(pct) + "% longer than usual";
+        } else if (pct < -10) {
+          deltaEl.classList.add("up");
+          deltaEl.textContent = "▼ " + Math.round(Math.abs(pct)) + "% shorter than usual";
+        } else {
+          deltaEl.textContent = "About average for today";
+        }
+      }
+    }
+
+    var tbody = document.querySelector("[data-sim-stats-rows]");
+    if (tbody) {
+      var rows = getSimPersonas().map(function (p) {
+        return { p: p, today: getPersonaDialsToday(p.id), week: getPersonaDialsThisWeek(p.id) };
+      }).sort(function (a, b) { return b.week - a.week; });
+      tbody.innerHTML = rows.length ? rows.map(function (row) {
+        return (
+          '<tr>' +
+            '<td class="cell-strong">' + row.p.name + '</td>' +
+            '<td><span class="tag">' + (row.p.direction === "inbound" ? "Inbound" : "Outbound") + '</span></td>' +
+            '<td class="cell-mono">' + row.today + '</td>' +
+            '<td class="cell-mono">' + row.week + '</td>' +
+          '</tr>'
+        );
+      }).join("") : '<tr><td colspan="4" class="muted">No personas yet.</td></tr>';
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
@@ -2081,8 +2207,10 @@
     wireDrawers();
     wireAddUserModal();
     seedSimPersonas();
+    seedSimDialHistory();
     renderAllSimGrids();
     wireEditPersonaModal();
+    renderSimStatsPage();
   });
 
   window.D360 = window.D360 || {};

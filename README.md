@@ -53,6 +53,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `users.html` | Users (Admin/Manager) — add/remove accounts, and per-user drawer settings: change role, assign an agent's team lead, and grant/revoke individual page-access overrides beyond the role's default (e.g. give one Team lead access to Templates) |
 | `templates.html` | Response template library |
 | `simulations.html` | Customer Simulations — card grid of Inbound/Outbound AI personas, each editable (Edit Agent modal: name, first message, system prompt, voice, conversation controls, daily dial limit) and deletable, with a Dial button (call-count stepper, default 1) that counts down against that persona's own daily limit as well as a shared "dialed today" total (Trainer role and above) |
+| `simulations-stats.html` | Customer Simulations sub-page ("Dialling stats") — total dials today/this week, average call length today vs all time (with an over/under-usual indicator), and a per-persona dials today/this week table (Trainer role and above) |
 | `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
 | `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide. Admin/Manager/Trainer see the company-wide queue; Team lead sees their own team's packages and a read-only view of their team's training requests |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
@@ -123,10 +124,16 @@ fallback to `assets/logo.svg`).
   controls, and its own daily dial limit — default 10). The pencil/trash icons on each card open
   an "Edit Agent" modal to change any of those fields, or delete the persona outright. Each card's
   Dial button is paired with a quantity stepper (min 1, max 20, default 1); clicking Dial logs that
-  many dials against the persona in `d360-sim-dial-log` (showing "N of `dailyDialLimit` dials left
-  today," disabling Dial once exhausted) and also adds to a page-wide "calls dialed today" counter
-  next to both search boxes, stored in `d360-sim-dial-count`. Both logs are keyed by the current
-  date, so they reset on their own each new calendar day.
+  many dials — plus a randomly generated call duration per dial — against the persona and the day
+  in `d360-sim-dial-history` (showing "N of `dailyDialLimit` dials left today," disabling Dial once
+  exhausted) and also adds to a page-wide "calls dialed today" counter next to both search boxes.
+  `d360-sim-dial-history` is a single array with one entry per calendar day (`{date, total,
+  totalDurationSeconds, perPersona}`), so both "today" figures and roll-ups across the last 7 days
+  and all time can be read from the same store. Its "Dialling stats" link opens
+  `simulations-stats.html`, which reads that same history to show total dials today/this week,
+  dials today/this week per persona, and average call length today vs all time — flagging in
+  orange when today's calls are running over 10% longer than the all-time average, or green when
+  they're running over 10% shorter.
 
 No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
 submissions, training packages, guide requests, users and their access overrides, simulation
