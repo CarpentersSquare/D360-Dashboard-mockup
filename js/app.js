@@ -76,20 +76,29 @@
 
   /* ---- 5. Modals ----
      [data-open-modal="id"] opens, [data-close-modal] / overlay click closes. */
+  /* Shared by the initial page-load wiring pass below and by
+     renderCustomGuides(), which injects new [data-open-modal]
+     triggers/.modal-overlay elements after that pass has already run. */
+  function wireModalTrigger(trigger) {
+    var onGuidesPage = document.body.getAttribute("data-page") === "agent-guides";
+    trigger.addEventListener("click", function () {
+      var id = trigger.getAttribute("data-open-modal");
+      var m = document.getElementById(id);
+      if (m) m.classList.add("open");
+      if (onGuidesPage && id.indexOf("guide-") === 0) recordGuideRead(id);
+    });
+  }
+  function wireModalOverlay(overlay) {
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay || e.target.hasAttribute("data-close-modal")) {
+        overlay.classList.remove("open");
+      }
+    });
+  }
+
   function wireModals() {
-    document.querySelectorAll("[data-open-modal]").forEach(function (trigger) {
-      trigger.addEventListener("click", function () {
-        var m = document.getElementById(trigger.getAttribute("data-open-modal"));
-        if (m) m.classList.add("open");
-      });
-    });
-    document.querySelectorAll(".modal-overlay").forEach(function (overlay) {
-      overlay.addEventListener("click", function (e) {
-        if (e.target === overlay || e.target.hasAttribute("data-close-modal")) {
-          overlay.classList.remove("open");
-        }
-      });
-    });
+    document.querySelectorAll("[data-open-modal]").forEach(wireModalTrigger);
+    document.querySelectorAll(".modal-overlay").forEach(wireModalOverlay);
   }
 
   /* ---- 6. Drawers ----
@@ -164,6 +173,15 @@
           if (roleNote) roleNote.style.display = "none";
         }
 
+        var personalSection = d && d.querySelector("#drawer-personal-section");
+        if (personalSection && userId) {
+          var pu = getUsers().filter(function (u) { return u.id === userId; })[0];
+          var birthdayInput = personalSection.querySelector("#drawer-birthday-input");
+          if (birthdayInput) birthdayInput.value = (pu && pu.birthday) || "";
+          var personalNote = personalSection.querySelector("#drawer-personal-note");
+          if (personalNote) personalNote.style.display = "none";
+        }
+
         var accessSection = d && d.querySelector("#drawer-access-section");
         if (accessSection) {
           drawerOpenAgentName = name;
@@ -218,6 +236,22 @@
         if (accessSection && user.name) renderAccessOverrideOptions(accessSection, newRole, user.name);
         var roleNote = document.getElementById("drawer-role-note");
         if (roleNote) roleNote.style.display = "block";
+      });
+    }
+
+    var saveBirthdayBtn = document.getElementById("drawer-save-personal");
+    if (saveBirthdayBtn) {
+      saveBirthdayBtn.addEventListener("click", function () {
+        if (!drawerOpenUserId) return;
+        var list = getUsers();
+        var user = list.filter(function (u) { return u.id === drawerOpenUserId; })[0];
+        if (!user) return;
+        var birthdayInput = document.getElementById("drawer-birthday-input");
+        user.birthday = (birthdayInput && birthdayInput.value) || null;
+        saveUsers(list);
+        renderUpcomingBirthdays();
+        var personalNote = document.getElementById("drawer-personal-note");
+        if (personalNote) personalNote.style.display = "block";
       });
     }
 
@@ -521,6 +555,8 @@
     newsfeed: ["admin", "manager", "teamlead", "trainer", "agent"],
     overview: ["admin", "manager"],
     "call-centre-dashboard": ["admin", "manager", "teamlead"],
+    "scheduled-dialler": ["admin", "manager", "teamlead"],
+    "scheduled-dialler-upload": ["admin", "manager"],
     "my-performance": ["agent"],
     qa: ["admin", "manager", "trainer"],
     complaints: ["admin", "manager", "teamlead"],
@@ -538,6 +574,7 @@
   };
   var NAV_LABELS = {
     newsfeed: "Newsfeed", overview: "Overview", "call-centre-dashboard": "Call Centre Dashboard",
+    "scheduled-dialler": "Scheduled Dialler", "scheduled-dialler-upload": "Scheduled Dialler – Upload",
     "my-performance": "My Performance", qa: "QA Review", complaints: "Complaints",
     "my-qa": "My QA", "my-training-development": "My Training & Development",
     analytics: "Analytics", users: "Users", templates: "Templates",
@@ -585,6 +622,110 @@
     if (roleLabel) roleLabel.textContent = displayLabel;
     refreshEmployeeOptionHints();
     renderBanner(role);
+    renderMyTeamRoster();
+    scopeTeamRowsToLead();
+  }
+
+  /* Which team lead's roster the "My Team Performance" pages should
+     show. Priya Nair is the only team lead with a named role-switch
+     sub-option in this prototype, so she's the default whenever the
+     generic "Team lead" option (no specific employee) is picked. */
+  function currentTeamLeadName() {
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
+    return (role === "teamlead" && employee) ? employee : "Priya Nair";
+  }
+
+  /* Every user (agents plus the team lead themself) currently
+     assigned to teamLeadName via the Users page's per-agent "Team
+     lead" field — the same field Admin/Manager edit from a user's
+     drawer. Reassigning an agent there is what moves them on/off
+     this list. */
+  function teamLeadRosterNames(teamLeadName) {
+    var names = getUsers().filter(function (u) { return u.teamLead === teamLeadName; }).map(function (u) { return u.name; });
+    names.unshift(teamLeadName);
+    return names;
+  }
+
+  /* Demo performance figures for My Team Performance's roster table —
+     kept separate from d360-users (which is account-settings only,
+     see Users page) since these are performance numbers, not account
+     data. Anyone assigned to a team lead who isn't in this table
+     (e.g. reassigned from elsewhere in the prototype) shows dashes
+     rather than a fabricated score. */
+  var TEAM_PERFORMANCE_STATS = {
+    "Priya Nair": { status: "online", interactions: 98, qaScore: 94, wrapup: "8s" },
+    "Daniel Okafor": { status: "online", interactions: 112, qaScore: 88, wrapup: "11s" },
+    "Grace Thompson": { status: "online", interactions: 87, qaScore: 95, wrapup: "10s" },
+    "Marcus Bennett": { status: "away", interactions: 73, qaScore: 79, wrapup: "15s" },
+    "Olivia Hughes": { status: "online", interactions: 104, qaScore: 90, wrapup: "10s" }
+  };
+
+  function renderMyTeamKpis(members) {
+    var teamEl = document.getElementById("mtp-kpi-team");
+    if (!teamEl) return;
+    var leads = members.filter(function (u) { return u.role === "teamlead"; }).length;
+    var agents = members.length - leads;
+    teamEl.textContent = members.length;
+    document.getElementById("mtp-kpi-team-sub").textContent =
+      leads + " team lead" + (leads === 1 ? "" : "s") + " · " + agents + " agent" + (agents === 1 ? "" : "s");
+
+    var stats = members.map(function (u) { return TEAM_PERFORMANCE_STATS[u.name]; }).filter(Boolean);
+    var online = stats.filter(function (s) { return s.status === "online"; }).length;
+    var away = stats.filter(function (s) { return s.status === "away"; }).length;
+    var offline = stats.filter(function (s) { return s.status === "offline"; }).length;
+    document.getElementById("mtp-kpi-online").innerHTML = online + '<span class="muted" style="font-size:18px;">/' + members.length + '</span>';
+    document.getElementById("mtp-kpi-online-sub").textContent = away + " away · " + offline + " offline";
+
+    var interactions = stats.map(function (s) { return s.interactions; }).filter(function (v) { return typeof v === "number"; });
+    document.getElementById("mtp-kpi-interactions").textContent = interactions.length ? interactions.reduce(function (a, b) { return a + b; }, 0) : "–";
+
+    var qaScores = stats.map(function (s) { return s.qaScore; }).filter(function (v) { return typeof v === "number"; });
+    document.getElementById("mtp-kpi-qa").textContent = qaScores.length ? Math.round(qaScores.reduce(function (a, b) { return a + b; }, 0) / qaScores.length) : "–";
+
+    var wrapSecs = stats.map(function (s) { return parseInt(s.wrapup, 10); }).filter(function (v) { return !isNaN(v); });
+    document.getElementById("mtp-kpi-wrapup").textContent = wrapSecs.length ? Math.round(wrapSecs.reduce(function (a, b) { return a + b; }, 0) / wrapSecs.length) + "s" : "–";
+  }
+
+  function renderMyTeamRoster() {
+    var tbody = document.querySelector("[data-team-roster]");
+    if (!tbody) return;
+    var lead = currentTeamLeadName();
+    var names = teamLeadRosterNames(lead);
+    var members = getUsers().filter(function (u) { return names.indexOf(u.name) !== -1; });
+    members.sort(function (a) { return a.name === lead ? -1 : 0; });
+    renderMyTeamKpis(members);
+    if (!members.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No team members assigned yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = members.map(function (u) {
+      var stats = TEAM_PERFORMANCE_STATS[u.name] || { status: "online", interactions: "–", qaScore: "–", wrapup: "–" };
+      var statusLabel = stats.status === "online" ? "Online" : stats.status === "away" ? "Away" : "Offline";
+      return '<tr class="clickable" data-open-drawer="agent-drawer" data-name="' + u.name + '">' +
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
+        '<td><span class="tag">' + (ROLE_LABELS[u.role] || u.role) + '</span></td>' +
+        '<td><span class="status-dot ' + stats.status + '">' + statusLabel + '</span></td>' +
+        '<td class="cell-mono">' + stats.interactions + '</td>' +
+        '<td class="cell-mono">' + stats.qaScore + '</td>' +
+        '<td class="cell-mono">' + stats.wrapup + '</td>' +
+        '</tr>';
+    }).join("");
+    wireDrawerTriggers();
+  }
+
+  /* The other "My Team ..." pages (Interaction Stats, QA Review, All
+     scored calls) keep their existing per-interaction demo rows, but
+     hide any row for an agent no longer on this team lead's roster —
+     gated to data-page="my-team-performance" so it never touches the
+     full company roster on users.html. */
+  function scopeTeamRowsToLead() {
+    if (document.body.getAttribute("data-page") !== "my-team-performance") return;
+    var names = teamLeadRosterNames(currentTeamLeadName());
+    document.querySelectorAll("table.data tbody tr[data-name]").forEach(function (row) {
+      if (row.closest("[data-team-roster]")) return; // already scoped by renderMyTeamRoster()
+      row.style.display = names.indexOf(row.getAttribute("data-name")) !== -1 ? "" : "none";
+    });
   }
 
   function wireRoleSwitch() {
@@ -672,8 +813,22 @@
     return GUIDE_MAP[String(reason).trim().toLowerCase()] || null;
   }
 
+  /* Repairs packages saved by an older version of this prototype that
+     didn't set dueAt (or set it from a bad assignedAt) — without this,
+     those packages render "Action by Invalid Date" forever, since
+     dueAt is only ever computed once, at assignment time. */
   function getTrainingPackages() {
-    try { return JSON.parse(localStorage.getItem(TRAINING_KEY)) || []; } catch (e) { return []; }
+    var list;
+    try { list = JSON.parse(localStorage.getItem(TRAINING_KEY)) || []; } catch (e) { return []; }
+    var repaired = false;
+    list.forEach(function (p) {
+      if (!p.dueAt || isNaN(new Date(p.dueAt).getTime())) {
+        p.dueAt = addDays(p.assignedAt && !isNaN(new Date(p.assignedAt).getTime()) ? p.assignedAt : new Date().toISOString(), DUE_WINDOW_DAYS);
+        repaired = true;
+      }
+    });
+    if (repaired) saveTrainingPackages(list);
+    return list;
   }
   function saveTrainingPackages(list) { localStorage.setItem(TRAINING_KEY, JSON.stringify(list)); }
 
@@ -787,6 +942,7 @@
   function trainingItemRow(p, opts) {
     var done = p.status === "completed";
     var due = dueInfo(p);
+    var canSignOff = !!p.readAt;
     return '<div data-training-id="' + p.id + '" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--border-soft);">' +
       '<div>' +
       '<div class="checklist__title">' + p.guideTitle + '</div>' +
@@ -795,8 +951,10 @@
       '</div>' +
       '<div class="row" style="gap:8px;align-items:center;">' +
       '<span class="pill ' + statusPillClass(p.status) + '">' + statusLabel(p.status) + '</span>' +
-      (opts && opts.compact ? '' : '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '">Read guide</a>') +
-      (done ? '' : '<button type="button" class="btn btn--primary btn--sm" data-sign-off-training="' + p.id + '">Sign off</button>') +
+      (opts && opts.compact ? '' : '<a class="btn btn--sm" href="agent-guides.html?open=' + p.guideId + '&mine=1">Read guide</a>') +
+      (done ? '' : canSignOff
+        ? '<button type="button" class="btn btn--primary btn--sm" data-sign-off-training="' + p.id + '">Sign off</button>'
+        : (opts && opts.compact ? '' : '<span class="small muted">Read the guide to unlock sign-off</span>')) +
       '</div></div>';
   }
 
@@ -810,6 +968,62 @@
         onDone();
       });
     });
+  }
+
+  /* ---- 13b. Guide read acknowledgments (prototype only) ----
+     Records every time the current agent (always "Rob Ashton" in this
+     single-user prototype, same convention as My QA / My Performance)
+     opens a guide on agent-guides.html — both a running history for
+     Trainers/Admins/Managers ("Guide read history" on Training &
+     Development) and the gate that unlocks Sign off on a matching
+     open training package: trainingItemRow() only shows Sign off once
+     p.readAt is set. */
+  var GUIDE_READS_KEY = "d360-guide-reads";
+  var CURRENT_AGENT_NAME = "Rob Ashton";
+
+  function getGuideReads() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_READS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveGuideReads(list) { localStorage.setItem(GUIDE_READS_KEY, JSON.stringify(list)); }
+
+  function recordGuideRead(guideId) {
+    var titleEl = document.getElementById(guideId + "-title");
+    var title = titleEl ? titleEl.textContent : guideId;
+    var readAt = new Date().toISOString();
+
+    var reads = getGuideReads();
+    reads.unshift({ agentName: CURRENT_AGENT_NAME, guideId: guideId, guideTitle: title, readAt: readAt });
+    saveGuideReads(reads);
+
+    var packages = getTrainingPackages();
+    var changed = false;
+    packages.forEach(function (p) {
+      if (p.agentName === CURRENT_AGENT_NAME && p.guideId === guideId && p.status !== "completed" && !p.readAt) {
+        p.readAt = readAt;
+        changed = true;
+      }
+    });
+    if (changed) saveTrainingPackages(packages);
+    renderGuideReadHistory();
+  }
+
+  /* Trainer/Admin/Manager-facing log — training-development.html's
+     "Guide read history" card. Most recent acknowledgment first. */
+  function renderGuideReadHistory() {
+    var tbody = document.querySelector("[data-guide-read-history]");
+    if (!tbody) return;
+    var reads = getGuideReads();
+    if (!reads.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="muted" style="padding:16px;">No guides have been read yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = reads.map(function (r) {
+      return '<tr>' +
+        '<td class="cell-strong">' + r.agentName + '</td>' +
+        '<td><a href="agent-guides.html?open=' + r.guideId + '">' + r.guideTitle + '</a></td>' +
+        '<td class="muted">' + new Date(r.readAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + '</td>' +
+        '</tr>';
+    }).join("");
   }
 
   /* Full list — my-training-development.html (the Agent's own "My
@@ -862,6 +1076,11 @@
     if (!id) return;
     var modal = document.getElementById(id);
     if (modal) modal.classList.add("open");
+    // &mine=1 only appears on the agent's own "Read guide" links (My
+    // Training & Development) — the Trainer queue's guide-title link
+    // omits it, since a Trainer opening a guide to review it isn't the
+    // agent acknowledging they've read it.
+    if (params.get("mine") === "1") recordGuideRead(id);
   }
 
   /* ---- 14b. Guide requests (prototype only) ----
@@ -988,6 +1207,256 @@
     });
   }
 
+  /* ---- 14d. Guide management: add/edit/remove (Admin/Manager/Trainer) ----
+     The 9 built-in guides stay real static HTML — title, tags,
+     description, "Updated" date, and their bespoke step-by-step modal.
+     Editing one only layers a title/category/tags/description/updated
+     override on top (applyGuideOverrides()), plus an optional
+     plain-text body that replaces the modal's content if the admin
+     chooses to fill it in — the rich step-by-step markup is never
+     duplicated into JS. Guides created via "Add a guide" are fully
+     custom instead: stored whole in d360-guides-custom and rendered
+     (card + modal) from scratch by renderCustomGuides(). Removing
+     either kind just adds its id to a shared "removed" list. */
+  var GUIDE_OVERRIDES_KEY = "d360-guide-overrides";
+  var GUIDE_REMOVED_KEY = "d360-guide-removed";
+  var CUSTOM_GUIDES_KEY = "d360-guides-custom";
+  var guideFormEditingId = null;
+
+  function getGuideOverrides() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveGuideOverrides(map) { localStorage.setItem(GUIDE_OVERRIDES_KEY, JSON.stringify(map)); }
+
+  function getGuideRemoved() {
+    try { return JSON.parse(localStorage.getItem(GUIDE_REMOVED_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveGuideRemoved(list) { localStorage.setItem(GUIDE_REMOVED_KEY, JSON.stringify(list)); }
+
+  function getCustomGuides() {
+    try { return JSON.parse(localStorage.getItem(CUSTOM_GUIDES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveCustomGuides(list) { localStorage.setItem(CUSTOM_GUIDES_KEY, JSON.stringify(list)); }
+
+  function fmtGuideDate(iso) {
+    return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  }
+
+  function guideBodyHtml(bodyText) {
+    var lines = String(bodyText || "").split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
+    return lines.length ? lines.map(function (l) { return "<p>" + l + "</p>"; }).join("") : "";
+  }
+
+  function guideCategoryGrid(category) {
+    var heading = Array.prototype.filter.call(document.querySelectorAll(".section-title"), function (h) {
+      return h.textContent.trim() === category;
+    })[0];
+    return heading ? heading.nextElementSibling : null;
+  }
+
+  function categoryOfGuideCard(card) {
+    var grid = card.parentElement;
+    var heading = grid && grid.previousElementSibling;
+    return (heading && heading.classList.contains("section-title")) ? heading.textContent.trim() : "Compliance & Verification";
+  }
+
+  /* Re-applies every saved override on top of the static guide cards —
+     called once at load, and again after every edit. */
+  function applyGuideOverrides() {
+    var overrides = getGuideOverrides();
+    Object.keys(overrides).forEach(function (id) {
+      var card = document.querySelector('[data-guide-card="' + id + '"]');
+      if (!card) return;
+      var o = overrides[id];
+      var titleEl = card.querySelector(".card__head h3");
+      if (titleEl && o.title) titleEl.textContent = o.title;
+      var tagsRow = card.querySelector(".card__body .row");
+      if (tagsRow && o.tags) tagsRow.innerHTML = o.tags.map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("");
+      var descEl = card.querySelector(".card__body p");
+      if (descEl && o.description) descEl.textContent = o.description;
+      var updatedEl = card.querySelector(".card__foot .small.muted");
+      if (updatedEl && o.updatedAt) updatedEl.textContent = "Updated " + fmtGuideDate(o.updatedAt);
+
+      var modalTitleEl = document.getElementById(id + "-title");
+      if (modalTitleEl && o.title) modalTitleEl.textContent = o.title;
+      if (o.bodyText) {
+        var modal = document.getElementById(id);
+        var modalBody = modal && modal.querySelector(".modal__body");
+        if (modalBody) modalBody.innerHTML = guideBodyHtml(o.bodyText);
+      }
+
+      if (o.category) {
+        var grid = guideCategoryGrid(o.category);
+        if (grid && card.parentElement !== grid) grid.appendChild(card);
+      }
+    });
+  }
+
+  function applyGuideRemovals() {
+    getGuideRemoved().forEach(function (id) {
+      var card = document.querySelector('[data-guide-card="' + id + '"]');
+      if (card) card.style.display = "none";
+    });
+  }
+
+  function guideCardHtml(g) {
+    return '<div class="card" data-guide-card="' + g.id + '">' +
+      '<div class="card__head"><h3>' + g.title + "</h3></div>" +
+      '<div class="card__body">' +
+      '<div class="row" style="gap:6px;margin-bottom:12px;">' + (g.tags || []).map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("") + "</div>" +
+      '<p class="muted" style="margin:0;">' + (g.description || "") + "</p>" +
+      "</div>" +
+      '<div class="card__foot row" style="justify-content:space-between;align-items:center;">' +
+      '<span class="small muted">Updated ' + fmtGuideDate(g.updatedAt) + "</span>" +
+      '<button class="btn btn--primary btn--sm" type="button" data-open-modal="' + g.id + '">Open guide</button>' +
+      '<span class="row" style="gap:6px;" data-roles="admin,manager,trainer">' +
+      '<button class="btn btn--ghost btn--sm" type="button" data-edit-guide="' + g.id + '">Edit</button>' +
+      '<button class="btn btn--ghost btn--sm" type="button" data-remove-guide="' + g.id + '">Remove</button>' +
+      "</span></div></div>";
+  }
+
+  function guideModalHtml(g) {
+    var body = guideBodyHtml(g.bodyText) || '<p class="muted">No details added for this guide yet.</p>';
+    return '<div class="modal-overlay" id="' + g.id + '">' +
+      '<div class="modal modal--guide" role="dialog" aria-modal="true" aria-labelledby="' + g.id + '-title">' +
+      '<div class="modal__head"><h3 id="' + g.id + '-title">' + g.title + "</h3>" +
+      '<button class="icon-btn" data-close-modal aria-label="Close">×</button></div>' +
+      '<div class="modal__body">' + body + "</div>" +
+      '<div class="modal__foot"><button class="btn" data-close-modal>Close</button></div>' +
+      "</div></div>";
+  }
+
+  /* Rebuilds every custom (admin-added) guide's card + modal from
+     scratch — simplest way to keep them in sync after an add/edit/
+     remove, since there are only ever a handful in this prototype. */
+  function renderCustomGuides() {
+    var modalsContainer = document.getElementById("custom-guide-modals");
+    if (!modalsContainer) return;
+    document.querySelectorAll('[data-guide-card^="guide-custom-"]').forEach(function (el) { el.remove(); });
+    modalsContainer.innerHTML = "";
+
+    var removed = getGuideRemoved();
+    var guides = getCustomGuides().filter(function (g) { return removed.indexOf(g.id) === -1; });
+    guides.forEach(function (g) {
+      var grid = guideCategoryGrid(g.category);
+      if (grid) grid.insertAdjacentHTML("beforeend", guideCardHtml(g));
+      modalsContainer.insertAdjacentHTML("beforeend", guideModalHtml(g));
+    });
+    document.querySelectorAll('[data-guide-card^="guide-custom-"] [data-open-modal]').forEach(wireModalTrigger);
+    modalsContainer.querySelectorAll(".modal-overlay").forEach(wireModalOverlay);
+  }
+
+  function wireGuideManagement() {
+    var modal = document.getElementById("add-guide-modal");
+    if (!modal) return;
+
+    var titleInput = document.getElementById("guide-form-title");
+    var categorySelect = document.getElementById("guide-form-category");
+    var tagsInput = document.getElementById("guide-form-tags");
+    var descInput = document.getElementById("guide-form-description");
+    var bodyInput = document.getElementById("guide-form-body");
+    var modalTitleEl = document.getElementById("add-guide-modal-title");
+    var bodyNote = document.getElementById("guide-form-body-note");
+
+    function resetForm() {
+      guideFormEditingId = null;
+      titleInput.value = "";
+      categorySelect.value = "Compliance & Verification";
+      tagsInput.value = "";
+      descInput.value = "";
+      bodyInput.value = "";
+      modalTitleEl.textContent = "Add a guide";
+      bodyNote.textContent = 'Optional — one paragraph per line.';
+    }
+
+    document.querySelectorAll('.page-head [data-open-modal="add-guide-modal"]').forEach(function (btn) {
+      btn.addEventListener("click", resetForm);
+    });
+
+    document.addEventListener("click", function (e) {
+      var editBtn = e.target.closest("[data-edit-guide]");
+      if (editBtn) {
+        var id = editBtn.getAttribute("data-edit-guide");
+        guideFormEditingId = id;
+        var custom = getCustomGuides().filter(function (g) { return g.id === id; })[0];
+        if (custom) {
+          titleInput.value = custom.title;
+          categorySelect.value = custom.category;
+          tagsInput.value = (custom.tags || []).join(", ");
+          descInput.value = custom.description || "";
+          bodyInput.value = custom.bodyText || "";
+          bodyNote.textContent = "One paragraph per line.";
+        } else {
+          var card = document.querySelector('[data-guide-card="' + id + '"]');
+          var o = getGuideOverrides()[id] || {};
+          var cardTags = card ? Array.prototype.map.call(card.querySelectorAll(".card__body .row .tag"), function (t) { return t.textContent; }) : [];
+          titleInput.value = o.title || (card ? card.querySelector(".card__head h3").textContent.trim() : id);
+          categorySelect.value = o.category || (card ? categoryOfGuideCard(card) : "Compliance & Verification");
+          tagsInput.value = (o.tags || cardTags).join(", ");
+          descInput.value = o.description || (card ? card.querySelector(".card__body p").textContent.trim() : "");
+          bodyInput.value = o.bodyText || "";
+          bodyNote.textContent = 'Leave blank to keep this guide\'s current step-by-step content — filling it in replaces "Open guide" with plain text.';
+        }
+        modalTitleEl.textContent = "Edit guide";
+        modal.classList.add("open");
+        return;
+      }
+
+      var removeBtn = e.target.closest("[data-remove-guide]");
+      if (removeBtn) {
+        var rid = removeBtn.getAttribute("data-remove-guide");
+        var card2 = document.querySelector('[data-guide-card="' + rid + '"]');
+        var name = card2 ? card2.querySelector(".card__head h3").textContent.trim() : rid;
+        if (window.confirm('Remove "' + name + '"? This can\'t be undone in this prototype session.')) {
+          var removedList = getGuideRemoved();
+          if (removedList.indexOf(rid) === -1) removedList.push(rid);
+          saveGuideRemoved(removedList);
+          applyGuideRemovals();
+          renderCustomGuides();
+        }
+      }
+    });
+
+    document.getElementById("guide-form-submit").addEventListener("click", function () {
+      var title = titleInput.value.trim();
+      if (!title) { titleInput.focus(); return; }
+      var category = categorySelect.value;
+      var tags = tagsInput.value.split(",").map(function (t) { return t.trim(); }).filter(Boolean);
+      var description = descInput.value.trim();
+      var bodyText = bodyInput.value.trim();
+      var now = new Date().toISOString();
+
+      if (guideFormEditingId) {
+        var custom = getCustomGuides().filter(function (g) { return g.id === guideFormEditingId; })[0];
+        if (custom) {
+          custom.title = title; custom.category = category; custom.tags = tags;
+          custom.description = description; custom.updatedAt = now;
+          if (bodyText) custom.bodyText = bodyText;
+          saveCustomGuides(getCustomGuides().map(function (g) { return g.id === custom.id ? custom : g; }));
+        } else {
+          var overrides = getGuideOverrides();
+          var existing = overrides[guideFormEditingId] || {};
+          overrides[guideFormEditingId] = {
+            title: title, category: category, tags: tags, description: description,
+            updatedAt: now, bodyText: bodyText || existing.bodyText
+          };
+          saveGuideOverrides(overrides);
+          applyGuideOverrides();
+        }
+      } else {
+        var list = getCustomGuides();
+        list.unshift({
+          id: "guide-custom-" + Date.now(),
+          title: title, category: category, tags: tags, description: description,
+          updatedAt: now, bodyText: bodyText
+        });
+        saveCustomGuides(list);
+      }
+      renderCustomGuides();
+      modal.classList.remove("open");
+    });
+  }
+
   /* ---- 14c. Team lead training view (prototype only) ----
      training-development.html (Team lead role) shows the same
      training-package and guide-request data as the company-wide view
@@ -1095,12 +1564,12 @@
     if (localStorage.getItem(USERS_KEY)) return;
     saveUsers([
       { id: "u1", name: "Rob Ashton", role: "admin", teamLead: null },
-      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null },
+      { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null, birthday: "1990-07-02" },
       { id: "u3", name: "Daniel Okafor", role: "agent", teamLead: "Priya Nair" },
       { id: "u4", name: "Grace Thompson", role: "agent", teamLead: "Priya Nair" },
-      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair" },
-      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair" },
-      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null },
+      { id: "u5", name: "Marcus Bennett", role: "agent", teamLead: "Priya Nair", birthday: "1990-07-09" },
+      { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair", birthday: "1990-07-15" },
+      { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null, birthday: "1990-07-22" },
       { id: "u8", name: "James Whitmore", role: "agent", teamLead: null },
       { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null }
     ]);
@@ -1111,6 +1580,41 @@
     var first = parts[0] ? parts[0][0] : "";
     var last = parts.length > 1 ? parts[parts.length - 1][0] : "";
     return (first + last).toUpperCase();
+  }
+
+  /* This year's (or next year's, if it's already passed) occurrence of
+     a "YYYY-MM-DD" birthday string — the stored year is just whatever
+     the date picker needed, it's never shown or used for age. */
+  function nextBirthdayOccurrence(iso) {
+    var parts = iso.split("-");
+    var month = parseInt(parts[1], 10) - 1;
+    var day = parseInt(parts[2], 10);
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var next = new Date(today.getFullYear(), month, day);
+    if (next < today) next = new Date(today.getFullYear() + 1, month, day);
+    return next;
+  }
+
+  /* Newsfeed's "Upcoming birthdays" card — reads whatever's been typed
+     into each user's Personal details on users.html, rather than a
+     fixed list, so it always reflects the current roster. */
+  function renderUpcomingBirthdays() {
+    var listEl = document.querySelector("[data-birthdays-list]");
+    if (!listEl) return;
+    var withBirthday = getUsers().filter(function (u) { return u.birthday; });
+    withBirthday.forEach(function (u) { u._next = nextBirthdayOccurrence(u.birthday); });
+    withBirthday.sort(function (a, b) { return a._next - b._next; });
+    var upcoming = withBirthday.slice(0, 5);
+    if (!upcoming.length) {
+      listEl.innerHTML = '<li class="muted small">No birthdays on file yet — add one from a user\'s profile on the Users page.</li>';
+      return;
+    }
+    listEl.innerHTML = upcoming.map(function (u) {
+      return '<li><span class="avatar avatar--sm">' + userInitials(u.name) + '</span>' +
+        '<div class="checklist__main"><div class="checklist__title">' + u.name + '</div>' +
+        '<div class="checklist__desc">' + u._next.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + '</div></div></li>';
+    }).join("");
   }
 
   function renderUsersKpis(list) {
@@ -1189,12 +1693,38 @@
     wireDrawerTriggers();
   }
 
+  /* Scheduled Dialler's Agents page — the "Not available" worker list
+     mirrors the Users roster exactly (same people, plain names) rather
+     than a separate hardcoded list, so editing Users keeps this page
+     in sync. Skills are illustrative Twilio worker attributes with no
+     backing data of their own, so they're assigned by rotating a fixed
+     list rather than stored per user. */
+  var DIALLER_SKILLS = ["Collections", "Sales", "Email Support", "Complaints", "Technical Support"];
+  function renderDiallerAgents() {
+    var tbody = document.getElementById("dialler-agents-body");
+    if (!tbody) return;
+    var list = getUsers();
+    document.querySelectorAll("#dialler-agents-count").forEach(function (el) { el.textContent = list.length; });
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:22px;">None.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(function (u, i) {
+      var skill = DIALLER_SKILLS[i % DIALLER_SKILLS.length];
+      return '<tr>' +
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
+        '<td><span class="pill pill--info">' + skill + '</span></td>' +
+        '</tr>';
+    }).join("");
+  }
+
   function wireAddUserModal() {
     var roleSelect = document.getElementById("add-user-role");
     var teamleadRow = document.getElementById("add-user-teamlead-row");
     var teamleadSelect = document.getElementById("add-user-teamlead");
     var nameInput = document.getElementById("add-user-name");
     var emailInput = document.getElementById("add-user-email");
+    var birthdayInput = document.getElementById("add-user-birthday");
     var submitBtn = document.getElementById("add-user-submit");
     if (!roleSelect || !submitBtn) return;
 
@@ -1217,14 +1747,17 @@
         id: "u-" + Date.now(),
         name: name,
         role: role,
-        teamLead: role === "agent" ? (teamleadSelect.value || null) : null
+        teamLead: role === "agent" ? (teamleadSelect.value || null) : null,
+        birthday: (birthdayInput && birthdayInput.value) || null
       });
       saveUsers(list);
       nameInput.value = "";
       if (emailInput) emailInput.value = "";
+      if (birthdayInput) birthdayInput.value = "";
       roleSelect.value = "agent";
       sync();
       renderUsersRoster();
+      renderUpcomingBirthdays();
       var modal = document.getElementById("add-user-modal");
       if (modal) modal.classList.remove("open");
     });
@@ -1308,19 +1841,26 @@
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
+    seedUsers();
+    renderDiallerAgents();
+    renderUpcomingBirthdays();
     wireRoleSwitch();
     seedTrainingPackages();
     renderTrainingQueue();
+    renderGuideReadHistory();
     renderTeamTraining();
     renderMyTraining();
     renderMyTrainingSummary();
+    applyGuideOverrides();
+    applyGuideRemovals();
+    renderCustomGuides();
+    wireGuideManagement();
     openGuideFromQuery();
     seedGuideRequests();
     renderGuideRequestsQueue();
     renderGuideRequestsAlert();
     renderTeamGuideRequests();
     wireGuideRequestForm();
-    seedUsers();
     renderUsersRoster();
     // wireDrawers() must run after renderUsersRoster() — it wires up
     // every current [data-open-drawer] element, and the roster rows

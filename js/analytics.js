@@ -230,7 +230,7 @@
     var svg = document.getElementById("ov-chart-svg");
     if (!svg) return;
     var N = points.length;
-    var plotLeft = 78, plotRight = 880, plotTop = 30, plotBottom = 270;
+    var plotLeft = 96, plotRight = 880, plotTop = 30, plotBottom = 270;
     var spacing = N > 1 ? (plotRight - plotLeft) / (N - 1) : (plotRight - plotLeft);
     var barW = Math.max(3, Math.min(14, spacing * 0.32));
     var xs = points.map(function (p, i) { return N > 1 ? plotLeft + i * spacing : (plotLeft + plotRight) / 2; });
@@ -253,7 +253,7 @@
     for (var g2 = 0; g2 <= 5; g2++) {
       var yv = plotTop + g2 * (plotBottom - plotTop) / 5;
       var val = axisMax - g2 * (axisMax / 5);
-      parts.push('<text x="' + (plotLeft - 10) + '" y="' + (yv + 4) + '">' + Math.round(val).toLocaleString() + "</text>");
+      parts.push('<text x="' + (plotLeft - 36) + '" y="' + (yv + 4) + '">' + Math.round(val).toLocaleString() + "</text>");
     }
     parts.push("</g>");
     parts.push('<g fill="#90A4AE" font-size="10" text-anchor="start">');
@@ -325,7 +325,7 @@
     var svg = document.getElementById("ov-aht-chart-svg");
     if (!svg) return;
     var N = points.length;
-    var plotLeft = 78, plotRight = 880, plotTop = 30, plotBottom = 270;
+    var plotLeft = 96, plotRight = 880, plotTop = 30, plotBottom = 270;
     var spacing = N > 1 ? (plotRight - plotLeft) / (N - 1) : (plotRight - plotLeft);
     var xs = points.map(function (p, i) { return N > 1 ? plotLeft + i * spacing : (plotLeft + plotRight) / 2; });
     var AHT_MAX = 360, ACW_MAX = 120;
