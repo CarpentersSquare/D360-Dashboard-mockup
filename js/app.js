@@ -2059,6 +2059,11 @@
     renderSimDialCount();
     renderSimGrid("inbound");
     renderSimGrid("outbound");
+    // Every call rebuilds each card's HTML from scratch, including its own
+    // [data-roles] edit/delete/more-options controls — re-apply the current
+    // role immediately after so those controls don't reappear for a role
+    // that shouldn't see them (e.g. dialling as Trainer/Team lead).
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
   }
 
   /* ---- Card interactions: stepper/dial, edit, delete ---- */
@@ -2270,15 +2275,9 @@
     wireAddUserModal();
     seedSimPersonas();
     seedSimDialHistory();
-    renderAllSimGrids();
+    renderAllSimGrids(); // also re-applies the current role, now that the persona cards exist
     wireEditPersonaModal();
     renderSimStatsPage();
-    // Re-apply the current role now that the persona cards exist —
-    // wireRoleSwitch() ran earlier and already filtered every [data-roles]
-    // element present in the page's static HTML, but the sim cards (and
-    // their own [data-roles] edit/delete/more-options controls) are only
-    // just built above, so they need a second pass to get hidden/shown correctly.
-    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
   });
 
   window.D360 = window.D360 || {};
