@@ -242,6 +242,10 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 <span data-sim-dial-count>0</span> dialed today
               </div>
+              <div class="sim-credit-pill" data-sim-credit-pill title="Shared daily simulation credit remaining across all personas">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/></svg>
+                <strong data-sim-credit-value>100%</strong> credit remaining today
+              </div>
               <div class="sim-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" placeholder="Search by name, company…" aria-label="Search inbound personas" />
@@ -251,7 +255,11 @@
                 <option>Sort: Last name</option>
                 <option>Sort: Status</option>
               </select>
-              <button class="btn btn--dark" data-open-modal="add-agent-modal">
+              <button class="btn btn--ghost" data-open-modal="request-credit-modal" data-roles="admin,manager">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/></svg>
+                Request more credit
+              </button>
+              <button class="btn btn--dark" data-open-modal="add-agent-modal" data-roles="admin,manager">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 Add Agent
               </button>
@@ -273,6 +281,10 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 <span data-sim-dial-count>0</span> dialed today
               </div>
+              <div class="sim-credit-pill" data-sim-credit-pill title="Shared daily simulation credit remaining across all personas">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/></svg>
+                <strong data-sim-credit-value>100%</strong> credit remaining today
+              </div>
               <div class="sim-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" placeholder="Search by name, company…" aria-label="Search outbound personas" />
@@ -282,7 +294,11 @@
                 <option>Sort: Last name</option>
                 <option>Sort: Status</option>
               </select>
-              <button class="btn btn--dark" data-open-modal="add-agent-modal">
+              <button class="btn btn--ghost" data-open-modal="request-credit-modal" data-roles="admin,manager">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"/><line x1="23" y1="13" x2="23" y2="11"/></svg>
+                Request more credit
+              </button>
+              <button class="btn btn--dark" data-open-modal="add-agent-modal" data-roles="admin,manager">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 Add Agent
               </button>
@@ -336,6 +352,26 @@
         </div>
       </div>
     </div>
+
+  <!-- Request more credit modal (decorative — no request is actually sent) -->
+  <div class="modal-overlay" id="request-credit-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="request-credit-modal-title">
+      <div class="modal__head">
+        <h3 id="request-credit-modal-title">Request more simulation credit</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p>Today's shared simulation credit has <strong data-request-credit-remaining>100%</strong> remaining.</p>
+        <p class="muted">In the live product this would notify Billing to top up today's simulated-call allowance for Customer Simulations. No request is actually sent in this prototype.</p>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Cancel</button>
+        <button class="btn btn--primary" data-close-modal>Send request</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Add persona modal (decorative — no data is created) -->
   <div class="modal-overlay" id="add-agent-modal">
@@ -417,8 +453,20 @@
           <input type="text" id="edit-persona-first-message" />
         </div>
         <div class="form-row">
-          <label for="edit-persona-system-prompt">System Prompt</label>
+          <label for="edit-persona-system-prompt">System Prompt - Turn-taking rule (must follow strictly)</label>
           <textarea id="edit-persona-system-prompt" rows="7"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="edit-persona-personality">Personality</label>
+          <textarea id="edit-persona-personality" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="edit-persona-call-goals">Your goals for this call</label>
+          <textarea id="edit-persona-call-goals" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="edit-persona-behavioural-rules">Behavioural rules</label>
+          <textarea id="edit-persona-behavioural-rules" rows="3"></textarea>
         </div>
         <div class="form-row">
           <label for="edit-persona-tags">Tags (comma-separated)</label>

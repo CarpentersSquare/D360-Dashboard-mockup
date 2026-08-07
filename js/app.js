@@ -1778,6 +1778,7 @@
   var SIM_PERSONAS_KEY = "d360-sim-personas";
   var SIM_DIAL_HISTORY_KEY = "d360-sim-dial-history";
   var SIM_DEFAULT_DAILY_LIMIT = 10;
+  var SIM_DAILY_CREDIT_LIMIT = 150;
   var SIM_CALL_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 
   function todayKey() {
@@ -1819,12 +1820,17 @@
     var today = todayKey();
     var entry = history.filter(function (e) { return e.date === today; })[0];
     if (!entry) {
-      entry = { date: today, total: 0, totalDurationSeconds: 0, perPersona: {} };
+      entry = { date: today, total: 0, totalDurationSeconds: 0, perPersona: {}, perPersonaDuration: {} };
       history.push(entry);
     }
+    if (!entry.perPersonaDuration) entry.perPersonaDuration = {};
     entry.total += qty;
     entry.perPersona[personaId] = (entry.perPersona[personaId] || 0) + qty;
-    for (var i = 0; i < qty; i++) entry.totalDurationSeconds += simRandomCallDurationSeconds();
+    for (var i = 0; i < qty; i++) {
+      var duration = simRandomCallDurationSeconds();
+      entry.totalDurationSeconds += duration;
+      entry.perPersonaDuration[personaId] = (entry.perPersonaDuration[personaId] || 0) + duration;
+    }
     saveSimDialHistory(history);
     renderSimDialCount();
   }
@@ -1837,6 +1843,28 @@
   function renderSimDialCount() {
     var count = getSimDialCount();
     document.querySelectorAll("[data-sim-dial-count]").forEach(function (el) { el.textContent = count; });
+    renderSimCreditPill();
+  }
+
+  /* ---- Shared daily simulation credit (all personas combined) ----
+     A simple prototype stand-in for a real usage-based credit balance:
+     every dial (across every persona) draws down the same shared pool,
+     shown as a "% credit remaining today" pill next to the dial
+     counter. Managers and above get a "Request more credit" action;
+     it's decorative here, but in the live product would notify Billing. */
+  function getSimCreditRemainingPct() {
+    return Math.max(0, Math.round((1 - getSimDialCount() / SIM_DAILY_CREDIT_LIMIT) * 100));
+  }
+  function renderSimCreditPill() {
+    var pct = getSimCreditRemainingPct();
+    var cls = pct > 50 ? "ok" : pct > 20 ? "warn" : "low";
+    document.querySelectorAll("[data-sim-credit-pill]").forEach(function (el) {
+      el.classList.remove("ok", "warn", "low");
+      el.classList.add(cls);
+    });
+    document.querySelectorAll("[data-sim-credit-value], [data-request-credit-remaining]").forEach(function (el) {
+      el.textContent = pct + "%";
+    });
   }
 
   /* ---- Per-persona daily dial log ---- */
@@ -1868,6 +1896,21 @@
     var entry = getSimDayEntry(todayKey());
     return (entry && entry.total) ? entry.totalDurationSeconds / entry.total : 0;
   }
+  function personaAvgSecondsFromEntries(entries, id) {
+    var duration = 0, count = 0;
+    entries.forEach(function (e) {
+      duration += (e.perPersonaDuration && e.perPersonaDuration[id]) || 0;
+      count += (e.perPersona && e.perPersona[id]) || 0;
+    });
+    return count ? duration / count : 0;
+  }
+  function getPersonaAvgSecondsToday(id) {
+    var entry = getSimDayEntry(todayKey());
+    return entry ? personaAvgSecondsFromEntries([entry], id) : 0;
+  }
+  function getPersonaAvgSecondsAllTime(id) {
+    return personaAvgSecondsFromEntries(getSimDialHistory(), id);
+  }
 
   /* ---- Persona data store ---- */
   function getSimPersonas() {
@@ -1889,6 +1932,9 @@
     var p = {
       id: simPersonaId(), name: name, direction: direction, avatarColor: avatarColor,
       firstMessage: firstMessage, systemPrompt: simDefaultSystemPrompt(name),
+      personality: "Friendly but expects a quick, clear answer; can get slightly impatient if the call drags on.",
+      callGoals: "Get a clear, confident answer to your question and understand the next steps before ending the call.",
+      behaviouralRules: "Stay in character as the customer throughout the call. Do not mention being an AI or break character. End the call naturally once your question has been answered.",
       tags: "Customer, General", voice: "Laura - Enthusiast, Quirky Attitude",
       eagerness: "Normal", turnModel: "turn_v3", silenceSeconds: 3, maxDurationSeconds: 1200,
       speculativeTurn: true, dailyDialLimit: SIM_DEFAULT_DAILY_LIMIT, connected: false
@@ -1937,16 +1983,21 @@
       var d = new Date();
       d.setDate(d.getDate() - i);
       var perPersona = {};
+      var perPersonaDuration = {};
       var total = 0, totalDurationSeconds = 0;
       personas.forEach(function (p) {
         if (Math.random() < 0.6) {
           var n = 1 + Math.floor(Math.random() * 6);
           perPersona[p.id] = n;
           total += n;
-          for (var c = 0; c < n; c++) totalDurationSeconds += simRandomCallDurationSeconds();
+          for (var c = 0; c < n; c++) {
+            var duration = simRandomCallDurationSeconds();
+            totalDurationSeconds += duration;
+            perPersonaDuration[p.id] = (perPersonaDuration[p.id] || 0) + duration;
+          }
         }
       });
-      history.push({ date: simDateKey(d), total: total, totalDurationSeconds: totalDurationSeconds, perPersona: perPersona });
+      history.push({ date: simDateKey(d), total: total, totalDurationSeconds: totalDurationSeconds, perPersona: perPersona, perPersonaDuration: perPersonaDuration });
     }
     saveSimDialHistory(history);
   }
@@ -1965,7 +2016,7 @@
             '<div class="sim-card__quote">“' + p.firstMessage + '”</div>' +
             statusHtml +
           '</div>' +
-          '<div class="sim-card__actions">' +
+          '<div class="sim-card__actions" data-roles="admin,manager">' +
             '<button type="button" class="icon-btn sim-edit-btn" data-edit-persona="' + p.id + '" title="Edit agent" aria-label="Edit ' + p.name + '">' +
               '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
             '</button>' +
@@ -1989,7 +2040,7 @@
               SIM_CALL_SVG + 'Dial' +
             '</button>' +
           '</div>' +
-          '<button type="button" class="btn btn--ghost icon-btn sim-more-btn" aria-label="More options for ' + p.name + '">' +
+          '<button type="button" class="btn btn--ghost icon-btn sim-more-btn" data-roles="admin,manager" aria-label="More options for ' + p.name + '">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>' +
           '</button>' +
         '</div>' +
@@ -2074,6 +2125,9 @@
     document.getElementById("edit-persona-name").value = p.name;
     document.getElementById("edit-persona-first-message").value = p.firstMessage;
     document.getElementById("edit-persona-system-prompt").value = p.systemPrompt;
+    document.getElementById("edit-persona-personality").value = p.personality || "";
+    document.getElementById("edit-persona-call-goals").value = p.callGoals || "";
+    document.getElementById("edit-persona-behavioural-rules").value = p.behaviouralRules || "";
     document.getElementById("edit-persona-tags").value = p.tags;
     document.getElementById("edit-persona-voice").value = p.voice;
     document.getElementById("edit-persona-daily-limit").value = p.dailyDialLimit || SIM_DEFAULT_DAILY_LIMIT;
@@ -2097,6 +2151,9 @@
       p.name = document.getElementById("edit-persona-name").value.trim() || p.name;
       p.firstMessage = document.getElementById("edit-persona-first-message").value.trim();
       p.systemPrompt = document.getElementById("edit-persona-system-prompt").value;
+      p.personality = document.getElementById("edit-persona-personality").value;
+      p.callGoals = document.getElementById("edit-persona-call-goals").value;
+      p.behaviouralRules = document.getElementById("edit-persona-behavioural-rules").value;
       p.tags = document.getElementById("edit-persona-tags").value.trim();
       p.voice = document.getElementById("edit-persona-voice").value;
       p.dailyDialLimit = Math.max(1, parseInt(document.getElementById("edit-persona-daily-limit").value, 10) || SIM_DEFAULT_DAILY_LIMIT);
@@ -2150,7 +2207,10 @@
     var tbody = document.querySelector("[data-sim-stats-rows]");
     if (tbody) {
       var rows = getSimPersonas().map(function (p) {
-        return { p: p, today: getPersonaDialsToday(p.id), week: getPersonaDialsThisWeek(p.id) };
+        return {
+          p: p, today: getPersonaDialsToday(p.id), week: getPersonaDialsThisWeek(p.id),
+          avgToday: getPersonaAvgSecondsToday(p.id), avgAllTime: getPersonaAvgSecondsAllTime(p.id)
+        };
       }).sort(function (a, b) { return b.week - a.week; });
       tbody.innerHTML = rows.length ? rows.map(function (row) {
         return (
@@ -2159,9 +2219,11 @@
             '<td><span class="tag">' + (row.p.direction === "inbound" ? "Inbound" : "Outbound") + '</span></td>' +
             '<td class="cell-mono">' + row.today + '</td>' +
             '<td class="cell-mono">' + row.week + '</td>' +
+            '<td class="cell-mono">' + (row.avgToday ? formatDuration(row.avgToday) : "—") + '</td>' +
+            '<td class="cell-mono">' + (row.avgAllTime ? formatDuration(row.avgAllTime) : "—") + '</td>' +
           '</tr>'
         );
-      }).join("") : '<tr><td colspan="4" class="muted">No personas yet.</td></tr>';
+      }).join("") : '<tr><td colspan="6" class="muted">No personas yet.</td></tr>';
     }
   }
 
@@ -2211,6 +2273,12 @@
     renderAllSimGrids();
     wireEditPersonaModal();
     renderSimStatsPage();
+    // Re-apply the current role now that the persona cards exist —
+    // wireRoleSwitch() ran earlier and already filtered every [data-roles]
+    // element present in the page's static HTML, but the sim cards (and
+    // their own [data-roles] edit/delete/more-options controls) are only
+    // just built above, so they need a second pass to get hidden/shown correctly.
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
   });
 
   window.D360 = window.D360 || {};
