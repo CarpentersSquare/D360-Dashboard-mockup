@@ -56,7 +56,7 @@
   ];
   var EMAIL_DOMAINS = ["gmail.com", "outlook.com", "yahoo.co.uk", "hotmail.com", "icloud.com"];
   var SUPPORT_EMAIL = "support@d360.com";
-  var D360_SMS_NUMBER = "+447000000000";
+  var D360_SMS_NUMBER = "+44 7000 000000";
   var SMS_BODIES = [
     "Hi, this is D360 — just a reminder that your payment is due in 3 days. Reply STOP to opt out of reminders.",
     "Thanks for your call today. Your reference number is DL-" + randInt(10000, 99999) + ".",
