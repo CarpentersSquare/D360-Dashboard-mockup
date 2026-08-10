@@ -122,8 +122,12 @@ fallback to `assets/logo.svg`).
 - Drives **Customer Simulations personas** (`simulations.html`): every Inbound/Outbound card is a
   `d360-sim-personas` record (name, first message, system prompt, personality, call goals,
   behavioural rules, tags, voice, conversation controls, and its own daily dial limit — default
-  10). The pencil/trash icons on each card open an "Edit Agent" modal to change any of those
-  fields, or delete the persona outright. Each card's Dial button is paired with a quantity
+  10). Each card's avatar is a small hand-drawn inline SVG face — no external images — with skin
+  tone, hair colour/style and expression all derived deterministically from the persona's id, so
+  the same persona always gets the same face; the expression is matched to mood keywords in the
+  persona's name (e.g. "Angry Customer" gets cross eyebrows), falling back to a neutral/happy
+  split otherwise. The pencil/trash icons on each card open an "Edit Agent" modal to change any of
+  those fields, or delete the persona outright. Each card's Dial button is paired with a quantity
   stepper (min 1, max 20, default 1); clicking Dial logs that many dials — plus a randomly
   generated call duration per dial — against the persona and the day in `d360-sim-dial-history`
   (showing "N of `dailyDialLimit` dials left today," disabling Dial once exhausted) and also adds

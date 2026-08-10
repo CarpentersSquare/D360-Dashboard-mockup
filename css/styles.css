@@ -818,7 +818,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 }
 .sim-card__top { display: flex; align-items: flex-start; gap: 12px; }
 .sim-card__avatar {
-  width: 44px; height: 44px; border-radius: 12px; color: #fff; flex: none;
+  width: 44px; height: 44px; border-radius: 12px; color: #fff; flex: none; overflow: hidden;
   display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14.5px;
 }
 .sim-card__headline { flex: 1; min-width: 0; }

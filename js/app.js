@@ -2002,6 +2002,99 @@
     saveSimDialHistory(history);
   }
 
+  /* ---- Persona avatars: hand-drawn inline SVG faces, no external images ----
+     Deterministically derived from the persona's id, so the same persona
+     always gets the same face across re-renders — skin tone, hair colour
+     and hair style are picked by hashing the id, while the expression is
+     matched to mood keywords in the persona's name (e.g. "Angry Customer"
+     gets cross eyebrows), falling back to a neutral/happy split. */
+  var SIM_SKIN_TONES = ["#F4C29B", "#E8B084", "#C68863", "#9C6B47", "#6E4A34"];
+  var SIM_HAIR_COLORS = ["#241C15", "#4A2E1C", "#8A5A2E", "#C9971F", "#6B6B6E", "#7C4DFF", "#B23A5C"];
+  var SIM_HAIR_STYLES = ["short", "long", "spiky", "bob", "bald"];
+
+  function simHash(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  function simPersonaExpression(p) {
+    var name = (p.name || "").toLowerCase();
+    if (name.indexOf("angry") !== -1) return "cross";
+    if (name.indexOf("unhappy") !== -1) return "sad";
+    if (name.indexOf("confused") !== -1) return "confused";
+    if (name.indexOf("do not call") !== -1) return "cross";
+    if (name.indexOf("interested") !== -1) return "happy";
+    if (name.indexOf("returning") !== -1) return "happy";
+    if (name.indexOf("skeptical") !== -1) return "confused";
+    if (name.indexOf("busy executive") !== -1) return "cross";
+    return (simHash(p.id || p.name || "") % 2 === 0) ? "neutral" : "happy";
+  }
+
+  function simAvatarSvg(p) {
+    var h = simHash(p.id || p.name || "x");
+    var skin = SIM_SKIN_TONES[h % SIM_SKIN_TONES.length];
+    var hair = SIM_HAIR_COLORS[Math.floor(h / 5) % SIM_HAIR_COLORS.length];
+    var style = SIM_HAIR_STYLES[Math.floor(h / 35) % SIM_HAIR_STYLES.length];
+    var expr = simPersonaExpression(p);
+    var ink = "#2b2320";
+
+    var earsSvg = '<circle cx="10" cy="26" r="2.4" fill="' + skin + '"/><circle cx="34" cy="26" r="2.4" fill="' + skin + '"/>';
+    var faceSvg = '<circle cx="22" cy="25" r="12" fill="' + skin + '"/>';
+
+    var hairDome = '<path d="M9 16c0-8.5 5.8-14 13-14s13 5.5 13 14v1.5H9z" fill="' + hair + '"/>';
+    var hairSides = "";
+    if (style === "bald") {
+      hairDome = "";
+    } else if (style === "long") {
+      hairSides = '<path d="M8.5 16.5v12c0 1.7 1.4 3 3 3h1.2v-15z" fill="' + hair + '"/>' +
+                  '<path d="M35.5 16.5v12c0 1.7-1.4 3-3 3h-1.2v-15z" fill="' + hair + '"/>';
+    } else if (style === "bob") {
+      hairSides = '<path d="M8.5 16.5c-.6 4.6.2 8.2 2 10.5h1.7v-11z" fill="' + hair + '"/>' +
+                  '<path d="M35.5 16.5c.6 4.6-.2 8.2-2 10.5h-1.7v-11z" fill="' + hair + '"/>';
+    } else if (style === "spiky") {
+      hairDome = "";
+      hairSides = '<path d="M9.5 15 11.5 8 14 14 17 6.5 19.5 13.5 22 6 24.5 13.5 27 6.5 30 14 32.5 8 34.5 15" ' +
+        'fill="none" stroke="' + hair + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    var browsSvg, mouthSvg;
+    switch (expr) {
+      case "cross":
+        browsSvg = '<path d="M14.5 18 20 20.5M29.5 18 24 20.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17.5 30h9" stroke="#2b2320" stroke-width="2" stroke-linecap="round"/>';
+        break;
+      case "sad":
+        browsSvg = '<path d="M14.5 19.5 20 18M29.5 19.5 24 18" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17.5 31.5c1.7-2 8.3-2 10 0" stroke="#2b2320" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+        break;
+      case "confused":
+        browsSvg = '<path d="M14.5 19.5 20 19M24 17 29.5 19.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 29.8c2-1.2 5 1.4 8 0" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round" fill="none"/>';
+        break;
+      case "happy":
+        browsSvg = '<path d="M14.5 19 20 17.5M29.5 19 24 17.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17 29c1.8 2.2 8.2 2.2 10 0" stroke="#2b2320" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+        break;
+      case "bored":
+        browsSvg = '<path d="M14.5 20 20 20M29.5 20 24 20" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 30.3h8" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round"/>';
+        break;
+      default:
+        browsSvg = '<path d="M14.5 19 20 19M29.5 19 24 19" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 29.8h8" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round"/>';
+    }
+    var eyesSvg = (expr === "bored")
+      ? '<path d="M15.3 23.8h3.4M25.3 23.8h3.4" stroke="' + ink + '" stroke-width="1.6" stroke-linecap="round"/>'
+      : '<circle cx="17" cy="24" r="1.5" fill="' + ink + '"/><circle cx="27" cy="24" r="1.5" fill="' + ink + '"/>';
+
+    return (
+      '<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" focusable="false">' +
+        earsSvg + faceSvg + hairDome + eyesSvg + browsSvg + mouthSvg + hairSides +
+      '</svg>'
+    );
+  }
+
   /* ---- Rendering ---- */
   function simPersonaCardHtml(p) {
     var remaining = simRemainingDials(p);
@@ -2010,7 +2103,7 @@
     return (
       '<div class="sim-card" data-persona-id="' + p.id + '">' +
         '<div class="sim-card__top">' +
-          '<span class="sim-card__avatar" style="background:' + p.avatarColor + ';">' + userInitials(p.name) + '</span>' +
+          '<span class="sim-card__avatar" style="background:' + p.avatarColor + ';">' + simAvatarSvg(p) + '</span>' +
           '<div class="sim-card__headline">' +
             '<div class="sim-card__name">' + p.name + '</div>' +
             '<div class="sim-card__quote">“' + p.firstMessage + '”</div>' +
