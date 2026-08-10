@@ -340,6 +340,111 @@
     });
   }
 
+  /* ---- 9b. Newsfeed business updates (prototype only) ----
+     newsfeed.html's "Recent business updates" list is a d360-business-
+     updates localStorage array (title, category tag, date, description).
+     Manager and Admin get an "Add update" button on the card and
+     pencil/trash icons on each item, opening the same modal in add or
+     edit mode; everyone else sees a read-only list. */
+  var BUSINESS_UPDATES_KEY = "d360-business-updates";
+  var businessUpdateEditingId = null;
+
+  function seedBusinessUpdates() {
+    if (localStorage.getItem(BUSINESS_UPDATES_KEY)) return;
+    saveBusinessUpdates([
+      { id: "bu1", title: "New AI wrap-up model rolled out", category: "Product", date: "29 Jun", desc: "Average wrap-up time is now down to ~9s across the team following this week's model upgrade." },
+      { id: "bu2", title: "Dial360 shortlisted for CX Awards 2026", category: "Company", date: "27 Jun", desc: "We're a finalist in “Best Use of AI in Customer Service” — winners announced in August." },
+      { id: "bu3", title: "Salesforce integration now live", category: "Product", date: "24 Jun", desc: "Interaction history now syncs automatically to linked Salesforce records." },
+      { id: "bu4", title: "Office closed — Summer Bank Holiday", category: "HR", date: "20 Jun", desc: "Office closed Monday 25 August. Live coverage continues via the Hub as normal." }
+    ]);
+  }
+  function getBusinessUpdates() {
+    try { return JSON.parse(localStorage.getItem(BUSINESS_UPDATES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveBusinessUpdates(list) { localStorage.setItem(BUSINESS_UPDATES_KEY, JSON.stringify(list)); }
+
+  function renderBusinessUpdates() {
+    var list = document.querySelector("[data-business-updates-list]");
+    if (!list) return;
+    var updates = getBusinessUpdates();
+    list.innerHTML = updates.length ? updates.map(function (u) {
+      return (
+        '<li>' +
+          '<div class="checklist__main">' +
+            '<div class="checklist__title">' + u.title + ' <span class="tag" style="margin-left:6px;">' + u.category + '</span></div>' +
+            '<div class="checklist__desc">' + u.desc + ' · ' + u.date + '</div>' +
+          '</div>' +
+          '<div class="row" style="gap:2px;flex:none;" data-roles="admin,manager">' +
+            '<button type="button" class="icon-btn" data-edit-business-update="' + u.id + '" title="Edit update" aria-label="Edit ' + u.title + '">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="icon-btn" data-delete-business-update="' + u.id + '" title="Delete update" aria-label="Delete ' + u.title + '">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</li>'
+      );
+    }).join("") : '<li class="muted small">No business updates yet.</li>';
+    wireBusinessUpdateRowActions(list);
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
+  }
+
+  function wireBusinessUpdateRowActions(list) {
+    list.querySelectorAll("[data-edit-business-update]").forEach(function (btn) {
+      btn.addEventListener("click", function () { openBusinessUpdateModal(btn.getAttribute("data-edit-business-update")); });
+    });
+    list.querySelectorAll("[data-delete-business-update]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-delete-business-update");
+        var u = getBusinessUpdates().filter(function (x) { return x.id === id; })[0];
+        if (!u) return;
+        if (window.confirm("Delete “" + u.title + "”? This can't be undone in this prototype session.")) {
+          saveBusinessUpdates(getBusinessUpdates().filter(function (x) { return x.id !== id; }));
+          renderBusinessUpdates();
+        }
+      });
+    });
+  }
+
+  function openBusinessUpdateModal(id) {
+    businessUpdateEditingId = id || null;
+    var titleEl = document.getElementById("business-update-modal-title");
+    var u = id ? getBusinessUpdates().filter(function (x) { return x.id === id; })[0] : null;
+    if (titleEl) titleEl.textContent = u ? "Edit business update" : "Add business update";
+    document.getElementById("business-update-title").value = u ? u.title : "";
+    document.getElementById("business-update-category").value = u ? u.category : "Product";
+    document.getElementById("business-update-date").value = u ? u.date : "";
+    document.getElementById("business-update-desc").value = u ? u.desc : "";
+    var modal = document.getElementById("business-update-modal");
+    if (modal) modal.classList.add("open");
+  }
+
+  function wireBusinessUpdateModal() {
+    var addBtn = document.getElementById("add-business-update-btn");
+    var saveBtn = document.getElementById("business-update-save");
+    if (addBtn) addBtn.addEventListener("click", function () { openBusinessUpdateModal(null); });
+    if (!saveBtn) return;
+    saveBtn.addEventListener("click", function () {
+      var title = document.getElementById("business-update-title").value.trim();
+      if (!title) return;
+      var category = document.getElementById("business-update-category").value;
+      var date = document.getElementById("business-update-date").value.trim() || "Today";
+      var desc = document.getElementById("business-update-desc").value.trim();
+      var list = getBusinessUpdates();
+      if (businessUpdateEditingId) {
+        var existing = list.filter(function (x) { return x.id === businessUpdateEditingId; })[0];
+        if (existing) { existing.title = title; existing.category = category; existing.date = date; existing.desc = desc; }
+      } else {
+        list.unshift({ id: "bu" + Date.now(), title: title, category: category, date: date, desc: desc });
+      }
+      saveBusinessUpdates(list);
+      renderBusinessUpdates();
+      var modal = document.getElementById("business-update-modal");
+      if (modal) modal.classList.remove("open");
+      businessUpdateEditingId = null;
+    });
+  }
+
   /* ---- 10. Rolling announcement banner (prototype only) ----
      Team lead and above can post short messages via the banner's edit
      modal. Team lead messages are scoped to their own team; Manager and
@@ -783,6 +888,49 @@
         '<td>' + statusPill + '</td>' +
         '<td class="muted">Colin (AI-assisted)</td>';
       tbody.insertBefore(row, tbody.firstChild);
+    });
+  }
+
+  /* ---- 12b. Scorecard "feedback delivered" confirmation (prototype only) ----
+     scorecard.html's Reviewer actions panel has a "Confirm feedback
+     delivered" button; clicking it flips the status pill next to the
+     page title from "Awaiting feedback" to "Feedback Delivered" and
+     disables the button so it can't be pressed twice. Stored in
+     d360-scorecard-status, keyed by interaction ref, so the confirmed
+     state persists across reloads. */
+  var SCORECARD_STATUS_KEY = "d360-scorecard-status";
+
+  function getScorecardStatuses() {
+    try { return JSON.parse(localStorage.getItem(SCORECARD_STATUS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function renderScorecardFeedbackState() {
+    var btn = document.getElementById("confirm-feedback-btn");
+    if (!btn) return;
+    var ref = btn.getAttribute("data-scorecard-ref");
+    var delivered = !!getScorecardStatuses()[ref];
+    var pill = document.getElementById("scorecard-status-pill");
+    var note = document.getElementById("feedback-delivered-note");
+    if (delivered) {
+      if (pill) { pill.classList.remove("pill--flag"); pill.classList.add("pill--info"); pill.textContent = "Feedback Delivered"; }
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Feedback delivered';
+      if (note) {
+        var reviewerName = document.querySelector(".account__name");
+        note.style.display = "";
+        note.textContent = "Confirmed by " + (reviewerName ? reviewerName.textContent.trim() : "you") + ".";
+      }
+    }
+  }
+  function wireScorecardFeedback() {
+    var btn = document.getElementById("confirm-feedback-btn");
+    if (!btn) return;
+    renderScorecardFeedbackState();
+    btn.addEventListener("click", function () {
+      var ref = btn.getAttribute("data-scorecard-ref");
+      var statuses = getScorecardStatuses();
+      statuses[ref] = { status: "delivered" };
+      localStorage.setItem(SCORECARD_STATUS_KEY, JSON.stringify(statuses));
+      renderScorecardFeedbackState();
     });
   }
 
@@ -2336,6 +2484,10 @@
     wireTemplateCopy();
     wireRangePickers();
     renderColinQueue();
+    wireScorecardFeedback();
+    seedBusinessUpdates();
+    renderBusinessUpdates();
+    wireBusinessUpdateModal();
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
