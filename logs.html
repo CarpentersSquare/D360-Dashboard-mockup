@@ -212,10 +212,6 @@
         <!-- ===== Calls ===== -->
         <div class="tab-panel active" data-panel="calls">
           <form class="filterbar" id="calls-filter-form" aria-label="Filter calls" onsubmit="return false;">
-            <div class="field" style="flex:1.4;min-width:200px;">
-              <label for="calls-search">Search</label>
-              <input type="search" id="calls-search" placeholder="Search calls&hellip;" />
-            </div>
             <div class="field">
               <label for="calls-phone">Customer phone number</label>
               <input type="text" id="calls-phone" placeholder="e.g. 07123 456789" />
@@ -253,7 +249,7 @@
             <div class="table-wrap">
               <table class="data">
                 <thead>
-                  <tr><th>Date/time</th><th>Customer phone number</th><th>Direction</th><th>Duration</th><th>Status</th></tr>
+                  <tr><th>Date/time</th><th>Customer phone number</th><th>Direction</th><th>Duration</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody id="calls-table-body"></tbody>
               </table>
@@ -303,7 +299,7 @@
             <div class="table-wrap">
               <table class="data">
                 <thead>
-                  <tr><th>First message</th><th>Email address</th><th>Name</th><th>Query</th><th>Last message</th><th>Messages</th></tr>
+                  <tr><th>First message</th><th>Email address</th><th>Name</th><th>Query</th><th>Last message</th><th>Messages</th><th></th></tr>
                 </thead>
                 <tbody id="chats-table-body"></tbody>
               </table>
@@ -353,7 +349,7 @@
             <div class="table-wrap">
               <table class="data">
                 <thead>
-                  <tr><th>Date</th><th>To</th><th>From</th><th>Subject</th></tr>
+                  <tr><th>Date</th><th>To</th><th>From</th><th>Subject</th><th></th></tr>
                 </thead>
                 <tbody id="emails-table-body"></tbody>
               </table>
@@ -370,10 +366,6 @@
         <!-- ===== SMSs ===== -->
         <div class="tab-panel" data-panel="sms">
           <form class="filterbar" id="sms-filter-form" aria-label="Filter SMSs" onsubmit="return false;">
-            <div class="field" style="flex:1.4;min-width:200px;">
-              <label for="sms-search">Search</label>
-              <input type="search" id="sms-search" placeholder="Search number&hellip;" />
-            </div>
             <div class="field">
               <label for="sms-customer">Customer phone number</label>
               <input type="text" id="sms-customer" placeholder="Matches To or From" />
@@ -403,7 +395,7 @@
             <div class="table-wrap">
               <table class="data">
                 <thead>
-                  <tr><th>Date</th><th>To</th><th>From</th></tr>
+                  <tr><th>Date</th><th>To</th><th>From</th><th></th></tr>
                 </thead>
                 <tbody id="sms-table-body"></tbody>
               </table>
