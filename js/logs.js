@@ -56,7 +56,7 @@
   ];
   var EMAIL_DOMAINS = ["gmail.com", "outlook.com", "yahoo.co.uk", "hotmail.com", "icloud.com"];
   var SUPPORT_EMAIL = "support@d360.com";
-  var D360_SMS_NUMBER = "+447000000000";
+  var D360_SMS_NUMBER = "+44 7000 000000";
   var SMS_BODIES = [
     "Hi, this is D360 — just a reminder that your payment is due in 3 days. Reply STOP to opt out of reminders.",
     "Thanks for your call today. Your reference number is DL-" + randInt(10000, 99999) + ".",
@@ -180,14 +180,12 @@
   function digitsOnly(s) { return String(s).replace(/\D/g, ""); }
 
   function filterCalls() {
-    var search = (document.getElementById("calls-search").value || "").trim().toLowerCase();
     var phone = (document.getElementById("calls-phone").value || "").trim();
     var direction = document.getElementById("calls-direction").value;
     var range = parseRange("calls-from", "calls-to");
     var phoneDigits = digitsOnly(phone);
 
     return DATA.calls.filter(function (r) {
-      if (search && r.phone.toLowerCase().indexOf(search) === -1 && r.status.toLowerCase().indexOf(search) === -1) return false;
       if (phoneDigits && digitsOnly(r.phone).indexOf(phoneDigits) === -1) return false;
       if (direction !== "All" && r.direction !== direction) return false;
       if (!inRange(r.date, range)) return false;
@@ -222,25 +220,14 @@
   }
 
   function filterSms() {
-    var search = (document.getElementById("sms-search").value || "").trim().toLowerCase();
     var customer = (document.getElementById("sms-customer").value || "").trim();
     var customerDigits = digitsOnly(customer);
     var range = parseRange("sms-from", "sms-to");
 
     return DATA.sms.filter(function (r) {
-      if (search && r.to.toLowerCase().indexOf(search) === -1 && r.from.toLowerCase().indexOf(search) === -1) return false;
       if (customerDigits && digitsOnly(r.to).indexOf(customerDigits) === -1 && digitsOnly(r.from).indexOf(customerDigits) === -1) return false;
       if (!inRange(r.date, range)) return false;
       return true;
-    });
-  }
-
-  /* ---- Row click-through (dynamically rendered rows aren't covered
-     by app.js's one-time wireRowLinks(), so each render wires its own) ---- */
-  function wireRow(tr, href) {
-    tr.addEventListener("click", function (e) {
-      if (e.target.closest("a, button, input, select")) return;
-      window.location.href = href;
     });
   }
 
@@ -257,9 +244,6 @@
     if (tbody) {
       tbody.innerHTML = pageRows.map(rowHtmlFn).join("") ||
         '<tr><td colspan="8" class="muted" style="text-align:center;padding:24px;">No results match your filters.</td></tr>';
-      tbody.querySelectorAll("tr[data-href]").forEach(function (tr) {
-        wireRow(tr, tr.getAttribute("data-href"));
-      });
     }
 
     var info = document.getElementById(key + "-page-info");
@@ -303,12 +287,13 @@
       var href = r.status === "Answered" ? "log-call.html" : "log-call-abandoned.html";
       var directionPill = r.direction === "Inbound" ? "pill--info" : "pill--muted";
       var statusPill = r.status === "Answered" ? "pill--pass" : "pill--fail";
-      return "<tr class=\"clickable\" data-href=\"" + href + "\">" +
+      return "<tr>" +
         '<td class="cell-mono">' + fmtDateTime(r.date) + "</td>" +
         '<td class="cell-strong">' + escapeHtml(r.phone) + "</td>" +
         '<td><span class="pill ' + directionPill + '">' + r.direction + "</span></td>" +
         '<td class="cell-mono">' + fmtDuration(r.duration) + "</td>" +
         '<td><span class="pill ' + statusPill + '">' + r.status + "</span></td>" +
+        '<td class="right"><a href="' + href + '">View</a></td>' +
         "</tr>";
     });
   }
@@ -316,13 +301,14 @@
   function renderChats() {
     var rows = filterChats();
     renderTable("chats", rows, function (r) {
-      return "<tr class=\"clickable\" data-href=\"log-chat.html\">" +
+      return "<tr>" +
         '<td class="cell-mono">' + fmtDateTime(r.first) + "</td>" +
         '<td>' + escapeHtml(r.email) + "</td>" +
         '<td class="cell-strong">' + escapeHtml(r.name) + "</td>" +
         '<td>' + escapeHtml(r.query) + "</td>" +
         '<td class="cell-mono">' + fmtDateTime(r.last) + "</td>" +
         '<td class="cell-mono">' + r.messages + "</td>" +
+        '<td class="right"><a href="log-chat.html">View</a></td>' +
         "</tr>";
     });
   }
@@ -330,11 +316,12 @@
   function renderEmails() {
     var rows = filterEmails();
     renderTable("emails", rows, function (r) {
-      return "<tr class=\"clickable\" data-href=\"log-email.html\">" +
+      return "<tr>" +
         '<td class="cell-mono">' + fmtDateTime(r.date) + "</td>" +
         '<td>' + escapeHtml(r.to) + "</td>" +
         '<td>' + escapeHtml(r.from) + "</td>" +
         '<td class="cell-strong">' + escapeHtml(r.subject) + "</td>" +
+        '<td class="right"><a href="log-email.html">View</a></td>' +
         "</tr>";
     });
   }
@@ -342,10 +329,11 @@
   function renderSms() {
     var rows = filterSms();
     renderTable("sms", rows, function (r) {
-      return "<tr class=\"clickable\" data-href=\"log-sms.html\">" +
+      return "<tr>" +
         '<td class="cell-mono">' + fmtDateTime(r.date) + "</td>" +
         '<td class="cell-strong">' + escapeHtml(r.to) + "</td>" +
         '<td class="cell-strong">' + escapeHtml(r.from) + "</td>" +
+        '<td class="right"><a href="log-sms.html">View</a></td>' +
         "</tr>";
     });
   }
