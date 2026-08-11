@@ -420,7 +420,7 @@ table.data tbody tr.clickable:hover { background: #FAFAFC; }
 }
 .field { display: flex; flex-direction: column; gap: 4px; }
 .field label { font-size: 11px; color: var(--muted); font-weight: 600; }
-select, input[type=text], input[type=email], input[type=password], input[type=date], textarea {
+select, input[type=text], input[type=email], input[type=password], input[type=date], input[type=datetime-local], input[type=search], textarea {
   font-family: var(--font); font-size: 13px; color: var(--ink);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 8px 11px; background: #fff;
@@ -1158,3 +1158,37 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .dialer-dot--green { background: var(--success); }
 .dialer-dot--gray { background: var(--hairline); }
 .dialer-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; margin-bottom: 12px; }
+
+/* ============================================================
+   Logs — Calls / Live Chats / Emails / SMSs drill-downs
+   ============================================================ */
+.log-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; margin-bottom: 14px; }
+.log-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 22px; }
+.log-summary__item { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.log-summary__label { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+.log-summary__value { font-size: 16px; font-weight: 700; color: var(--ink); }
+
+.log-segments { display: flex; flex-direction: column; gap: 10px; }
+.log-segment { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); }
+.log-segment__num { width: 28px; height: 28px; border-radius: 999px; background: var(--info-bg); color: var(--indigo); font-weight: 700; font-size: 12.5px; display: flex; align-items: center; justify-content: center; flex: none; }
+.log-segment__main { flex: 1; }
+.log-segment__title { font-weight: 600; font-size: 13.5px; }
+.log-segment__meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.log-body-card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; white-space: pre-wrap; font-size: 13.5px; line-height: 1.65; color: var(--ink); }
+
+/* Beautified live-chat transcript — additive, scoped classes so the
+   plain call-transcript look (.transcript/.turn, used on interaction.html)
+   is untouched. */
+.chat-transcript { display: flex; flex-direction: column; gap: 16px; max-width: 680px; margin: 0 auto; }
+.chat-turn { display: flex; gap: 10px; max-width: 78%; }
+.chat-turn.customer { align-self: flex-end; flex-direction: row-reverse; }
+.chat-turn.system { align-self: center; max-width: 90%; }
+.chat-turn__main { display: flex; flex-direction: column; gap: 3px; }
+.chat-turn.customer .chat-turn__main { align-items: flex-end; }
+.chat-turn__meta { font-size: 11px; color: var(--muted); padding: 0 4px; }
+.chat-turn__bubble { border-radius: 16px; padding: 10px 15px; font-size: 13.5px; line-height: 1.5; }
+.chat-turn.agent .chat-turn__bubble { background: var(--info-bg); color: var(--ink); border-bottom-left-radius: 4px; }
+.chat-turn.bot .chat-turn__bubble { background: #EEEEEE; color: var(--muted); border-bottom-left-radius: 4px; }
+.chat-turn.customer .chat-turn__bubble { background: var(--gradient); color: #fff; border-bottom-right-radius: 4px; }
+.chat-turn.system .chat-turn__bubble { background: transparent; color: var(--muted); font-size: 11.5px; text-align: center; padding: 4px; }

@@ -49,6 +49,12 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `my-training-development.html` | An agent's own assigned training — guide, expected action-by date, sign off (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail, with a "Confirm feedback delivered" reviewer action that flips the status pill to "Feedback Delivered" |
+| `logs.html` | Logs — searchable Calls / Live Chats / Emails / SMSs tabs over the last 30 days, each with type-specific filters and pagination (Admin/Manager/Team lead) |
+| `log-call.html` | Call detail — segments (including transfers), agents active on each segment, and Download Recording / Download Transcript actions |
+| `log-call-abandoned.html` | Call detail for an abandoned call — customer hung up before an agent answered, so there's no recording, transcript or agent segment |
+| `log-chat.html` | Live chat detail — beautified message-bubble transcript, with the bot and any handling agents named |
+| `log-email.html` | Email detail — To/From/Subject plus the email body |
+| `log-sms.html` | SMS detail — To/From plus the message body |
 | `analytics.html` | Reporting & inline-SVG charts |
 | `users.html` | Users (Admin/Manager) — add/remove accounts, and per-user drawer settings: change role, assign an agent's team lead, and grant/revoke individual page-access overrides beyond the role's default (e.g. give one Team lead access to Templates) |
 | `templates.html` | Response template library |
