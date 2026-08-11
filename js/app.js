@@ -340,6 +340,111 @@
     });
   }
 
+  /* ---- 9b. Newsfeed business updates (prototype only) ----
+     newsfeed.html's "Recent business updates" list is a d360-business-
+     updates localStorage array (title, category tag, date, description).
+     Manager and Admin get an "Add update" button on the card and
+     pencil/trash icons on each item, opening the same modal in add or
+     edit mode; everyone else sees a read-only list. */
+  var BUSINESS_UPDATES_KEY = "d360-business-updates";
+  var businessUpdateEditingId = null;
+
+  function seedBusinessUpdates() {
+    if (localStorage.getItem(BUSINESS_UPDATES_KEY)) return;
+    saveBusinessUpdates([
+      { id: "bu1", title: "New AI wrap-up model rolled out", category: "Product", date: "29 Jun", desc: "Average wrap-up time is now down to ~9s across the team following this week's model upgrade." },
+      { id: "bu2", title: "Dial360 shortlisted for CX Awards 2026", category: "Company", date: "27 Jun", desc: "We're a finalist in “Best Use of AI in Customer Service” — winners announced in August." },
+      { id: "bu3", title: "Salesforce integration now live", category: "Product", date: "24 Jun", desc: "Interaction history now syncs automatically to linked Salesforce records." },
+      { id: "bu4", title: "Office closed — Summer Bank Holiday", category: "HR", date: "20 Jun", desc: "Office closed Monday 25 August. Live coverage continues via the Hub as normal." }
+    ]);
+  }
+  function getBusinessUpdates() {
+    try { return JSON.parse(localStorage.getItem(BUSINESS_UPDATES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveBusinessUpdates(list) { localStorage.setItem(BUSINESS_UPDATES_KEY, JSON.stringify(list)); }
+
+  function renderBusinessUpdates() {
+    var list = document.querySelector("[data-business-updates-list]");
+    if (!list) return;
+    var updates = getBusinessUpdates();
+    list.innerHTML = updates.length ? updates.map(function (u) {
+      return (
+        '<li>' +
+          '<div class="checklist__main">' +
+            '<div class="checklist__title">' + u.title + ' <span class="tag" style="margin-left:6px;">' + u.category + '</span></div>' +
+            '<div class="checklist__desc">' + u.desc + ' · ' + u.date + '</div>' +
+          '</div>' +
+          '<div class="row" style="gap:2px;flex:none;" data-roles="admin,manager">' +
+            '<button type="button" class="icon-btn" data-edit-business-update="' + u.id + '" title="Edit update" aria-label="Edit ' + u.title + '">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="icon-btn" data-delete-business-update="' + u.id + '" title="Delete update" aria-label="Delete ' + u.title + '">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</li>'
+      );
+    }).join("") : '<li class="muted small">No business updates yet.</li>';
+    wireBusinessUpdateRowActions(list);
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
+  }
+
+  function wireBusinessUpdateRowActions(list) {
+    list.querySelectorAll("[data-edit-business-update]").forEach(function (btn) {
+      btn.addEventListener("click", function () { openBusinessUpdateModal(btn.getAttribute("data-edit-business-update")); });
+    });
+    list.querySelectorAll("[data-delete-business-update]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-delete-business-update");
+        var u = getBusinessUpdates().filter(function (x) { return x.id === id; })[0];
+        if (!u) return;
+        if (window.confirm("Delete “" + u.title + "”? This can't be undone in this prototype session.")) {
+          saveBusinessUpdates(getBusinessUpdates().filter(function (x) { return x.id !== id; }));
+          renderBusinessUpdates();
+        }
+      });
+    });
+  }
+
+  function openBusinessUpdateModal(id) {
+    businessUpdateEditingId = id || null;
+    var titleEl = document.getElementById("business-update-modal-title");
+    var u = id ? getBusinessUpdates().filter(function (x) { return x.id === id; })[0] : null;
+    if (titleEl) titleEl.textContent = u ? "Edit business update" : "Add business update";
+    document.getElementById("business-update-title").value = u ? u.title : "";
+    document.getElementById("business-update-category").value = u ? u.category : "Product";
+    document.getElementById("business-update-date").value = u ? u.date : "";
+    document.getElementById("business-update-desc").value = u ? u.desc : "";
+    var modal = document.getElementById("business-update-modal");
+    if (modal) modal.classList.add("open");
+  }
+
+  function wireBusinessUpdateModal() {
+    var addBtn = document.getElementById("add-business-update-btn");
+    var saveBtn = document.getElementById("business-update-save");
+    if (addBtn) addBtn.addEventListener("click", function () { openBusinessUpdateModal(null); });
+    if (!saveBtn) return;
+    saveBtn.addEventListener("click", function () {
+      var title = document.getElementById("business-update-title").value.trim();
+      if (!title) return;
+      var category = document.getElementById("business-update-category").value;
+      var date = document.getElementById("business-update-date").value.trim() || "Today";
+      var desc = document.getElementById("business-update-desc").value.trim();
+      var list = getBusinessUpdates();
+      if (businessUpdateEditingId) {
+        var existing = list.filter(function (x) { return x.id === businessUpdateEditingId; })[0];
+        if (existing) { existing.title = title; existing.category = category; existing.date = date; existing.desc = desc; }
+      } else {
+        list.unshift({ id: "bu" + Date.now(), title: title, category: category, date: date, desc: desc });
+      }
+      saveBusinessUpdates(list);
+      renderBusinessUpdates();
+      var modal = document.getElementById("business-update-modal");
+      if (modal) modal.classList.remove("open");
+      businessUpdateEditingId = null;
+    });
+  }
+
   /* ---- 10. Rolling announcement banner (prototype only) ----
      Team lead and above can post short messages via the banner's edit
      modal. Team lead messages are scoped to their own team; Manager and
@@ -785,6 +890,49 @@
         '<td>' + statusPill + '</td>' +
         '<td class="muted">Colin (AI-assisted)</td>';
       tbody.insertBefore(row, tbody.firstChild);
+    });
+  }
+
+  /* ---- 12b. Scorecard "feedback delivered" confirmation (prototype only) ----
+     scorecard.html's Reviewer actions panel has a "Confirm feedback
+     delivered" button; clicking it flips the status pill next to the
+     page title from "Awaiting feedback" to "Feedback Delivered" and
+     disables the button so it can't be pressed twice. Stored in
+     d360-scorecard-status, keyed by interaction ref, so the confirmed
+     state persists across reloads. */
+  var SCORECARD_STATUS_KEY = "d360-scorecard-status";
+
+  function getScorecardStatuses() {
+    try { return JSON.parse(localStorage.getItem(SCORECARD_STATUS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function renderScorecardFeedbackState() {
+    var btn = document.getElementById("confirm-feedback-btn");
+    if (!btn) return;
+    var ref = btn.getAttribute("data-scorecard-ref");
+    var delivered = !!getScorecardStatuses()[ref];
+    var pill = document.getElementById("scorecard-status-pill");
+    var note = document.getElementById("feedback-delivered-note");
+    if (delivered) {
+      if (pill) { pill.classList.remove("pill--flag"); pill.classList.add("pill--info"); pill.textContent = "Feedback Delivered"; }
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Feedback delivered';
+      if (note) {
+        var reviewerName = document.querySelector(".account__name");
+        note.style.display = "";
+        note.textContent = "Confirmed by " + (reviewerName ? reviewerName.textContent.trim() : "you") + ".";
+      }
+    }
+  }
+  function wireScorecardFeedback() {
+    var btn = document.getElementById("confirm-feedback-btn");
+    if (!btn) return;
+    renderScorecardFeedbackState();
+    btn.addEventListener("click", function () {
+      var ref = btn.getAttribute("data-scorecard-ref");
+      var statuses = getScorecardStatuses();
+      statuses[ref] = { status: "delivered" };
+      localStorage.setItem(SCORECARD_STATUS_KEY, JSON.stringify(statuses));
+      renderScorecardFeedbackState();
     });
   }
 
@@ -2004,6 +2152,99 @@
     saveSimDialHistory(history);
   }
 
+  /* ---- Persona avatars: hand-drawn inline SVG faces, no external images ----
+     Deterministically derived from the persona's id, so the same persona
+     always gets the same face across re-renders — skin tone, hair colour
+     and hair style are picked by hashing the id, while the expression is
+     matched to mood keywords in the persona's name (e.g. "Angry Customer"
+     gets cross eyebrows), falling back to a neutral/happy split. */
+  var SIM_SKIN_TONES = ["#F4C29B", "#E8B084", "#C68863", "#9C6B47", "#6E4A34"];
+  var SIM_HAIR_COLORS = ["#241C15", "#4A2E1C", "#8A5A2E", "#C9971F", "#6B6B6E", "#7C4DFF", "#B23A5C"];
+  var SIM_HAIR_STYLES = ["short", "long", "spiky", "bob", "bald"];
+
+  function simHash(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  function simPersonaExpression(p) {
+    var name = (p.name || "").toLowerCase();
+    if (name.indexOf("angry") !== -1) return "cross";
+    if (name.indexOf("unhappy") !== -1) return "sad";
+    if (name.indexOf("confused") !== -1) return "confused";
+    if (name.indexOf("do not call") !== -1) return "cross";
+    if (name.indexOf("interested") !== -1) return "happy";
+    if (name.indexOf("returning") !== -1) return "happy";
+    if (name.indexOf("skeptical") !== -1) return "confused";
+    if (name.indexOf("busy executive") !== -1) return "cross";
+    return (simHash(p.id || p.name || "") % 2 === 0) ? "neutral" : "happy";
+  }
+
+  function simAvatarSvg(p) {
+    var h = simHash(p.id || p.name || "x");
+    var skin = SIM_SKIN_TONES[h % SIM_SKIN_TONES.length];
+    var hair = SIM_HAIR_COLORS[Math.floor(h / 5) % SIM_HAIR_COLORS.length];
+    var style = SIM_HAIR_STYLES[Math.floor(h / 35) % SIM_HAIR_STYLES.length];
+    var expr = simPersonaExpression(p);
+    var ink = "#2b2320";
+
+    var earsSvg = '<circle cx="10" cy="26" r="2.4" fill="' + skin + '"/><circle cx="34" cy="26" r="2.4" fill="' + skin + '"/>';
+    var faceSvg = '<circle cx="22" cy="25" r="12" fill="' + skin + '"/>';
+
+    var hairDome = '<path d="M9 16c0-8.5 5.8-14 13-14s13 5.5 13 14v1.5H9z" fill="' + hair + '"/>';
+    var hairSides = "";
+    if (style === "bald") {
+      hairDome = "";
+    } else if (style === "long") {
+      hairSides = '<path d="M8.5 16.5v12c0 1.7 1.4 3 3 3h1.2v-15z" fill="' + hair + '"/>' +
+                  '<path d="M35.5 16.5v12c0 1.7-1.4 3-3 3h-1.2v-15z" fill="' + hair + '"/>';
+    } else if (style === "bob") {
+      hairSides = '<path d="M8.5 16.5c-.6 4.6.2 8.2 2 10.5h1.7v-11z" fill="' + hair + '"/>' +
+                  '<path d="M35.5 16.5c.6 4.6-.2 8.2-2 10.5h-1.7v-11z" fill="' + hair + '"/>';
+    } else if (style === "spiky") {
+      hairDome = "";
+      hairSides = '<path d="M9.5 15 11.5 8 14 14 17 6.5 19.5 13.5 22 6 24.5 13.5 27 6.5 30 14 32.5 8 34.5 15" ' +
+        'fill="none" stroke="' + hair + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    var browsSvg, mouthSvg;
+    switch (expr) {
+      case "cross":
+        browsSvg = '<path d="M14.5 18 20 20.5M29.5 18 24 20.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17.5 30h9" stroke="#2b2320" stroke-width="2" stroke-linecap="round"/>';
+        break;
+      case "sad":
+        browsSvg = '<path d="M14.5 19.5 20 18M29.5 19.5 24 18" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17.5 31.5c1.7-2 8.3-2 10 0" stroke="#2b2320" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+        break;
+      case "confused":
+        browsSvg = '<path d="M14.5 19.5 20 19M24 17 29.5 19.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 29.8c2-1.2 5 1.4 8 0" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round" fill="none"/>';
+        break;
+      case "happy":
+        browsSvg = '<path d="M14.5 19 20 17.5M29.5 19 24 17.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17 29c1.8 2.2 8.2 2.2 10 0" stroke="#2b2320" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+        break;
+      case "bored":
+        browsSvg = '<path d="M14.5 20 20 20M29.5 20 24 20" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 30.3h8" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round"/>';
+        break;
+      default:
+        browsSvg = '<path d="M14.5 19 20 19M29.5 19 24 19" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 29.8h8" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round"/>';
+    }
+    var eyesSvg = (expr === "bored")
+      ? '<path d="M15.3 23.8h3.4M25.3 23.8h3.4" stroke="' + ink + '" stroke-width="1.6" stroke-linecap="round"/>'
+      : '<circle cx="17" cy="24" r="1.5" fill="' + ink + '"/><circle cx="27" cy="24" r="1.5" fill="' + ink + '"/>';
+
+    return (
+      '<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" focusable="false">' +
+        earsSvg + faceSvg + hairDome + eyesSvg + browsSvg + mouthSvg + hairSides +
+      '</svg>'
+    );
+  }
+
   /* ---- Rendering ---- */
   function simPersonaCardHtml(p) {
     var remaining = simRemainingDials(p);
@@ -2012,7 +2253,7 @@
     return (
       '<div class="sim-card" data-persona-id="' + p.id + '">' +
         '<div class="sim-card__top">' +
-          '<span class="sim-card__avatar" style="background:' + p.avatarColor + ';">' + userInitials(p.name) + '</span>' +
+          '<span class="sim-card__avatar" style="background:' + p.avatarColor + ';">' + simAvatarSvg(p) + '</span>' +
           '<div class="sim-card__headline">' +
             '<div class="sim-card__name">' + p.name + '</div>' +
             '<div class="sim-card__quote">“' + p.firstMessage + '”</div>' +
@@ -2245,6 +2486,10 @@
     wireTemplateCopy();
     wireRangePickers();
     renderColinQueue();
+    wireScorecardFeedback();
+    seedBusinessUpdates();
+    renderBusinessUpdates();
+    wireBusinessUpdateModal();
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
