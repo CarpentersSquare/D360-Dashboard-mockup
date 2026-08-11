@@ -53,6 +53,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `users.html` | Users (Admin/Manager) — add/remove accounts, and per-user drawer settings: change role, assign an agent's team lead, and grant/revoke individual page-access overrides beyond the role's default (e.g. give one Team lead access to Templates) |
 | `templates.html` | Response template library |
 | `simulations.html` | Customer Simulations — rehearse inbound/outbound calls with simulated personas (Trainer role and above) |
+| `new-simulations.html` | New Simulations — placeholder page, coming soon (Trainer role and above) |
 | `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
 | `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide. Admin/Manager/Trainer see the company-wide queue; Team lead sees their own team's packages and a read-only view of their team's training requests |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |

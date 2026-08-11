@@ -564,6 +564,7 @@
     users: ["admin", "manager"],
     templates: ["admin", "manager", "teamlead", "trainer"],
     simulations: ["admin", "manager", "teamlead", "trainer"],
+    "new-simulations": ["admin", "manager", "teamlead", "trainer"],
     "colin-scorecard": ["admin", "manager", "teamlead", "trainer"],
     "training-development": ["admin", "manager", "teamlead", "trainer"],
     "agent-guides": ["admin", "manager", "teamlead", "trainer", "agent"],
@@ -575,7 +576,7 @@
     "my-performance": "My Performance", qa: "QA Review", complaints: "Complaints",
     "my-qa": "My QA", "my-training-development": "My Training & Development",
     analytics: "Analytics", users: "Users", templates: "Templates",
-    simulations: "Customer Simulations", "colin-scorecard": "Colin Scorecard",
+    simulations: "Customer Simulations", "new-simulations": "New Simulations", "colin-scorecard": "Colin Scorecard",
     "training-development": "Training & Development", "agent-guides": "Agent Guides",
     billing: "Billing", settings: "Settings"
   };
