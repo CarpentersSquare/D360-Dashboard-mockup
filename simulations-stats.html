@@ -3,15 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Team Performance · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — a team lead's overview of their team's performance (prototype)." />
+  <title>Dialling Stats · Customer Simulations · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — dialling stats for Customer Simulations: total dials, per-persona breakdown, and average call length (prototype). Trainer role and above." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="my-team-performance">
+<!--
+  DUMMY DATA CONVENTION (shared across all pages):
+  - Agents: ~9 UK names (Rob Ashton/Admin, Priya Nair/Team lead, etc.)
+  - Customers: plausible UK names + companies
+  - Channels: call / email / chat
+  - Outcomes: Resolved, Callback booked, Escalated, Sale, No answer
+  - QA: pass-rate ~88%; flags: "DPA not completed", "Compliance phrase missing", "Tone"
+  - Phone: +44 format · Dates: relative to "today"
+  All content is hard-coded and illustrative. No backend.
+
+  ACCESS NOTE: Customer Simulations (and this stats sub-page) is restricted
+  to the Trainer role and above (Trainer, Team lead, Admin) — see the
+  "Team roles" tab on settings.html. There is no real authentication or
+  RBAC in this prototype, so the restriction is documented here and on
+  that page rather than enforced.
+
+  This page has no sidebar entry of its own — it's reached via the
+  "Dialling stats" link on simulations.html, and uses data-page="simulations"
+  so that nav item highlights as active, per the sub-page convention also
+  used by scorecard.html / interaction.html.
+-->
+<body data-page="simulations">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -194,150 +215,78 @@
     <main class="main">
       <div class="page-head">
         <div>
-          <h1>My Team Performance</h1>
-          <div class="sub">Key information about Team Priya, with detailed breakdowns below</div>
+          <h1>Dialling Stats</h1>
+          <div class="sub">Total dial volume, per-persona breakdown and average call length for Customer Simulations</div>
+        </div>
+        <div class="page-head__actions">
+          <a class="btn btn--ghost" href="simulations.html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            Back to Customer Simulations
+          </a>
         </div>
       </div>
 
-      <!-- Overview tiles -->
+      <!-- Restricted-access notice (visual only — no real RBAC in this prototype) -->
+      <div class="sim-access-note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <strong>Trainer role and above.</strong> Dialling stats cover every simulated inbound and outbound persona
+          used to rehearse scenarios with agents — hidden from the Agent role in the sidebar's "Viewing as" switcher.
+          Not enforced here — this prototype has no real authentication or RBAC; see
+          <a href="settings.html#roles">Team roles</a> for the role definitions.
+        </div>
+      </div>
+
+      <!-- KPI tiles -->
       <div class="grid grid--kpi mb-18">
         <div class="kpi">
-          <div class="kpi__label">My team</div>
-          <div class="kpi__value" id="mtp-kpi-team">–</div>
-          <div class="kpi__sub" id="mtp-kpi-team-sub">–</div>
+          <div class="kpi__label">Total dials today</div>
+          <div class="kpi__value" data-stat="dials-today">0</div>
+          <div class="kpi__sub">Across all inbound &amp; outbound personas</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Online now</div>
-          <div class="kpi__value" id="mtp-kpi-online">–</div>
-          <div class="kpi__sub" id="mtp-kpi-online-sub">–</div>
+          <div class="kpi__label">Total dials this week</div>
+          <div class="kpi__value" data-stat="dials-week">0</div>
+          <div class="kpi__sub">Last 7 calendar days, including today</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Total interactions</div>
-          <div class="kpi__value" id="mtp-kpi-interactions">–</div>
-          <div class="kpi__delta up">▲ 5.2% vs last week</div>
+          <div class="kpi__label">Avg call length — today</div>
+          <div class="kpi__value" data-stat="avg-today">—</div>
+          <div class="kpi__delta" data-stat="avg-delta">No calls dialled yet today</div>
         </div>
         <div class="kpi">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value" id="mtp-kpi-qa">–</div>
-          <div class="kpi__delta up">▲ 2.3 pts this week</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value" id="mtp-kpi-wrapup">–</div>
-          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
+          <div class="kpi__label">Avg call length — all time</div>
+          <div class="kpi__value" data-stat="avg-alltime">—</div>
+          <div class="kpi__sub">Baseline across every logged dial</div>
         </div>
       </div>
 
-      <!-- Sub-pages -->
-      <div class="grid grid--2 mb-18">
-        <a class="card" href="my-team-interaction-stats.html" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;">
-          <div class="card__body" style="display:flex;flex-direction:column;gap:14px;flex:1;">
-            <div style="width:46px;height:46px;border-radius:12px;background:var(--info-bg);color:var(--indigo);display:flex;align-items:center;justify-content:center;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div>
-              <h3 style="margin:0 0 6px;">Interaction Stats</h3>
-              <p class="small muted" style="margin:0;">Total interactions, channel split (calls, live chat, email) and a per-agent breakdown with average wrap-up time.</p>
-            </div>
-            <div style="margin-top:auto;">
-              <span class="btn btn--ghost btn--sm">View details →</span>
-            </div>
-          </div>
-        </a>
-        <a class="card" href="my-team-qa.html" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;">
-          <div class="card__body" style="display:flex;flex-direction:column;gap:14px;flex:1;">
-            <div style="width:46px;height:46px;border-radius:12px;background:var(--info-bg);color:var(--indigo);display:flex;align-items:center;justify-content:center;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-            </div>
-            <div>
-              <h3 style="margin:0 0 6px;">QA Review</h3>
-              <p class="small muted" style="margin:0;">Team Priya's QA pass rate, scored calls, flagged interactions and how you compare to other teams.</p>
-            </div>
-            <div style="margin-top:auto;">
-              <span class="btn btn--ghost btn--sm">View details →</span>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <!-- Roster table -->
+      <!-- Dials per persona -->
       <div class="card">
         <div class="card__head">
-          <h3>Team roster</h3>
-          <span class="tag">Showing your allocated team only</span>
+          <h3>Dials per persona</h3>
+          <span class="muted small">Sorted by dials this week</span>
         </div>
         <div class="table-wrap">
           <table class="data">
             <thead>
               <tr>
-                <th>Agent</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Interactions handled <span class="muted">(this week)</span></th>
-                <th>Avg QA score</th>
-                <th>Avg wrap-up</th>
+                <th>Persona</th>
+                <th>Direction</th>
+                <th>Dials today</th>
+                <th>Dials this week</th>
+                <th>Avg length today</th>
+                <th>Avg length all time</th>
               </tr>
             </thead>
-            <tbody data-team-roster>
-              <tr><td colspan="6" class="muted" style="padding:16px;">Loading team…</td></tr>
+            <tbody data-sim-stats-rows>
+              <tr><td colspan="6" class="muted">Loading…</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
     </main>
-  </div>
-
-  <!-- ===== Agent detail drawer ===== -->
-  <div class="drawer-overlay" id="agent-drawer-overlay"></div>
-  <div class="drawer" id="agent-drawer" aria-label="Agent details">
-    <div class="drawer__head">
-      <h3 data-drawer-name>Agent</h3>
-      <button class="icon-btn" data-close-drawer aria-label="Close agent details">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="drawer__body">
-
-      <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
-        <span class="avatar avatar--lg" aria-hidden="true">AG</span>
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <span class="tag">Agent</span>
-            <span class="status-dot online">Online</span>
-          </div>
-          <div class="muted small">Team Priya · joined Mar 2025</div>
-        </div>
-      </div>
-
-      <p class="section-title">This week</p>
-      <div class="row" style="gap:12px;margin-bottom:6px;">
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Interactions handled</div>
-          <div class="kpi__value" style="font-size:24px;">91</div>
-          <div class="kpi__delta up">▲ 6 vs last week</div>
-        </div>
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value" style="font-size:24px;">87</div>
-          <div class="kpi__sub">team avg 89</div>
-        </div>
-      </div>
-      <div class="row" style="gap:12px;margin-bottom:18px;">
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value" style="font-size:24px;">11s</div>
-          <div class="kpi__sub">down from 2.5 min</div>
-        </div>
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">QA pass rate</div>
-          <div class="kpi__value" style="font-size:24px;">91%</div>
-          <div class="kpi__delta up">▲ 1.8 pts</div>
-        </div>
-      </div>
-
-      <a class="btn btn--sm" href="interactions.html">View all interactions</a>
-    </div>
   </div>
 
   <!-- ===== Banner messages modal ===== -->
@@ -363,23 +312,24 @@
     </div>
   </div>
 
-      <!-- Launch Hub modal (visual): the live agent workstation opens as a separate app -->
-    <div class="modal-overlay" id="hub-modal">
-      <div class="modal">
-        <div class="modal__head">
-          <h3>Launch Dial360 Hub</h3>
-          <button class="icon-btn" data-close-modal aria-label="Close">✕</button>
-        </div>
-        <div class="modal__body">
-          <p>The <strong>Hub</strong> is the live agent workstation — where calls, live chats and emails are handled in real time.</p>
-          <p class="muted">It runs as a separate application and isn’t part of this prototype. This is where an agent would launch it.</p>
-        </div>
-        <div class="modal__foot">
-          <button class="btn" data-close-modal>Close</button>
-          <a class="btn btn--primary" href="#" onclick="return false;">Open Hub ↗</a>
-        </div>
+  <!-- Launch Hub modal (visual): the live agent workstation opens as a separate app -->
+  <div class="modal-overlay" id="hub-modal">
+    <div class="modal">
+      <div class="modal__head">
+        <h3>Launch Dial360 Hub</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">✕</button>
+      </div>
+      <div class="modal__body">
+        <p>The <strong>Hub</strong> is the live agent workstation — where calls, live chats and emails are handled in real time.</p>
+        <p class="muted">It runs as a separate application and isn’t part of this prototype. This is where an agent would launch it.</p>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Close</button>
+        <a class="btn btn--primary" href="#" onclick="return false;">Open Hub ↗</a>
       </div>
     </div>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>

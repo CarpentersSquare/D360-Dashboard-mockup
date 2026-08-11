@@ -340,6 +340,111 @@
     });
   }
 
+  /* ---- 9b. Newsfeed business updates (prototype only) ----
+     newsfeed.html's "Recent business updates" list is a d360-business-
+     updates localStorage array (title, category tag, date, description).
+     Manager and Admin get an "Add update" button on the card and
+     pencil/trash icons on each item, opening the same modal in add or
+     edit mode; everyone else sees a read-only list. */
+  var BUSINESS_UPDATES_KEY = "d360-business-updates";
+  var businessUpdateEditingId = null;
+
+  function seedBusinessUpdates() {
+    if (localStorage.getItem(BUSINESS_UPDATES_KEY)) return;
+    saveBusinessUpdates([
+      { id: "bu1", title: "New AI wrap-up model rolled out", category: "Product", date: "29 Jun", desc: "Average wrap-up time is now down to ~9s across the team following this week's model upgrade." },
+      { id: "bu2", title: "Dial360 shortlisted for CX Awards 2026", category: "Company", date: "27 Jun", desc: "We're a finalist in “Best Use of AI in Customer Service” — winners announced in August." },
+      { id: "bu3", title: "Salesforce integration now live", category: "Product", date: "24 Jun", desc: "Interaction history now syncs automatically to linked Salesforce records." },
+      { id: "bu4", title: "Office closed — Summer Bank Holiday", category: "HR", date: "20 Jun", desc: "Office closed Monday 25 August. Live coverage continues via the Hub as normal." }
+    ]);
+  }
+  function getBusinessUpdates() {
+    try { return JSON.parse(localStorage.getItem(BUSINESS_UPDATES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveBusinessUpdates(list) { localStorage.setItem(BUSINESS_UPDATES_KEY, JSON.stringify(list)); }
+
+  function renderBusinessUpdates() {
+    var list = document.querySelector("[data-business-updates-list]");
+    if (!list) return;
+    var updates = getBusinessUpdates();
+    list.innerHTML = updates.length ? updates.map(function (u) {
+      return (
+        '<li>' +
+          '<div class="checklist__main">' +
+            '<div class="checklist__title">' + u.title + ' <span class="tag" style="margin-left:6px;">' + u.category + '</span></div>' +
+            '<div class="checklist__desc">' + u.desc + ' · ' + u.date + '</div>' +
+          '</div>' +
+          '<div class="row" style="gap:2px;flex:none;" data-roles="admin,manager">' +
+            '<button type="button" class="icon-btn" data-edit-business-update="' + u.id + '" title="Edit update" aria-label="Edit ' + u.title + '">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="icon-btn" data-delete-business-update="' + u.id + '" title="Delete update" aria-label="Delete ' + u.title + '">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</li>'
+      );
+    }).join("") : '<li class="muted small">No business updates yet.</li>';
+    wireBusinessUpdateRowActions(list);
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
+  }
+
+  function wireBusinessUpdateRowActions(list) {
+    list.querySelectorAll("[data-edit-business-update]").forEach(function (btn) {
+      btn.addEventListener("click", function () { openBusinessUpdateModal(btn.getAttribute("data-edit-business-update")); });
+    });
+    list.querySelectorAll("[data-delete-business-update]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-delete-business-update");
+        var u = getBusinessUpdates().filter(function (x) { return x.id === id; })[0];
+        if (!u) return;
+        if (window.confirm("Delete “" + u.title + "”? This can't be undone in this prototype session.")) {
+          saveBusinessUpdates(getBusinessUpdates().filter(function (x) { return x.id !== id; }));
+          renderBusinessUpdates();
+        }
+      });
+    });
+  }
+
+  function openBusinessUpdateModal(id) {
+    businessUpdateEditingId = id || null;
+    var titleEl = document.getElementById("business-update-modal-title");
+    var u = id ? getBusinessUpdates().filter(function (x) { return x.id === id; })[0] : null;
+    if (titleEl) titleEl.textContent = u ? "Edit business update" : "Add business update";
+    document.getElementById("business-update-title").value = u ? u.title : "";
+    document.getElementById("business-update-category").value = u ? u.category : "Product";
+    document.getElementById("business-update-date").value = u ? u.date : "";
+    document.getElementById("business-update-desc").value = u ? u.desc : "";
+    var modal = document.getElementById("business-update-modal");
+    if (modal) modal.classList.add("open");
+  }
+
+  function wireBusinessUpdateModal() {
+    var addBtn = document.getElementById("add-business-update-btn");
+    var saveBtn = document.getElementById("business-update-save");
+    if (addBtn) addBtn.addEventListener("click", function () { openBusinessUpdateModal(null); });
+    if (!saveBtn) return;
+    saveBtn.addEventListener("click", function () {
+      var title = document.getElementById("business-update-title").value.trim();
+      if (!title) return;
+      var category = document.getElementById("business-update-category").value;
+      var date = document.getElementById("business-update-date").value.trim() || "Today";
+      var desc = document.getElementById("business-update-desc").value.trim();
+      var list = getBusinessUpdates();
+      if (businessUpdateEditingId) {
+        var existing = list.filter(function (x) { return x.id === businessUpdateEditingId; })[0];
+        if (existing) { existing.title = title; existing.category = category; existing.date = date; existing.desc = desc; }
+      } else {
+        list.unshift({ id: "bu" + Date.now(), title: title, category: category, date: date, desc: desc });
+      }
+      saveBusinessUpdates(list);
+      renderBusinessUpdates();
+      var modal = document.getElementById("business-update-modal");
+      if (modal) modal.classList.remove("open");
+      businessUpdateEditingId = null;
+    });
+  }
+
   /* ---- 10. Rolling announcement banner (prototype only) ----
      Team lead and above can post short messages via the banner's edit
      modal. Team lead messages are scoped to their own team; Manager and
@@ -555,6 +660,9 @@
     newsfeed: ["admin", "manager", "teamlead", "trainer", "agent"],
     overview: ["admin", "manager"],
     "call-centre-dashboard": ["admin", "manager", "teamlead"],
+    "scheduled-dialler": ["admin", "manager", "teamlead"],
+    "scheduled-dialler-upload": ["admin", "manager"],
+    logs: ["admin", "manager", "teamlead"],
     "my-performance": ["agent"],
     qa: ["admin", "manager", "trainer"],
     complaints: ["admin", "manager", "teamlead"],
@@ -573,6 +681,8 @@
   };
   var NAV_LABELS = {
     newsfeed: "Newsfeed", overview: "Overview", "call-centre-dashboard": "Call Centre Dashboard",
+    "scheduled-dialler": "Scheduled Dialler", "scheduled-dialler-upload": "Scheduled Dialler – Upload",
+    logs: "Logs",
     "my-performance": "My Performance", qa: "QA Review", complaints: "Complaints",
     "my-qa": "My QA", "my-training-development": "My Training & Development",
     analytics: "Analytics", users: "Users", templates: "Templates",
@@ -781,6 +891,49 @@
         '<td>' + statusPill + '</td>' +
         '<td class="muted">Colin (AI-assisted)</td>';
       tbody.insertBefore(row, tbody.firstChild);
+    });
+  }
+
+  /* ---- 12b. Scorecard "feedback delivered" confirmation (prototype only) ----
+     scorecard.html's Reviewer actions panel has a "Confirm feedback
+     delivered" button; clicking it flips the status pill next to the
+     page title from "Awaiting feedback" to "Feedback Delivered" and
+     disables the button so it can't be pressed twice. Stored in
+     d360-scorecard-status, keyed by interaction ref, so the confirmed
+     state persists across reloads. */
+  var SCORECARD_STATUS_KEY = "d360-scorecard-status";
+
+  function getScorecardStatuses() {
+    try { return JSON.parse(localStorage.getItem(SCORECARD_STATUS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function renderScorecardFeedbackState() {
+    var btn = document.getElementById("confirm-feedback-btn");
+    if (!btn) return;
+    var ref = btn.getAttribute("data-scorecard-ref");
+    var delivered = !!getScorecardStatuses()[ref];
+    var pill = document.getElementById("scorecard-status-pill");
+    var note = document.getElementById("feedback-delivered-note");
+    if (delivered) {
+      if (pill) { pill.classList.remove("pill--flag"); pill.classList.add("pill--info"); pill.textContent = "Feedback Delivered"; }
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Feedback delivered';
+      if (note) {
+        var reviewerName = document.querySelector(".account__name");
+        note.style.display = "";
+        note.textContent = "Confirmed by " + (reviewerName ? reviewerName.textContent.trim() : "you") + ".";
+      }
+    }
+  }
+  function wireScorecardFeedback() {
+    var btn = document.getElementById("confirm-feedback-btn");
+    if (!btn) return;
+    renderScorecardFeedbackState();
+    btn.addEventListener("click", function () {
+      var ref = btn.getAttribute("data-scorecard-ref");
+      var statuses = getScorecardStatuses();
+      statuses[ref] = { status: "delivered" };
+      localStorage.setItem(SCORECARD_STATUS_KEY, JSON.stringify(statuses));
+      renderScorecardFeedbackState();
     });
   }
 
@@ -1691,6 +1844,31 @@
     wireDrawerTriggers();
   }
 
+  /* Scheduled Dialler's Agents page — the "Not available" worker list
+     mirrors the Users roster exactly (same people, plain names) rather
+     than a separate hardcoded list, so editing Users keeps this page
+     in sync. Skills are illustrative Twilio worker attributes with no
+     backing data of their own, so they're assigned by rotating a fixed
+     list rather than stored per user. */
+  var DIALLER_SKILLS = ["Collections", "Sales", "Email Support", "Complaints", "Technical Support"];
+  function renderDiallerAgents() {
+    var tbody = document.getElementById("dialler-agents-body");
+    if (!tbody) return;
+    var list = getUsers();
+    document.querySelectorAll("#dialler-agents-count").forEach(function (el) { el.textContent = list.length; });
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:22px;">None.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(function (u, i) {
+      var skill = DIALLER_SKILLS[i % DIALLER_SKILLS.length];
+      return '<tr>' +
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(u.name) + '</span><span class="cell-strong">' + u.name + '</span></span></td>' +
+        '<td><span class="pill pill--info">' + skill + '</span></td>' +
+        '</tr>';
+    }).join("");
+  }
+
   function wireAddUserModal() {
     var roleSelect = document.getElementById("add-user-role");
     var teamleadRow = document.getElementById("add-user-teamlead-row");
@@ -1736,6 +1914,568 @@
     });
   }
 
+  /* ---- 16. Customer Simulations personas & dial limits (prototype only) ----
+     simulations.html's Inbound/Outbound persona cards are backed by a
+     d360-sim-personas localStorage list, so each one's "AI agent"
+     config (system prompt, voice, conversation controls, and its own
+     daily dial limit) can be edited via the Edit Agent modal and
+     persists. Dialling is logged in d360-sim-dial-history, an array
+     with one entry per calendar day ({date, total, totalDurationSeconds,
+     perPersona: {id: count}}), so each card can show how many dials it
+     has left today against its own configurable limit (default 10),
+     the page-wide "calls dialed today" counter can total every dial
+     across all personas, and simulations-stats.html can roll the same
+     history up into this-week and all-time figures. */
+  var SIM_PERSONAS_KEY = "d360-sim-personas";
+  var SIM_DIAL_HISTORY_KEY = "d360-sim-dial-history";
+  var SIM_DEFAULT_DAILY_LIMIT = 10;
+  var SIM_DAILY_CREDIT_LIMIT = 150;
+  var SIM_CALL_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function simDateKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function simLastNDates(n) {
+    var dates = [];
+    for (var i = 0; i < n; i++) {
+      var d = new Date();
+      d.setDate(d.getDate() - i);
+      dates.push(simDateKey(d));
+    }
+    return dates;
+  }
+  function simRandomCallDurationSeconds() {
+    return 90 + Math.floor(Math.random() * 181);
+  }
+  function formatDuration(seconds) {
+    seconds = Math.round(seconds || 0);
+    var m = Math.floor(seconds / 60);
+    var s = seconds % 60;
+    return m + "m " + String(s).padStart(2, "0") + "s";
+  }
+
+  /* ---- Dial history: one entry per calendar day ---- */
+  function getSimDialHistory() {
+    try { return JSON.parse(localStorage.getItem(SIM_DIAL_HISTORY_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveSimDialHistory(list) { localStorage.setItem(SIM_DIAL_HISTORY_KEY, JSON.stringify(list)); }
+  function getSimDayEntry(date) {
+    return getSimDialHistory().filter(function (e) { return e.date === date; })[0] || null;
+  }
+  function logSimDials(personaId, qty) {
+    var history = getSimDialHistory();
+    var today = todayKey();
+    var entry = history.filter(function (e) { return e.date === today; })[0];
+    if (!entry) {
+      entry = { date: today, total: 0, totalDurationSeconds: 0, perPersona: {}, perPersonaDuration: {} };
+      history.push(entry);
+    }
+    if (!entry.perPersonaDuration) entry.perPersonaDuration = {};
+    entry.total += qty;
+    entry.perPersona[personaId] = (entry.perPersona[personaId] || 0) + qty;
+    for (var i = 0; i < qty; i++) {
+      var duration = simRandomCallDurationSeconds();
+      entry.totalDurationSeconds += duration;
+      entry.perPersonaDuration[personaId] = (entry.perPersonaDuration[personaId] || 0) + duration;
+    }
+    saveSimDialHistory(history);
+    renderSimDialCount();
+  }
+
+  /* ---- Page-wide "dialed today" counter (all personas combined) ---- */
+  function getSimDialCount() {
+    var entry = getSimDayEntry(todayKey());
+    return entry ? entry.total : 0;
+  }
+  function renderSimDialCount() {
+    var count = getSimDialCount();
+    document.querySelectorAll("[data-sim-dial-count]").forEach(function (el) { el.textContent = count; });
+    renderSimCreditPill();
+  }
+
+  /* ---- Shared daily simulation credit (all personas combined) ----
+     A simple prototype stand-in for a real usage-based credit balance:
+     every dial (across every persona) draws down the same shared pool,
+     shown as a "% credit remaining today" pill next to the dial
+     counter. Managers and above get a "Request more credit" action;
+     it's decorative here, but in the live product would notify Billing. */
+  function getSimCreditRemainingPct() {
+    return Math.max(0, Math.round((1 - getSimDialCount() / SIM_DAILY_CREDIT_LIMIT) * 100));
+  }
+  function renderSimCreditPill() {
+    var pct = getSimCreditRemainingPct();
+    var cls = pct > 50 ? "ok" : pct > 20 ? "warn" : "low";
+    document.querySelectorAll("[data-sim-credit-pill]").forEach(function (el) {
+      el.classList.remove("ok", "warn", "low");
+      el.classList.add(cls);
+    });
+    document.querySelectorAll("[data-sim-credit-value], [data-request-credit-remaining]").forEach(function (el) {
+      el.textContent = pct + "%";
+    });
+  }
+
+  /* ---- Per-persona daily dial log ---- */
+  function getPersonaDialsToday(id) {
+    var entry = getSimDayEntry(todayKey());
+    return (entry && entry.perPersona[id]) || 0;
+  }
+  function simRemainingDials(p) {
+    return Math.max(0, (p.dailyDialLimit || SIM_DEFAULT_DAILY_LIMIT) - getPersonaDialsToday(p.id));
+  }
+
+  /* ---- This-week / all-time aggregates (for simulations-stats.html) ---- */
+  function getSimWeekEntries() {
+    var dates = simLastNDates(7);
+    return getSimDialHistory().filter(function (e) { return dates.indexOf(e.date) !== -1; });
+  }
+  function getSimWeekTotal() {
+    return getSimWeekEntries().reduce(function (sum, e) { return sum + e.total; }, 0);
+  }
+  function getPersonaDialsThisWeek(id) {
+    return getSimWeekEntries().reduce(function (sum, e) { return sum + (e.perPersona[id] || 0); }, 0);
+  }
+  function getSimAllTimeAvgSeconds() {
+    var totalDuration = 0, totalCalls = 0;
+    getSimDialHistory().forEach(function (e) { totalDuration += e.totalDurationSeconds; totalCalls += e.total; });
+    return totalCalls ? totalDuration / totalCalls : 0;
+  }
+  function getSimTodayAvgSeconds() {
+    var entry = getSimDayEntry(todayKey());
+    return (entry && entry.total) ? entry.totalDurationSeconds / entry.total : 0;
+  }
+  function personaAvgSecondsFromEntries(entries, id) {
+    var duration = 0, count = 0;
+    entries.forEach(function (e) {
+      duration += (e.perPersonaDuration && e.perPersonaDuration[id]) || 0;
+      count += (e.perPersona && e.perPersona[id]) || 0;
+    });
+    return count ? duration / count : 0;
+  }
+  function getPersonaAvgSecondsToday(id) {
+    var entry = getSimDayEntry(todayKey());
+    return entry ? personaAvgSecondsFromEntries([entry], id) : 0;
+  }
+  function getPersonaAvgSecondsAllTime(id) {
+    return personaAvgSecondsFromEntries(getSimDialHistory(), id);
+  }
+
+  /* ---- Persona data store ---- */
+  function getSimPersonas() {
+    try { return JSON.parse(localStorage.getItem(SIM_PERSONAS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveSimPersonas(list) { localStorage.setItem(SIM_PERSONAS_KEY, JSON.stringify(list)); }
+
+  function simPersonaId() {
+    return "agent_" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 8);
+  }
+  function simDefaultSystemPrompt(name) {
+    return "Turn-taking rule (must follow strictly): The call has just connected and no one has spoken yet. " +
+      "Stay completely silent and produce no output. Do not greet, do not introduce yourself, do not narrate. " +
+      "Wait for the agent to speak first. Only after the agent's first line should you respond. If 10 seconds " +
+      "pass with no agent speech, you may then speak first with your opening line.\n\nYou are playing the role " +
+      "of a customer calling a loan company's support line.\n\nYour name is " + name + ".";
+  }
+  function makeSimPersona(name, direction, avatarColor, firstMessage, extra) {
+    var p = {
+      id: simPersonaId(), name: name, direction: direction, avatarColor: avatarColor,
+      firstMessage: firstMessage, systemPrompt: simDefaultSystemPrompt(name),
+      personality: "Friendly but expects a quick, clear answer; can get slightly impatient if the call drags on.",
+      callGoals: "Get a clear, confident answer to your question and understand the next steps before ending the call.",
+      behaviouralRules: "Stay in character as the customer throughout the call. Do not mention being an AI or break character. End the call naturally once your question has been answered.",
+      tags: "Customer, General", voice: "Laura - Enthusiast, Quirky Attitude",
+      eagerness: "Normal", turnModel: "turn_v3", silenceSeconds: 3, maxDurationSeconds: 1200,
+      speculativeTurn: true, dailyDialLimit: SIM_DEFAULT_DAILY_LIMIT, connected: false
+    };
+    if (extra) { for (var k in extra) p[k] = extra[k]; }
+    return p;
+  }
+
+  function seedSimPersonas() {
+    if (localStorage.getItem(SIM_PERSONAS_KEY)) return;
+    saveSimPersonas([
+      makeSimPersona("Jenny Warner", "inbound", "#1D2E5C", "Hello, I've applied for a loan but not received any funds into my account"),
+      makeSimPersona("Matty Spencer", "inbound", "#9C1E6E", "Hi I am looking for more information about your loan"),
+      makeSimPersona("Veronica Miller", "inbound", "#16B8A6", "Hello, I'd like to check the balance remaining on my loan"),
+      makeSimPersona("Mack Smith", "inbound", "#17181A", "Hello, I had an email advising I had been denied. Why is this?"),
+      makeSimPersona("Daisy Johnson", "inbound", "#8A7B1E", "Hello, please can you help me with my loan application?"),
+      makeSimPersona("Frankie Williams", "inbound", "#24405C", "I would like to withdraw my loan application"),
+      makeSimPersona("Charlie Brown", "inbound", "#2F4F4C", "Hello, I am requesting a statement to be sent and other information"),
+      makeSimPersona("Ronald Garcia", "inbound", "#6B5A22", "Hi, can you confirm my next repayment date and amount?"),
+      makeSimPersona("Mary Scott", "inbound", "#8C6FC9", "Hello, I checked my credit report and seen you have done a credit search"),
+      makeSimPersona("Nancy Davis", "inbound", "#8E2E8A", "I want to reinstate my ACH"),
+      makeSimPersona("Ann Wilson", "inbound", "#5C7A99", "Hello, I believe I have a loan with you can you check?", { connected: true }),
+      makeSimPersona("Danny Anderson", "inbound", "#3D4FA8", "Hello, I would like to defer my upcoming payment"),
+      makeSimPersona("Harriet Martinez", "inbound", "#3FAE58", "hi, asking about my loan"),
+      makeSimPersona("Angry Customer", "inbound", "#8B8F5E", "This is the third time I've called about this — I want to speak to a manager now"),
+      makeSimPersona("Unhappy Customer", "inbound", "#A9611D", "I've been on hold for twenty minutes, this is ridiculous"),
+      makeSimPersona("Confused Customer", "inbound", "#4A7C8C", "I don't understand this letter you've sent me, can you explain it?"),
+      makeSimPersona("Interested Prospect", "outbound", "#2E9E5B", "Yes, I'd like to hear more about what you can offer me"),
+      makeSimPersona("Skeptical Prospect", "outbound", "#B8860B", "How do I know this isn't a scam call?"),
+      makeSimPersona("Busy Executive", "outbound", "#455A64", "I've got two minutes, what do you need?"),
+      makeSimPersona("Price Shopper", "outbound", "#8C6FC9", "What's the best rate you can do, I've had other offers"),
+      makeSimPersona("Returning Customer", "outbound", "#16B8A6", "I've used you before, what's changed since then?"),
+      makeSimPersona("Do Not Call Request", "outbound", "var(--danger)", "Please remove my number, I don't want to be contacted again")
+    ]);
+  }
+
+  /* Seeds two prior weeks of dial history (never touches today) so
+     simulations-stats.html has a meaningful all-time average and a
+     "this week" baseline the first time it's viewed. */
+  function seedSimDialHistory() {
+    if (localStorage.getItem(SIM_DIAL_HISTORY_KEY)) return;
+    var personas = getSimPersonas();
+    if (!personas.length) return;
+    var history = [];
+    for (var i = 13; i >= 1; i--) {
+      var d = new Date();
+      d.setDate(d.getDate() - i);
+      var perPersona = {};
+      var perPersonaDuration = {};
+      var total = 0, totalDurationSeconds = 0;
+      personas.forEach(function (p) {
+        if (Math.random() < 0.6) {
+          var n = 1 + Math.floor(Math.random() * 6);
+          perPersona[p.id] = n;
+          total += n;
+          for (var c = 0; c < n; c++) {
+            var duration = simRandomCallDurationSeconds();
+            totalDurationSeconds += duration;
+            perPersonaDuration[p.id] = (perPersonaDuration[p.id] || 0) + duration;
+          }
+        }
+      });
+      history.push({ date: simDateKey(d), total: total, totalDurationSeconds: totalDurationSeconds, perPersona: perPersona, perPersonaDuration: perPersonaDuration });
+    }
+    saveSimDialHistory(history);
+  }
+
+  /* ---- Persona avatars: hand-drawn inline SVG faces, no external images ----
+     Deterministically derived from the persona's id, so the same persona
+     always gets the same face across re-renders — skin tone, hair colour
+     and hair style are picked by hashing the id, while the expression is
+     matched to mood keywords in the persona's name (e.g. "Angry Customer"
+     gets cross eyebrows), falling back to a neutral/happy split. */
+  var SIM_SKIN_TONES = ["#F4C29B", "#E8B084", "#C68863", "#9C6B47", "#6E4A34"];
+  var SIM_HAIR_COLORS = ["#241C15", "#4A2E1C", "#8A5A2E", "#C9971F", "#6B6B6E", "#7C4DFF", "#B23A5C"];
+  var SIM_HAIR_STYLES = ["short", "long", "spiky", "bob", "bald"];
+
+  function simHash(str) {
+    var h = 0;
+    for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  function simPersonaExpression(p) {
+    var name = (p.name || "").toLowerCase();
+    if (name.indexOf("angry") !== -1) return "cross";
+    if (name.indexOf("unhappy") !== -1) return "sad";
+    if (name.indexOf("confused") !== -1) return "confused";
+    if (name.indexOf("do not call") !== -1) return "cross";
+    if (name.indexOf("interested") !== -1) return "happy";
+    if (name.indexOf("returning") !== -1) return "happy";
+    if (name.indexOf("skeptical") !== -1) return "confused";
+    if (name.indexOf("busy executive") !== -1) return "cross";
+    return (simHash(p.id || p.name || "") % 2 === 0) ? "neutral" : "happy";
+  }
+
+  function simAvatarSvg(p) {
+    var h = simHash(p.id || p.name || "x");
+    var skin = SIM_SKIN_TONES[h % SIM_SKIN_TONES.length];
+    var hair = SIM_HAIR_COLORS[Math.floor(h / 5) % SIM_HAIR_COLORS.length];
+    var style = SIM_HAIR_STYLES[Math.floor(h / 35) % SIM_HAIR_STYLES.length];
+    var expr = simPersonaExpression(p);
+    var ink = "#2b2320";
+
+    var earsSvg = '<circle cx="10" cy="26" r="2.4" fill="' + skin + '"/><circle cx="34" cy="26" r="2.4" fill="' + skin + '"/>';
+    var faceSvg = '<circle cx="22" cy="25" r="12" fill="' + skin + '"/>';
+
+    var hairDome = '<path d="M9 16c0-8.5 5.8-14 13-14s13 5.5 13 14v1.5H9z" fill="' + hair + '"/>';
+    var hairSides = "";
+    if (style === "bald") {
+      hairDome = "";
+    } else if (style === "long") {
+      hairSides = '<path d="M8.5 16.5v12c0 1.7 1.4 3 3 3h1.2v-15z" fill="' + hair + '"/>' +
+                  '<path d="M35.5 16.5v12c0 1.7-1.4 3-3 3h-1.2v-15z" fill="' + hair + '"/>';
+    } else if (style === "bob") {
+      hairSides = '<path d="M8.5 16.5c-.6 4.6.2 8.2 2 10.5h1.7v-11z" fill="' + hair + '"/>' +
+                  '<path d="M35.5 16.5c.6 4.6-.2 8.2-2 10.5h-1.7v-11z" fill="' + hair + '"/>';
+    } else if (style === "spiky") {
+      hairDome = "";
+      hairSides = '<path d="M9.5 15 11.5 8 14 14 17 6.5 19.5 13.5 22 6 24.5 13.5 27 6.5 30 14 32.5 8 34.5 15" ' +
+        'fill="none" stroke="' + hair + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    var browsSvg, mouthSvg;
+    switch (expr) {
+      case "cross":
+        browsSvg = '<path d="M14.5 18 20 20.5M29.5 18 24 20.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17.5 30h9" stroke="#2b2320" stroke-width="2" stroke-linecap="round"/>';
+        break;
+      case "sad":
+        browsSvg = '<path d="M14.5 19.5 20 18M29.5 19.5 24 18" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17.5 31.5c1.7-2 8.3-2 10 0" stroke="#2b2320" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+        break;
+      case "confused":
+        browsSvg = '<path d="M14.5 19.5 20 19M24 17 29.5 19.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 29.8c2-1.2 5 1.4 8 0" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round" fill="none"/>';
+        break;
+      case "happy":
+        browsSvg = '<path d="M14.5 19 20 17.5M29.5 19 24 17.5" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M17 29c1.8 2.2 8.2 2.2 10 0" stroke="#2b2320" stroke-width="1.8" stroke-linecap="round" fill="none"/>';
+        break;
+      case "bored":
+        browsSvg = '<path d="M14.5 20 20 20M29.5 20 24 20" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 30.3h8" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round"/>';
+        break;
+      default:
+        browsSvg = '<path d="M14.5 19 20 19M29.5 19 24 19" stroke="' + ink + '" stroke-width="1.7" stroke-linecap="round"/>';
+        mouthSvg = '<path d="M18 29.8h8" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round"/>';
+    }
+    var eyesSvg = (expr === "bored")
+      ? '<path d="M15.3 23.8h3.4M25.3 23.8h3.4" stroke="' + ink + '" stroke-width="1.6" stroke-linecap="round"/>'
+      : '<circle cx="17" cy="24" r="1.5" fill="' + ink + '"/><circle cx="27" cy="24" r="1.5" fill="' + ink + '"/>';
+
+    return (
+      '<svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" focusable="false">' +
+        earsSvg + faceSvg + hairDome + eyesSvg + browsSvg + mouthSvg + hairSides +
+      '</svg>'
+    );
+  }
+
+  /* ---- Rendering ---- */
+  function simPersonaCardHtml(p) {
+    var remaining = simRemainingDials(p);
+    var exhausted = remaining <= 0;
+    var statusHtml = p.connected ? '<div class="sim-card__status"><span class="status-dot online">Connected</span></div>' : "";
+    return (
+      '<div class="sim-card" data-persona-id="' + p.id + '">' +
+        '<div class="sim-card__top">' +
+          '<span class="sim-card__avatar" style="background:' + p.avatarColor + ';">' + simAvatarSvg(p) + '</span>' +
+          '<div class="sim-card__headline">' +
+            '<div class="sim-card__name">' + p.name + '</div>' +
+            '<div class="sim-card__quote">“' + p.firstMessage + '”</div>' +
+            statusHtml +
+          '</div>' +
+          '<div class="sim-card__actions" data-roles="admin,manager">' +
+            '<button type="button" class="icon-btn sim-edit-btn" data-edit-persona="' + p.id + '" title="Edit agent" aria-label="Edit ' + p.name + '">' +
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+            '</button>' +
+            '<button type="button" class="icon-btn sim-delete-btn" data-delete-persona="' + p.id + '" title="Delete agent" aria-label="Delete ' + p.name + '">' +
+              '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sim-card__limit' + (exhausted ? " is-exhausted" : "") + '">' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' +
+          '<strong>' + remaining + '</strong> of ' + (p.dailyDialLimit || SIM_DEFAULT_DAILY_LIMIT) + ' dials left today' +
+        '</div>' +
+        '<div class="sim-dial-row">' +
+          '<div class="sim-dial-group">' +
+            '<div class="sim-qty-stepper">' +
+              '<button type="button" class="sim-qty-btn" data-qty-dec aria-label="Decrease number of calls">−</button>' +
+              '<input type="number" class="sim-qty-input" value="1" min="1" max="20" inputmode="numeric" aria-label="Number of calls to dial" />' +
+              '<button type="button" class="sim-qty-btn" data-qty-inc aria-label="Increase number of calls">+</button>' +
+            '</div>' +
+            '<button type="button" class="sim-call-btn" data-dial-persona-id="' + p.id + '" data-dial-persona="' + p.name + '"' + (exhausted ? " disabled" : "") + '>' +
+              SIM_CALL_SVG + 'Dial' +
+            '</button>' +
+          '</div>' +
+          '<button type="button" class="btn btn--ghost icon-btn sim-more-btn" data-roles="admin,manager" aria-label="More options for ' + p.name + '">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderSimGrid(direction) {
+    var container = document.querySelector('[data-sim-grid="' + direction + '"]');
+    if (!container) return;
+    var list = getSimPersonas().filter(function (p) { return p.direction === direction; });
+    container.innerHTML = list.length ? list.map(simPersonaCardHtml).join("") : '<p class="muted" style="padding:16px;">No personas yet.</p>';
+    wireSimCardActions(container);
+  }
+  function renderAllSimGrids() {
+    renderSimDialCount();
+    renderSimGrid("inbound");
+    renderSimGrid("outbound");
+    // Every call rebuilds each card's HTML from scratch, including its own
+    // [data-roles] edit/delete/more-options controls — re-apply the current
+    // role immediately after so those controls don't reappear for a role
+    // that shouldn't see them (e.g. dialling as Trainer/Team lead).
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
+  }
+
+  /* ---- Card interactions: stepper/dial, edit, delete ---- */
+  function wireSimCardActions(container) {
+    container.querySelectorAll("[data-edit-persona]").forEach(function (btn) {
+      btn.addEventListener("click", function () { openEditPersonaModal(btn.getAttribute("data-edit-persona")); });
+    });
+    container.querySelectorAll("[data-delete-persona]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-delete-persona");
+        var p = getSimPersonas().filter(function (x) { return x.id === id; })[0];
+        if (!p) return;
+        if (window.confirm("Delete " + p.name + "? This can't be undone in this prototype session.")) {
+          saveSimPersonas(getSimPersonas().filter(function (x) { return x.id !== id; }));
+          renderAllSimGrids();
+        }
+      });
+    });
+    container.querySelectorAll(".sim-dial-group").forEach(function (group) {
+      var input = group.querySelector(".sim-qty-input");
+      var decBtn = group.querySelector("[data-qty-dec]");
+      var incBtn = group.querySelector("[data-qty-inc]");
+      var callBtn = group.querySelector(".sim-call-btn");
+      if (!input || !callBtn) return;
+
+      function clamp() {
+        var v = parseInt(input.value, 10);
+        if (!v || v < 1) v = 1;
+        if (v > 20) v = 20;
+        input.value = v;
+        return v;
+      }
+      if (decBtn) decBtn.addEventListener("click", function () { input.value = Math.max(1, (parseInt(input.value, 10) || 1) - 1); });
+      if (incBtn) incBtn.addEventListener("click", function () { input.value = Math.min(20, (parseInt(input.value, 10) || 1) + 1); });
+      input.addEventListener("change", clamp);
+      if (callBtn.disabled) return;
+
+      callBtn.addEventListener("click", function () {
+        var id = callBtn.getAttribute("data-dial-persona-id");
+        var persona = callBtn.getAttribute("data-dial-persona") || "this persona";
+        var p = getSimPersonas().filter(function (x) { return x.id === id; })[0];
+        var remaining = p ? simRemainingDials(p) : 20;
+        var qty = Math.min(clamp(), Math.max(1, remaining));
+        logSimDials(id, qty);
+        var textEl = document.getElementById("call-modal-text");
+        if (textEl) {
+          textEl.textContent = "This would place " + qty + " simulated call" + (qty === 1 ? "" : "s") +
+            " to " + persona + " in the live Dial360 Hub, so an agent can rehearse the scenario in real time.";
+        }
+        var modal = document.getElementById("call-modal");
+        if (modal) modal.classList.add("open");
+        renderAllSimGrids();
+      });
+    });
+  }
+
+  /* ---- Edit Agent modal ---- */
+  var simEditingPersonaId = null;
+  function openEditPersonaModal(id) {
+    var p = getSimPersonas().filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    simEditingPersonaId = id;
+    document.getElementById("edit-persona-id").textContent = p.id;
+    document.getElementById("edit-persona-name").value = p.name;
+    document.getElementById("edit-persona-first-message").value = p.firstMessage;
+    document.getElementById("edit-persona-system-prompt").value = p.systemPrompt;
+    document.getElementById("edit-persona-personality").value = p.personality || "";
+    document.getElementById("edit-persona-call-goals").value = p.callGoals || "";
+    document.getElementById("edit-persona-behavioural-rules").value = p.behaviouralRules || "";
+    document.getElementById("edit-persona-tags").value = p.tags;
+    document.getElementById("edit-persona-voice").value = p.voice;
+    document.getElementById("edit-persona-daily-limit").value = p.dailyDialLimit || SIM_DEFAULT_DAILY_LIMIT;
+    document.getElementById("edit-persona-eagerness").value = p.eagerness;
+    document.getElementById("edit-persona-turn-model").value = p.turnModel;
+    document.getElementById("edit-persona-silence").value = p.silenceSeconds;
+    document.getElementById("edit-persona-duration").value = p.maxDurationSeconds;
+    document.getElementById("edit-persona-speculative").checked = !!p.speculativeTurn;
+    var modal = document.getElementById("edit-persona-modal");
+    if (modal) modal.classList.add("open");
+  }
+
+  function wireEditPersonaModal() {
+    var saveBtn = document.getElementById("edit-persona-save");
+    if (!saveBtn) return;
+    saveBtn.addEventListener("click", function () {
+      if (!simEditingPersonaId) return;
+      var list = getSimPersonas();
+      var p = list.filter(function (x) { return x.id === simEditingPersonaId; })[0];
+      if (!p) return;
+      p.name = document.getElementById("edit-persona-name").value.trim() || p.name;
+      p.firstMessage = document.getElementById("edit-persona-first-message").value.trim();
+      p.systemPrompt = document.getElementById("edit-persona-system-prompt").value;
+      p.personality = document.getElementById("edit-persona-personality").value;
+      p.callGoals = document.getElementById("edit-persona-call-goals").value;
+      p.behaviouralRules = document.getElementById("edit-persona-behavioural-rules").value;
+      p.tags = document.getElementById("edit-persona-tags").value.trim();
+      p.voice = document.getElementById("edit-persona-voice").value;
+      p.dailyDialLimit = Math.max(1, parseInt(document.getElementById("edit-persona-daily-limit").value, 10) || SIM_DEFAULT_DAILY_LIMIT);
+      p.eagerness = document.getElementById("edit-persona-eagerness").value;
+      p.turnModel = document.getElementById("edit-persona-turn-model").value;
+      p.silenceSeconds = parseInt(document.getElementById("edit-persona-silence").value, 10) || 0;
+      p.maxDurationSeconds = parseInt(document.getElementById("edit-persona-duration").value, 10) || 0;
+      p.speculativeTurn = document.getElementById("edit-persona-speculative").checked;
+      saveSimPersonas(list);
+      renderAllSimGrids();
+      var modal = document.getElementById("edit-persona-modal");
+      if (modal) modal.classList.remove("open");
+      simEditingPersonaId = null;
+    });
+  }
+
+  /* ---- Dialling stats page (simulations-stats.html) ---- */
+  function renderSimStatsPage() {
+    var todayEl = document.querySelector('[data-stat="dials-today"]');
+    if (!todayEl) return; // not on the stats page — no-op elsewhere
+    todayEl.textContent = getSimDialCount();
+    var weekEl = document.querySelector('[data-stat="dials-week"]');
+    if (weekEl) weekEl.textContent = getSimWeekTotal();
+
+    var avgToday = getSimTodayAvgSeconds();
+    var avgAllTime = getSimAllTimeAvgSeconds();
+    var avgTodayEl = document.querySelector('[data-stat="avg-today"]');
+    if (avgTodayEl) avgTodayEl.textContent = avgToday ? formatDuration(avgToday) : "—";
+    var avgAllTimeEl = document.querySelector('[data-stat="avg-alltime"]');
+    if (avgAllTimeEl) avgAllTimeEl.textContent = avgAllTime ? formatDuration(avgAllTime) : "—";
+
+    var deltaEl = document.querySelector('[data-stat="avg-delta"]');
+    if (deltaEl) {
+      deltaEl.classList.remove("up", "down", "warn");
+      if (!avgToday || !avgAllTime) {
+        deltaEl.textContent = "No calls dialled yet today";
+      } else {
+        var pct = ((avgToday - avgAllTime) / avgAllTime) * 100;
+        if (pct > 10) {
+          deltaEl.classList.add("warn");
+          deltaEl.textContent = "▲ " + Math.round(pct) + "% longer than usual";
+        } else if (pct < -10) {
+          deltaEl.classList.add("up");
+          deltaEl.textContent = "▼ " + Math.round(Math.abs(pct)) + "% shorter than usual";
+        } else {
+          deltaEl.textContent = "About average for today";
+        }
+      }
+    }
+
+    var tbody = document.querySelector("[data-sim-stats-rows]");
+    if (tbody) {
+      var rows = getSimPersonas().map(function (p) {
+        return {
+          p: p, today: getPersonaDialsToday(p.id), week: getPersonaDialsThisWeek(p.id),
+          avgToday: getPersonaAvgSecondsToday(p.id), avgAllTime: getPersonaAvgSecondsAllTime(p.id)
+        };
+      }).sort(function (a, b) { return b.week - a.week; });
+      tbody.innerHTML = rows.length ? rows.map(function (row) {
+        return (
+          '<tr>' +
+            '<td class="cell-strong">' + row.p.name + '</td>' +
+            '<td><span class="tag">' + (row.p.direction === "inbound" ? "Inbound" : "Outbound") + '</span></td>' +
+            '<td class="cell-mono">' + row.today + '</td>' +
+            '<td class="cell-mono">' + row.week + '</td>' +
+            '<td class="cell-mono">' + (row.avgToday ? formatDuration(row.avgToday) : "—") + '</td>' +
+            '<td class="cell-mono">' + (row.avgAllTime ? formatDuration(row.avgAllTime) : "—") + '</td>' +
+          '</tr>'
+        );
+      }).join("") : '<tr><td colspan="6" class="muted">No personas yet.</td></tr>';
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
@@ -1747,10 +2487,15 @@
     wireTemplateCopy();
     wireRangePickers();
     renderColinQueue();
+    wireScorecardFeedback();
+    seedBusinessUpdates();
+    renderBusinessUpdates();
+    wireBusinessUpdateModal();
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
     seedUsers();
+    renderDiallerAgents();
     renderUpcomingBirthdays();
     wireRoleSwitch();
     seedTrainingPackages();
@@ -1776,6 +2521,11 @@
     // present in the page's static HTML.
     wireDrawers();
     wireAddUserModal();
+    seedSimPersonas();
+    seedSimDialHistory();
+    renderAllSimGrids(); // also re-applies the current role, now that the persona cards exist
+    wireEditPersonaModal();
+    renderSimStatsPage();
   });
 
   window.D360 = window.D360 || {};

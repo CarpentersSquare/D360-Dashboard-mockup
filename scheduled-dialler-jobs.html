@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Team Performance · Dial360 Admin</title>
-  <meta name="description" content="Dial360 admin console — a team lead's overview of their team's performance (prototype)." />
+  <title>Scheduled Dialler · Jobs · Dial360 Admin</title>
+  <meta name="description" content="Dial360 admin console — Scheduled Dialler upload jobs (prototype)." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body data-page="my-team-performance">
+<body data-page="scheduled-dialler">
   <div class="banner-ticker" role="region" aria-label="Announcements">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-ticker__icon"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
     <div class="banner-ticker__viewport">
@@ -192,154 +192,95 @@
 
     <!-- ===== Main ===== -->
     <main class="main">
-      <div class="page-head">
-        <div>
-          <h1>My Team Performance</h1>
-          <div class="sub">Key information about Team Priya, with detailed breakdowns below</div>
-        </div>
+      <div class="dialer-page">
+    <div class="dialer-bar">
+      <div class="dialer-bar__brand">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+        Dialer Task Manager
       </div>
-
-      <!-- Overview tiles -->
-      <div class="grid grid--kpi mb-18">
-        <div class="kpi">
-          <div class="kpi__label">My team</div>
-          <div class="kpi__value" id="mtp-kpi-team">–</div>
-          <div class="kpi__sub" id="mtp-kpi-team-sub">–</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Online now</div>
-          <div class="kpi__value" id="mtp-kpi-online">–</div>
-          <div class="kpi__sub" id="mtp-kpi-online-sub">–</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Total interactions</div>
-          <div class="kpi__value" id="mtp-kpi-interactions">–</div>
-          <div class="kpi__delta up">▲ 5.2% vs last week</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value" id="mtp-kpi-qa">–</div>
-          <div class="kpi__delta up">▲ 2.3 pts this week</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value" id="mtp-kpi-wrapup">–</div>
-          <div class="kpi__delta up">▼ from 2.5 min baseline</div>
-        </div>
-      </div>
-
-      <!-- Sub-pages -->
-      <div class="grid grid--2 mb-18">
-        <a class="card" href="my-team-interaction-stats.html" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;">
-          <div class="card__body" style="display:flex;flex-direction:column;gap:14px;flex:1;">
-            <div style="width:46px;height:46px;border-radius:12px;background:var(--info-bg);color:var(--indigo);display:flex;align-items:center;justify-content:center;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <div>
-              <h3 style="margin:0 0 6px;">Interaction Stats</h3>
-              <p class="small muted" style="margin:0;">Total interactions, channel split (calls, live chat, email) and a per-agent breakdown with average wrap-up time.</p>
-            </div>
-            <div style="margin-top:auto;">
-              <span class="btn btn--ghost btn--sm">View details →</span>
-            </div>
-          </div>
-        </a>
-        <a class="card" href="my-team-qa.html" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;">
-          <div class="card__body" style="display:flex;flex-direction:column;gap:14px;flex:1;">
-            <div style="width:46px;height:46px;border-radius:12px;background:var(--info-bg);color:var(--indigo);display:flex;align-items:center;justify-content:center;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-            </div>
-            <div>
-              <h3 style="margin:0 0 6px;">QA Review</h3>
-              <p class="small muted" style="margin:0;">Team Priya's QA pass rate, scored calls, flagged interactions and how you compare to other teams.</p>
-            </div>
-            <div style="margin-top:auto;">
-              <span class="btn btn--ghost btn--sm">View details →</span>
-            </div>
-          </div>
-        </a>
-      </div>
-
-      <!-- Roster table -->
-      <div class="card">
-        <div class="card__head">
-          <h3>Team roster</h3>
-          <span class="tag">Showing your allocated team only</span>
-        </div>
-        <div class="table-wrap">
-          <table class="data">
-            <thead>
-              <tr>
-                <th>Agent</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Interactions handled <span class="muted">(this week)</span></th>
-                <th>Avg QA score</th>
-                <th>Avg wrap-up</th>
-              </tr>
-            </thead>
-            <tbody data-team-roster>
-              <tr><td colspan="6" class="muted" style="padding:16px;">Loading team…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </main>
-  </div>
-
-  <!-- ===== Agent detail drawer ===== -->
-  <div class="drawer-overlay" id="agent-drawer-overlay"></div>
-  <div class="drawer" id="agent-drawer" aria-label="Agent details">
-    <div class="drawer__head">
-      <h3 data-drawer-name>Agent</h3>
-      <button class="icon-btn" data-close-drawer aria-label="Close agent details">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
+      <nav class="dialer-bar__nav">
+        <a href="scheduled-dialler.html">Tasks</a>
+        <a href="scheduled-dialler-jobs.html" class="active">Jobs</a>
+        <a href="scheduled-dialler-upload.html" data-nav="scheduled-dialler-upload" data-roles="admin,manager">Upload</a>
+        <a href="scheduled-dialler-agents.html">Agents</a>
+      </nav>
+      <div class="dialer-bar__spacer"></div>
+      <div class="dialer-bar__meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> 1 worker</div>
+      <span class="dialer-toggle dialer-toggle--on">Dialer: ON</span>
+      <span class="dialer-toggle dialer-toggle--off">AMD: OFF</span>
     </div>
-    <div class="drawer__body">
 
-      <div class="row" style="align-items:center;gap:14px;margin-bottom:18px;">
-        <span class="avatar avatar--lg" aria-hidden="true">AG</span>
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <span class="tag">Agent</span>
-            <span class="status-dot online">Online</span>
+        <h1>Jobs</h1>
+        <div class="sub">The most recently uploaded job is active; only its items are dialed.</div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>File</th>
+                  <th>Items</th>
+                  <th>Created</th>
+                  <th>Expires</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                    <td class="cell-mono cell-strong">JOB-20260728-CKKF <span class="pill pill--pass" style="margin-left:8px;">Active</span></td>
+                    <td>CurrentDiallerList.csv</td>
+                    <td class="cell-mono">594</td>
+                    <td class="cell-mono">28/07/2026, 16:58:23</td>
+                    <td class="cell-mono">27/08/2026, 16:58:23</td>
+                    <td class="right"><a href="scheduled-dialler-job.html">View items</a></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-mono cell-strong">JOB-20260728-MTS1</td>
+                    <td>CurrentDiallerList.csv</td>
+                    <td class="cell-mono">589</td>
+                    <td class="cell-mono">28/07/2026, 16:29:03</td>
+                    <td class="cell-mono">27/08/2026, 16:29:03</td>
+                    <td class="right"><a href="scheduled-dialler-job.html">View items</a></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-mono cell-strong">JOB-20260728-BR11</td>
+                    <td>CurrentDiallerList.csv</td>
+                    <td class="cell-mono">589</td>
+                    <td class="cell-mono">28/07/2026, 15:59:33</td>
+                    <td class="cell-mono">27/08/2026, 15:59:33</td>
+                    <td class="right"><a href="scheduled-dialler-job.html">View items</a></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-mono cell-strong">JOB-20260728-ZKEP</td>
+                    <td>CurrentDiallerList.csv</td>
+                    <td class="cell-mono">589</td>
+                    <td class="cell-mono">28/07/2026, 15:28:42</td>
+                    <td class="cell-mono">27/08/2026, 15:28:42</td>
+                    <td class="right"><a href="scheduled-dialler-job.html">View items</a></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-mono cell-strong">JOB-20260728-EG4B</td>
+                    <td>CurrentDiallerList.csv</td>
+                    <td class="cell-mono">582</td>
+                    <td class="cell-mono">28/07/2026, 15:01:29</td>
+                    <td class="cell-mono">27/08/2026, 15:01:29</td>
+                    <td class="right"><a href="scheduled-dialler-job.html">View items</a></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-mono cell-strong">JOB-20260728-PRH2</td>
+                    <td>CurrentDiallerList.csv</td>
+                    <td class="cell-mono">583</td>
+                    <td class="cell-mono">28/07/2026, 14:35:26</td>
+                    <td class="cell-mono">27/08/2026, 14:35:26</td>
+                    <td class="right"><a href="scheduled-dialler-job.html">View items</a></td>
+                  </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="muted small">Team Priya · joined Mar 2025</div>
         </div>
       </div>
-
-      <p class="section-title">This week</p>
-      <div class="row" style="gap:12px;margin-bottom:6px;">
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Interactions handled</div>
-          <div class="kpi__value" style="font-size:24px;">91</div>
-          <div class="kpi__delta up">▲ 6 vs last week</div>
-        </div>
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Avg QA score</div>
-          <div class="kpi__value" style="font-size:24px;">87</div>
-          <div class="kpi__sub">team avg 89</div>
-        </div>
-      </div>
-      <div class="row" style="gap:12px;margin-bottom:18px;">
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">Avg wrap-up</div>
-          <div class="kpi__value" style="font-size:24px;">11s</div>
-          <div class="kpi__sub">down from 2.5 min</div>
-        </div>
-        <div class="kpi" style="flex:1;min-width:120px;box-shadow:none;border-color:var(--border-soft);">
-          <div class="kpi__label">QA pass rate</div>
-          <div class="kpi__value" style="font-size:24px;">91%</div>
-          <div class="kpi__delta up">▲ 1.8 pts</div>
-        </div>
-      </div>
-
-      <a class="btn btn--sm" href="interactions.html">View all interactions</a>
-    </div>
+</main>
   </div>
-
   <!-- ===== Banner messages modal ===== -->
   <div class="modal-overlay" id="banner-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="banner-modal-title">
