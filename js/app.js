@@ -2476,6 +2476,264 @@
     }
   }
 
+  /* ---- 17. New Simulations: personality matrix (prototype only) ----
+     new-simulations.html lets a reviewer build simulated-call batches by
+     toggling on customer x personality combinations in a matrix, then
+     "Generate List" bundles every ON cell into a new batch appended to
+     the history below. Customers and personalities are each their own
+     localStorage list — separate from Customer Simulations' own persona
+     records — editable via small modals reached from the pencil icons
+     in the matrix. Hovering a customer's name shows a floating tooltip
+     (the same pattern analytics.js uses for chart hovers) rather than a
+     modal, since it's meant to be glanced at, not dismissed. */
+  var MATRIX_CUSTOMERS_KEY = "d360-matrix-customers";
+  var MATRIX_PERSONALITIES_KEY = "d360-matrix-personalities";
+  var MATRIX_TOGGLES_KEY = "d360-matrix-toggles";
+  var MATRIX_BATCHES_KEY = "d360-matrix-batches";
+  var matrixEditingCustomerId = null;
+  var matrixEditingPersonalityId = null;
+
+  function getMatrixCustomers() {
+    try { return JSON.parse(localStorage.getItem(MATRIX_CUSTOMERS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveMatrixCustomers(list) { localStorage.setItem(MATRIX_CUSTOMERS_KEY, JSON.stringify(list)); }
+  function getMatrixPersonalities() {
+    try { return JSON.parse(localStorage.getItem(MATRIX_PERSONALITIES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveMatrixPersonalities(list) { localStorage.setItem(MATRIX_PERSONALITIES_KEY, JSON.stringify(list)); }
+  function getMatrixToggles() {
+    try { return JSON.parse(localStorage.getItem(MATRIX_TOGGLES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveMatrixToggles(map) { localStorage.setItem(MATRIX_TOGGLES_KEY, JSON.stringify(map)); }
+  function getMatrixBatches() {
+    try { return JSON.parse(localStorage.getItem(MATRIX_BATCHES_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveMatrixBatches(list) { localStorage.setItem(MATRIX_BATCHES_KEY, JSON.stringify(list)); }
+  function matrixToggleKey(customerId, personalityId) { return customerId + "__" + personalityId; }
+
+  function seedMatrixData() {
+    if (!localStorage.getItem(MATRIX_CUSTOMERS_KEY)) {
+      saveMatrixCustomers([
+        { id: "mc1", name: "Charlie Brown", info: "Existing customer since 2023. Requesting a statement and general account information. Prefers a slower, detailed explanation." },
+        { id: "mc2", name: "Daisy Johnson", info: "First-time applicant, still mid-application. Not yet familiar with the process — needs clear, patient guidance." },
+        { id: "mc3", name: "Frankie Williams", info: "Wants to withdraw an in-progress loan application. Has already decided; agent should confirm and process quickly." },
+        { id: "mc4", name: "Jenny Warner", info: "Applied for a loan but funds haven't arrived in her account yet. Wants a clear timeline and reassurance." },
+        { id: "mc5", name: "Mack Smith", info: "Recently declined for a loan and wants to understand why. May push back on a vague explanation." },
+        { id: "mc6", name: "Veronica Miller", info: "Existing customer checking her remaining loan balance ahead of a renewal decision." }
+      ]);
+    }
+    if (!localStorage.getItem(MATRIX_PERSONALITIES_KEY)) {
+      saveMatrixPersonalities([
+        { id: "mp1", name: "Happy", details: "Upbeat and satisfied; quick to agree, thank the agent, and wrap up the call positively." },
+        { id: "mp2", name: "Sad", details: "Downbeat and subdued in tone; may need extra reassurance and a gentler pace." },
+        { id: "mp3", name: "Anxious", details: "Nervous about the outcome; asks clarifying questions repeatedly and seeks confirmation." },
+        { id: "mp4", name: "Angry", details: "Frustrated and short-tempered; may raise their voice, interrupt, or push back on answers." },
+        { id: "mp5", name: "Chatty", details: "Talkative and prone to going off-topic; enjoys small talk before getting to the point." },
+        { id: "mp6", name: "Neutral", details: "Calm, matter-of-fact and straightforward, with no strong emotional signals either way." }
+      ]);
+    }
+  }
+
+  function wireMatrixToggles(tbody) {
+    tbody.querySelectorAll("[data-matrix-toggle]").forEach(function (input) {
+      input.addEventListener("change", function () {
+        var key = input.getAttribute("data-matrix-toggle");
+        var toggles = getMatrixToggles();
+        if (input.checked) toggles[key] = true; else delete toggles[key];
+        saveMatrixToggles(toggles);
+      });
+    });
+    tbody.querySelectorAll("[data-edit-customer]").forEach(function (btn) {
+      btn.addEventListener("click", function () { openEditMatrixCustomerModal(btn.getAttribute("data-edit-customer")); });
+    });
+    tbody.querySelectorAll("[data-customer-info]").forEach(function (el) {
+      el.addEventListener("mouseenter", function () {
+        var c = getMatrixCustomers().filter(function (x) { return x.id === el.getAttribute("data-customer-info"); })[0];
+        showMatrixTooltip((c && c.info) || "No further information yet.");
+      });
+      el.addEventListener("mousemove", moveMatrixTooltip);
+      el.addEventListener("mouseleave", hideMatrixTooltip);
+    });
+  }
+
+  function showMatrixTooltip(text) {
+    var el = document.getElementById("matrix-tooltip");
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add("open");
+  }
+  function hideMatrixTooltip() {
+    var el = document.getElementById("matrix-tooltip");
+    if (el) el.classList.remove("open");
+  }
+  function moveMatrixTooltip(e) {
+    var el = document.getElementById("matrix-tooltip");
+    if (!el || !el.classList.contains("open")) return;
+    el.style.left = (e.clientX + 14) + "px";
+    el.style.top = (e.clientY + 14) + "px";
+  }
+
+  function renderMatrixTable() {
+    var headRow = document.querySelector("[data-matrix-head-row]");
+    var tbody = document.querySelector("[data-matrix-rows]");
+    if (!tbody) return; // not on this page
+    var customers = getMatrixCustomers();
+    var personalities = getMatrixPersonalities();
+    var toggles = getMatrixToggles();
+
+    if (headRow) {
+      headRow.innerHTML = "<th>Customer</th>" + personalities.map(function (p) {
+        return (
+          '<th>' +
+            '<span class="row" style="gap:4px;justify-content:center;">' + p.name +
+              '<button type="button" class="icon-btn" data-edit-personality="' + p.id + '" title="Edit personality" aria-label="Edit ' + p.name + '">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+              '</button>' +
+            '</span>' +
+          '</th>'
+        );
+      }).join("");
+      headRow.querySelectorAll("[data-edit-personality]").forEach(function (btn) {
+        btn.addEventListener("click", function () { openEditMatrixPersonalityModal(btn.getAttribute("data-edit-personality")); });
+      });
+    }
+
+    tbody.innerHTML = customers.length ? customers.map(function (c) {
+      var cells = personalities.map(function (p) {
+        var key = matrixToggleKey(c.id, p.id);
+        return (
+          '<td class="matrix-cell">' +
+            '<label class="toggle">' +
+              '<input type="checkbox" data-matrix-toggle="' + key + '"' + (toggles[key] ? " checked" : "") + ' aria-label="' + c.name + ' as ' + p.name + '" />' +
+              '<span class="track"></span>' +
+            '</label>' +
+          '</td>'
+        );
+      }).join("");
+      return (
+        '<tr>' +
+          '<td>' +
+            '<span class="matrix-customer-name" data-customer-info="' + c.id + '">' + c.name + '</span> ' +
+            '<button type="button" class="icon-btn" data-edit-customer="' + c.id + '" title="Edit customer" aria-label="Edit ' + c.name + '">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>' +
+            '</button>' +
+          '</td>' + cells +
+        '</tr>'
+      );
+    }).join("") : '<tr><td colspan="' + (personalities.length + 1) + '" class="muted">No customers yet.</td></tr>';
+
+    wireMatrixToggles(tbody);
+  }
+
+  function formatMatrixBatchTime(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + ", " +
+      d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function renderMatrixHistory() {
+    var wrap = document.querySelector("[data-matrix-history]");
+    if (!wrap) return;
+    var batches = getMatrixBatches();
+    var countEl = document.querySelector("[data-matrix-batch-count]");
+    if (countEl) countEl.textContent = batches.length + " batch" + (batches.length === 1 ? "" : "es");
+    wrap.innerHTML = batches.length ? batches.map(function (b, idx) {
+      var num = batches.length - idx;
+      return (
+        '<div class="matrix-batch">' +
+          '<div class="matrix-batch__head">' +
+            '<span class="cell-strong">Batch #' + num + '</span>' +
+            '<span class="muted small">' + formatMatrixBatchTime(b.createdAt) + ' · ' + b.items.length + ' call' + (b.items.length === 1 ? "" : "s") + '</span>' +
+          '</div>' +
+          '<div class="matrix-batch__list">' +
+            b.items.map(function (it) { return '<span class="tag">' + it.customerName + ' · ' + it.personalityName + '</span>'; }).join("") +
+          '</div>' +
+        '</div>'
+      );
+    }).join("") : '<p class="muted small">No batches generated yet.</p>';
+  }
+
+  function wireMatrixGenerate() {
+    var btn = document.getElementById("matrix-generate-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var toggles = getMatrixToggles();
+      var customers = getMatrixCustomers();
+      var personalities = getMatrixPersonalities();
+      var items = [];
+      Object.keys(toggles).forEach(function (key) {
+        if (!toggles[key]) return;
+        var parts = key.split("__");
+        var c = customers.filter(function (x) { return x.id === parts[0]; })[0];
+        var p = personalities.filter(function (x) { return x.id === parts[1]; })[0];
+        if (c && p) items.push({ customerId: c.id, customerName: c.name, personalityId: p.id, personalityName: p.name });
+      });
+      if (!items.length) {
+        window.alert("Turn on at least one customer × personality combination first.");
+        return;
+      }
+      var batches = getMatrixBatches();
+      batches.unshift({ id: "batch" + Date.now(), createdAt: new Date().toISOString(), items: items });
+      saveMatrixBatches(batches);
+      renderMatrixHistory();
+    });
+  }
+
+  function openEditMatrixCustomerModal(id) {
+    var c = getMatrixCustomers().filter(function (x) { return x.id === id; })[0];
+    if (!c) return;
+    matrixEditingCustomerId = id;
+    document.getElementById("matrix-customer-name").value = c.name;
+    document.getElementById("matrix-customer-info").value = c.info || "";
+    var modal = document.getElementById("edit-matrix-customer-modal");
+    if (modal) modal.classList.add("open");
+  }
+  function wireMatrixCustomerModal() {
+    var saveBtn = document.getElementById("matrix-customer-save");
+    if (!saveBtn) return;
+    saveBtn.addEventListener("click", function () {
+      if (!matrixEditingCustomerId) return;
+      var list = getMatrixCustomers();
+      var c = list.filter(function (x) { return x.id === matrixEditingCustomerId; })[0];
+      if (!c) return;
+      c.name = document.getElementById("matrix-customer-name").value.trim() || c.name;
+      c.info = document.getElementById("matrix-customer-info").value.trim();
+      saveMatrixCustomers(list);
+      renderMatrixTable();
+      var modal = document.getElementById("edit-matrix-customer-modal");
+      if (modal) modal.classList.remove("open");
+      matrixEditingCustomerId = null;
+    });
+  }
+
+  function openEditMatrixPersonalityModal(id) {
+    var p = getMatrixPersonalities().filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    matrixEditingPersonalityId = id;
+    document.getElementById("matrix-personality-name").value = p.name;
+    document.getElementById("matrix-personality-details").value = p.details || "";
+    var modal = document.getElementById("edit-matrix-personality-modal");
+    if (modal) modal.classList.add("open");
+  }
+  function wireMatrixPersonalityModal() {
+    var saveBtn = document.getElementById("matrix-personality-save");
+    if (!saveBtn) return;
+    saveBtn.addEventListener("click", function () {
+      if (!matrixEditingPersonalityId) return;
+      var list = getMatrixPersonalities();
+      var p = list.filter(function (x) { return x.id === matrixEditingPersonalityId; })[0];
+      if (!p) return;
+      p.name = document.getElementById("matrix-personality-name").value.trim() || p.name;
+      p.details = document.getElementById("matrix-personality-details").value.trim();
+      saveMatrixPersonalities(list);
+      renderMatrixTable();
+      var modal = document.getElementById("edit-matrix-personality-modal");
+      if (modal) modal.classList.remove("open");
+      matrixEditingPersonalityId = null;
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     setActiveNav();
     wireLogin();
@@ -2526,6 +2784,12 @@
     renderAllSimGrids(); // also re-applies the current role, now that the persona cards exist
     wireEditPersonaModal();
     renderSimStatsPage();
+    seedMatrixData();
+    renderMatrixTable();
+    renderMatrixHistory();
+    wireMatrixGenerate();
+    wireMatrixCustomerModal();
+    wireMatrixPersonalityModal();
   });
 
   window.D360 = window.D360 || {};
