@@ -30,7 +30,7 @@ standalone pages with no sidebar and had to be retrofitted) — check this befor
 new page done.
 
 Fastest way to get this right: copy the full `<body>...</body>` of an existing, already-correct
-page (e.g. `complaints.html` or `colin-scorecard.html`) as your starting point, then replace only
+page (e.g. `tasks.html` or `colin-scorecard.html`) as your starting point, then replace only
 the `<main class="main">` contents and the `<title>`/`<meta description>`.
 
 ## Adding a new nav item
