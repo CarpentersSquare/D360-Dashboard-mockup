@@ -591,7 +591,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .int-card__desc { font-size: 12.5px; color: var(--muted); }
 
 /* Toggle (visual) */
-.toggle { position: relative; width: 42px; height: 24px; flex: none; }
+.toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex: none; }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .toggle .track { position: absolute; inset: 0; background: var(--hairline); border-radius: 999px; transition: background .2s; cursor: pointer; }
 .toggle .track::before { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 999px; transition: transform .2s; }
@@ -1192,3 +1192,14 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .chat-turn.bot .chat-turn__bubble { background: #EEEEEE; color: var(--muted); border-bottom-left-radius: 4px; }
 .chat-turn.customer .chat-turn__bubble { background: var(--gradient); color: #fff; border-bottom-right-radius: 4px; }
 .chat-turn.system .chat-turn__bubble { background: transparent; color: var(--muted); font-size: 11.5px; text-align: center; padding: 4px; }
+
+/* ============================================================
+   New Simulations — personality matrix (new-simulations.html)
+   ============================================================ */
+.matrix-table th, .matrix-table td { text-align: center; white-space: nowrap; }
+.matrix-table th:first-child, .matrix-table td:first-child { text-align: left; white-space: normal; }
+.matrix-customer-name { cursor: help; border-bottom: 1px dotted var(--muted); }
+.matrix-batch { padding: 14px 0; border-bottom: 1px solid var(--border-soft); }
+.matrix-batch:last-child { border-bottom: none; }
+.matrix-batch__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; gap: 6px; }
+.matrix-batch__list { display: flex; flex-wrap: wrap; gap: 6px; }
