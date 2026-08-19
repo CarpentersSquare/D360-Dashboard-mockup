@@ -205,23 +205,43 @@
         </div>
       </div>
 
-      <div class="card mb-18">
-        <div class="card__head">
-          <h3>Personality matrix</h3>
-          <span class="muted small">Hover a customer's name for more information</span>
+      <div class="grid mb-18" id="matrix-layout">
+        <div class="card" id="matrix-card">
+          <div class="card__head">
+            <h3>Personality matrix</h3>
+            <span class="muted small">Hover a customer's name for more information</span>
+          </div>
+          <div class="card__body" data-matrix-body>
+            <div class="table-wrap">
+              <table class="data matrix-table">
+                <thead>
+                  <tr data-matrix-head-row>
+                    <th>Customer</th>
+                  </tr>
+                </thead>
+                <tbody data-matrix-rows>
+                  <tr><td class="muted">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card__body" data-matrix-condensed style="display:none;">
+            <p class="muted small" style="margin:0;">Combinations captured in the generated list to the right — sending it brings the matrix back to build another.</p>
+          </div>
         </div>
-        <div class="card__body">
-          <div class="table-wrap">
-            <table class="data matrix-table">
-              <thead>
-                <tr data-matrix-head-row>
-                  <th>Customer</th>
-                </tr>
-              </thead>
-              <tbody data-matrix-rows>
-                <tr><td class="muted">Loading…</td></tr>
-              </tbody>
-            </table>
+
+        <div class="card" id="matrix-generated-card" style="display:none;">
+          <div class="card__head">
+            <h3>Generated list</h3>
+            <button type="button" class="btn btn--ghost btn--sm" id="matrix-discard-btn">Discard</button>
+          </div>
+          <div class="card__body">
+            <div class="matrix-batch__list" data-generated-items></div>
+            <hr class="divider" />
+            <h4 class="section-title">Available agents</h4>
+            <p class="muted small" style="margin:0 0 10px;">Select who this list should be sent to.</p>
+            <div data-available-agents></div>
+            <button type="button" class="btn btn--dark" id="matrix-send-btn" style="margin-top:14px;" disabled>Send List</button>
           </div>
         </div>
       </div>
