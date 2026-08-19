@@ -65,7 +65,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `templates.html` | Response template library |
 | `simulations.html` | Customer Simulations — card grid of Inbound/Outbound AI personas, with a Dial button (call-count stepper, default 1) that counts down against that persona's own daily limit as well as a shared "dialed today" total and daily credit balance (Trainer role and above). Managing personas (Add Agent, per-card Edit/Delete/more-options) and requesting more credit are Manager/Admin only — Trainer and Team lead get a read-only, dial-only view |
 | `simulations-stats.html` | Customer Simulations sub-page ("Dialling stats") — total dials today/this week, average call length today vs all time (with an over/under-usual indicator), and a per-persona dials today/this week table (Trainer role and above) |
-| `new-simulations.html` | New Simulations — a customer × personality matrix of toggles; "Generate List" batches every ON combination into a history log below. Hovering a customer's name shows further information as a floating tooltip; pencil icons let you edit each customer's info and each personality's details (Trainer role and above) |
+| `new-simulations.html` | New Simulations — a customer × personality matrix of toggles; "Generate List" stages every ON combination into a Generated List alongside the (now condensed) matrix, where you pick which agents to send it to; "Send List" logs the batch to the history below and resets the matrix. Hovering a customer's name shows further information as a floating tooltip; pencil icons let you edit each customer's info and each personality's details (Trainer role and above) |
 | `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
 | `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide. Admin/Manager/Trainer see the company-wide queue; Team lead sees their own team's packages and a read-only view of their team's training requests |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
@@ -174,14 +174,21 @@ fallback to `assets/logo.svg`).
 - Drives the **New Simulations personality matrix** (`new-simulations.html`): a `d360-matrix-
   customers` list (name + hover info) down the side and a `d360-matrix-personalities` list (name +
   behavioural details) across the top, with each cell's on/off state stored in `d360-matrix-
-  toggles`. "Generate List" reads every ON cell and appends a new entry — customer/personality
-  pairs plus a timestamp — to `d360-matrix-batches`, rendered newest-first in the "Batch history"
-  card below. Hovering a customer's name shows their info in a floating tooltip (the same
-  fixed-position, mouse-following element `analytics.js` uses for chart hovers) rather than a
-  modal, since it's meant to be glanced at and dismissed just by moving the mouse away. Pencil
-  icons next to each customer and each personality column open small modals to edit that
-  customer's info or that personality's details — a separate data set from Customer Simulations'
-  own persona records, even though some customer names overlap.
+  toggles`. "Generate List" reads every ON cell into a `d360-matrix-pending` staging record (the
+  customer/personality pairs plus an empty agent selection) rather than writing straight to
+  history: the Personality Matrix card condenses to a one-line note and a "Generated list" card
+  appears alongside it, listing the captured pairs plus an "Available agents" list (every
+  `d360-users` record with role Agent) that can be clicked to select who the list should go to.
+  "Send List" (enabled once at least one agent is picked) appends the pending list — plus the
+  chosen agents — as a new entry to `d360-matrix-batches`, rendered newest-first in the "Batch
+  history" card below, then clears the pending record so the matrix (already reset to all
+  toggles off at generate time) re-expands ready to build another list; "Discard" clears the
+  pending record without saving a batch. Hovering a customer's name shows their info in a
+  floating tooltip (the same fixed-position, mouse-following element `analytics.js` uses for
+  chart hovers) rather than a modal, since it's meant to be glanced at and dismissed just by
+  moving the mouse away. Pencil icons next to each customer and each personality column open
+  small modals to edit that customer's info or that personality's details — a separate data set
+  from Customer Simulations' own persona records, even though some customer names overlap.
 
 No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
 submissions, training packages, guide requests, users and their access overrides, simulation
