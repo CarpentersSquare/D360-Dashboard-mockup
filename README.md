@@ -65,7 +65,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `templates.html` | Response template library |
 | `simulations.html` | Customer Simulations — card grid of Inbound/Outbound AI personas, with a Dial button (call-count stepper, default 1) that counts down against that persona's own daily limit as well as a shared "dialed today" total and daily credit balance (Trainer role and above). Managing personas (Add Agent, per-card Edit/Delete/more-options) and requesting more credit are Manager/Admin only — Trainer and Team lead get a read-only, dial-only view |
 | `simulations-stats.html` | Customer Simulations sub-page ("Dialling stats") — total dials today/this week, average call length today vs all time (with an over/under-usual indicator), and a per-persona dials today/this week table (Trainer role and above) |
-| `new-simulations.html` | New Simulations — a customer × personality matrix of toggles; "Generate List" stages every ON combination into a Generated List alongside the (now condensed) matrix, where you pick which agents to send it to; "Send List" logs the batch to the history below and resets the matrix. Hovering a customer's name shows further information as a floating tooltip; pencil icons let you edit each customer's info and each personality's details (Trainer role and above) |
+| `new-simulations.html` | New Simulations — a customer × personality matrix of toggles, each showing a small "today · this week" sent-count once that combination has actually gone out; "Generate List" stages every ON combination into a Generated List alongside the (now condensed) matrix, where you pick which agents to send it to; "Send List" logs the batch to the history below and resets the matrix. Hovering a customer's name shows further information as a floating tooltip; pencil icons let you edit each customer's info and each personality's details (Trainer role and above) |
 | `colin-scorecard.html` | QA Colin (SDL) — pick an agent → an interaction → an AI-marked (AutoQA) scorecard (Trainer role and above) |
 | `training-development.html` | Training & Development — auto-generated training packages from QA scorecard failures, matched to an Agent Guide. Admin/Manager/Trainer see the company-wide queue; Team lead sees their own team's packages and a read-only view of their team's training requests |
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
@@ -188,7 +188,10 @@ fallback to `assets/logo.svg`).
   chart hovers) rather than a modal, since it's meant to be glanced at and dismissed just by
   moving the mouse away. Pencil icons next to each customer and each personality column open
   small modals to edit that customer's info or that personality's details — a separate data set
-  from Customer Simulations' own persona records, even though some customer names overlap.
+  from Customer Simulations' own persona records, even though some customer names overlap. Every
+  toggle that has ever been part of a sent batch shows a small "N · N" label underneath it (today's
+  sent count, then this week's), read straight from `d360-matrix-batches` — combinations that have
+  never been sent stay blank rather than cluttering the grid with "0 · 0".
 
 No data is fetched or persisted beyond what's listed above (role switch, banner messages, Colin
 submissions, training packages, guide requests, users and their access overrides, simulation

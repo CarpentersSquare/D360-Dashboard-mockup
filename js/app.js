@@ -2512,6 +2512,32 @@
   function saveMatrixBatches(list) { localStorage.setItem(MATRIX_BATCHES_KEY, JSON.stringify(list)); }
   function matrixToggleKey(customerId, personalityId) { return customerId + "__" + personalityId; }
 
+  /* How many times each customer x personality combination has actually
+     been sent (i.e. appears in a d360-matrix-batches entry), today and
+     in the last 7 days — shown as a small label under each matrix
+     toggle so a reviewer can see at a glance which combinations have
+     already gone out without leaving the page. */
+  function matrixComboCounts() {
+    var today = todayKey();
+    var weekDates = simLastNDates(7);
+    var counts = {};
+    getMatrixBatches().forEach(function (b) {
+      var d = new Date(b.createdAt);
+      if (isNaN(d.getTime())) return;
+      var dateKey = simDateKey(d);
+      var isToday = dateKey === today;
+      var isThisWeek = weekDates.indexOf(dateKey) !== -1;
+      if (!isToday && !isThisWeek) return;
+      (b.items || []).forEach(function (it) {
+        var key = matrixToggleKey(it.customerId, it.personalityId);
+        if (!counts[key]) counts[key] = { today: 0, week: 0 };
+        if (isToday) counts[key].today++;
+        if (isThisWeek) counts[key].week++;
+      });
+    });
+    return counts;
+  }
+
   /* The list staged between "Generate List" and "Send List" — the
      customer x personality combinations captured off the matrix, plus
      whichever agents have been picked to receive it so far. Cleared
@@ -2594,6 +2620,7 @@
     var customers = getMatrixCustomers();
     var personalities = getMatrixPersonalities();
     var toggles = getMatrixToggles();
+    var counts = matrixComboCounts();
 
     if (headRow) {
       headRow.innerHTML = "<th>Customer</th>" + personalities.map(function (p) {
@@ -2615,12 +2642,17 @@
     tbody.innerHTML = customers.length ? customers.map(function (c) {
       var cells = personalities.map(function (p) {
         var key = matrixToggleKey(c.id, p.id);
+        var combo = counts[key];
+        var countsHtml = combo ? '<span class="matrix-cell__counts"><b>' + combo.today + '</b> · ' + combo.week + '</span>' : "";
         return (
           '<td class="matrix-cell">' +
-            '<label class="toggle">' +
-              '<input type="checkbox" data-matrix-toggle="' + key + '"' + (toggles[key] ? " checked" : "") + ' aria-label="' + c.name + ' as ' + p.name + '" />' +
-              '<span class="track"></span>' +
-            '</label>' +
+            '<div class="matrix-cell__stack">' +
+              '<label class="toggle">' +
+                '<input type="checkbox" data-matrix-toggle="' + key + '"' + (toggles[key] ? " checked" : "") + ' aria-label="' + c.name + ' as ' + p.name + '" />' +
+                '<span class="track"></span>' +
+              '</label>' +
+              countsHtml +
+            '</div>' +
           '</td>'
         );
       }).join("");
@@ -2783,6 +2815,7 @@
       });
       saveMatrixBatches(batches);
       saveMatrixPending(null);
+      renderMatrixTable();
       renderMatrixHistory();
       renderMatrixLayout();
     });
