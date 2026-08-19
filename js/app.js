@@ -2490,6 +2490,7 @@
   var MATRIX_PERSONALITIES_KEY = "d360-matrix-personalities";
   var MATRIX_TOGGLES_KEY = "d360-matrix-toggles";
   var MATRIX_BATCHES_KEY = "d360-matrix-batches";
+  var MATRIX_PENDING_KEY = "d360-matrix-pending";
   var matrixEditingCustomerId = null;
   var matrixEditingPersonalityId = null;
 
@@ -2510,6 +2511,19 @@
   }
   function saveMatrixBatches(list) { localStorage.setItem(MATRIX_BATCHES_KEY, JSON.stringify(list)); }
   function matrixToggleKey(customerId, personalityId) { return customerId + "__" + personalityId; }
+
+  /* The list staged between "Generate List" and "Send List" — the
+     customer x personality combinations captured off the matrix, plus
+     whichever agents have been picked to receive it so far. Cleared
+     back to null once sent (or discarded), which is what puts the
+     matrix back into its full, editable state. */
+  function getMatrixPending() {
+    try { return JSON.parse(localStorage.getItem(MATRIX_PENDING_KEY)) || null; } catch (e) { return null; }
+  }
+  function saveMatrixPending(pending) {
+    if (pending) localStorage.setItem(MATRIX_PENDING_KEY, JSON.stringify(pending));
+    else localStorage.removeItem(MATRIX_PENDING_KEY);
+  }
 
   function seedMatrixData() {
     if (!localStorage.getItem(MATRIX_CUSTOMERS_KEY)) {
@@ -2644,7 +2658,9 @@
         '<div class="matrix-batch">' +
           '<div class="matrix-batch__head">' +
             '<span class="cell-strong">Batch #' + num + '</span>' +
-            '<span class="muted small">' + formatMatrixBatchTime(b.createdAt) + ' · ' + b.items.length + ' call' + (b.items.length === 1 ? "" : "s") + '</span>' +
+            '<span class="muted small">' + formatMatrixBatchTime(b.createdAt) + ' · ' + b.items.length + ' call' + (b.items.length === 1 ? "" : "s") +
+              (b.agentNames && b.agentNames.length ? ' · Sent to ' + b.agentNames.join(", ") : '') +
+            '</span>' +
           '</div>' +
           '<div class="matrix-batch__list">' +
             b.items.map(function (it) { return '<span class="tag">' + it.customerName + ' · ' + it.personalityName + '</span>'; }).join("") +
@@ -2652,6 +2668,63 @@
         '</div>'
       );
     }).join("") : '<p class="muted small">No batches generated yet.</p>';
+  }
+
+  /* Shows/hides the condensed matrix vs. full matrix and the Generated
+     List card based on whether a list is currently staged. Re-run after
+     every generate / agent pick / discard / send so the two cards and
+     the page-head Generate button always match the pending state. */
+  function renderMatrixLayout() {
+    var layout = document.getElementById("matrix-layout");
+    if (!layout) return; // not on this page
+    var pending = getMatrixPending();
+    var body = document.querySelector("[data-matrix-body]");
+    var condensed = document.querySelector("[data-matrix-condensed]");
+    var generatedCard = document.getElementById("matrix-generated-card");
+    var generateBtn = document.getElementById("matrix-generate-btn");
+    layout.classList.toggle("has-generated", !!pending);
+    if (body) body.style.display = pending ? "none" : "";
+    if (condensed) condensed.style.display = pending ? "" : "none";
+    if (generatedCard) generatedCard.style.display = pending ? "" : "none";
+    if (generateBtn) generateBtn.style.display = pending ? "none" : "";
+    if (pending) renderMatrixGenerated(pending);
+  }
+
+  function renderMatrixGenerated(pending) {
+    var itemsWrap = document.querySelector("[data-generated-items]");
+    if (itemsWrap) {
+      itemsWrap.innerHTML = pending.items.map(function (it) {
+        return '<span class="tag">' + it.customerName + ' · ' + it.personalityName + '</span>';
+      }).join("");
+    }
+    var agentsWrap = document.querySelector("[data-available-agents]");
+    if (agentsWrap) {
+      var agents = getUsers().filter(function (u) { return u.role === "agent"; });
+      var selected = pending.agentIds || [];
+      agentsWrap.innerHTML = agents.length ? '<div class="agent-pick-list">' + agents.map(function (a) {
+        var isActive = selected.indexOf(a.id) !== -1;
+        return (
+          '<button type="button" class="agent-pick' + (isActive ? " active" : "") + '" data-agent-pick="' + a.id + '">' +
+            '<span class="cell-user"><span class="avatar avatar--sm">' + userInitials(a.name) + '</span>' + a.name + '</span>' +
+            '<svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>' +
+          '</button>'
+        );
+      }).join("") + '</div>' : '<p class="muted small">No agents available.</p>';
+      agentsWrap.querySelectorAll("[data-agent-pick]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var p = getMatrixPending();
+          if (!p) return;
+          var id = btn.getAttribute("data-agent-pick");
+          p.agentIds = p.agentIds || [];
+          var idx = p.agentIds.indexOf(id);
+          if (idx === -1) p.agentIds.push(id); else p.agentIds.splice(idx, 1);
+          saveMatrixPending(p);
+          renderMatrixGenerated(p);
+        });
+      });
+    }
+    var sendBtn = document.getElementById("matrix-send-btn");
+    if (sendBtn) sendBtn.disabled = !(pending.agentIds && pending.agentIds.length);
   }
 
   function wireMatrixGenerate() {
@@ -2673,10 +2746,45 @@
         window.alert("Turn on at least one customer × personality combination first.");
         return;
       }
+      saveMatrixPending({ items: items, agentIds: [] });
+      saveMatrixToggles({});
+      renderMatrixTable();
+      renderMatrixLayout();
+    });
+  }
+
+  function wireMatrixDiscard() {
+    var btn = document.getElementById("matrix-discard-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      saveMatrixPending(null);
+      renderMatrixLayout();
+    });
+  }
+
+  function wireMatrixSend() {
+    var btn = document.getElementById("matrix-send-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var pending = getMatrixPending();
+      if (!pending || !pending.agentIds || !pending.agentIds.length) return;
+      var agents = getUsers();
+      var agentNames = pending.agentIds.map(function (id) {
+        var a = agents.filter(function (x) { return x.id === id; })[0];
+        return a ? a.name : null;
+      }).filter(Boolean);
       var batches = getMatrixBatches();
-      batches.unshift({ id: "batch" + Date.now(), createdAt: new Date().toISOString(), items: items });
+      batches.unshift({
+        id: "batch" + Date.now(),
+        createdAt: new Date().toISOString(),
+        items: pending.items,
+        agentIds: pending.agentIds.slice(),
+        agentNames: agentNames
+      });
       saveMatrixBatches(batches);
+      saveMatrixPending(null);
       renderMatrixHistory();
+      renderMatrixLayout();
     });
   }
 
@@ -2787,7 +2895,10 @@
     seedMatrixData();
     renderMatrixTable();
     renderMatrixHistory();
+    renderMatrixLayout();
     wireMatrixGenerate();
+    wireMatrixDiscard();
+    wireMatrixSend();
     wireMatrixCustomerModal();
     wireMatrixPersonalityModal();
   });
