@@ -50,6 +50,11 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `my-training-development.html` | An agent's own assigned training — guide, expected action-by date, sign off (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail, with a "Confirm feedback delivered" reviewer action that flips the status pill to "Feedback Delivered" |
 | `logs.html` | Logs — searchable Calls / Live Chats / Emails / SMSs tabs over the last 30 days, each with type-specific filters and pagination (Admin/Manager/Team lead) |
+| `scheduled-dialler.html` | Scheduled Dialler — Call List, the active job's per-record call queue (external ID, customer, phone, status, call type) |
+| `scheduled-dialler-jobs.html` | Scheduled Dialler sub-page — history of uploaded jobs; only the most recent is active/dialed |
+| `scheduled-dialler-job.html` | Scheduled Dialler sub-page — single job detail |
+| `scheduled-dialler-upload.html` | Scheduled Dialler sub-page — CSV upload to create a new job (Admin/Manager) |
+| `scheduled-dialler-agents.html` | Scheduled Dialler sub-page — dialer workers and their Twilio worker-attribute skills |
 | `log-call.html` | Call detail — segments (including transfers), agents active on each segment, and Download Recording / Download Transcript actions |
 | `log-call-abandoned.html` | Call detail for an abandoned call — customer hung up before an agent answered, so there's no recording, transcript or agent segment |
 | `log-chat.html` | Live chat detail — beautified message-bubble transcript, with the bot and any handling agents named |
