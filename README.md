@@ -34,7 +34,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `index.html` | Spoofed dial360.ai marketing homepage (Login + Get started) |
 | `sso.html` | Mocked single sign-on (email → identity provider → newsfeed) |
 | `login.html` | Facade email/password login — also lands on the newsfeed |
-| `newsfeed.html` | Company newsfeed — shoutouts, quote of the day, business updates (Manager/Admin can add/edit/delete), birthdays (landing page after sign-in) |
+| `newsfeed.html` | Company newsfeed — shoutouts, quote of the day, today's weather, business updates (Manager/Admin can add/edit/delete), birthdays (landing page after sign-in) |
 | `dashboard.html` | Admin Overview |
 | `call-centre-dashboard.html` | Live call centre floor view (queue, agent status, service level) |
 | `my-performance.html` | An agent's own performance overview (Agent role only) |
