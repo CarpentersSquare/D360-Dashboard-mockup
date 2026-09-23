@@ -975,6 +975,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
   display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;
 }
 .colin-compliance-item:last-child { border-bottom: none; }
+.colin-checklist-scroll { max-height: 360px; overflow-y: auto; }
 .colin-compliance-item__q { flex: 2; min-width: 220px; font-size: 13.5px; color: var(--ink); }
 .colin-verdict { display: flex; gap: 6px; flex: none; }
 .colin-verdict button {
