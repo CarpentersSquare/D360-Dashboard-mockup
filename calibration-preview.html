@@ -199,7 +199,7 @@
       <div class="page-head">
         <div>
           <h1>QA Calibration <span class="tag">Concept preview</span></h1>
-          <div class="sub">Score the same interaction independently, then reveal everyone's marks and discuss as a team</div>
+          <div class="sub">Score the same interaction independently, then reveal everyone's marks and agree a final outcome</div>
         </div>
         <div class="page-head__actions">
           <button class="btn btn--dark" type="button">
@@ -221,7 +221,7 @@
         <div class="tabs" role="tablist">
           <button class="tab active" data-tab="sessions">Sessions</button>
           <button class="tab" data-tab="evaluate">Your evaluation (blind)</button>
-          <button class="tab" data-tab="compare">Compare &amp; discuss (revealed)</button>
+          <button class="tab" data-tab="compare">Compare &amp; agree (revealed)</button>
         </div>
 
         <!-- ===== Sessions ===== -->
@@ -428,8 +428,8 @@
           <div class="banner banner--warn mb-18">
             <span style="font-size:22px;">⚠️</span>
             <div>
-              <div style="font-size:14.5px;">1 criterion needs discussion — reviewers didn't agree</div>
-              <div class="small" style="font-weight:500;margin-top:2px;">"Identity / DPA completed" was marked differently by Priya Nair vs. Hannah Price and Charlotte Reid.</div>
+              <div style="font-size:14.5px;">1 criterion needs an agreed outcome — reviewers didn't agree</div>
+              <div class="small" style="font-weight:500;margin-top:2px;">"Identity / DPA completed" was marked differently by Priya Nair vs. Hannah Price and Charlotte Reid. Pick the agreed outcome in the column on the right.</div>
             </div>
           </div>
 
@@ -446,6 +446,7 @@
                     <th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">PN</span>Priya Nair</span></th>
                     <th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">HP</span>Hannah Price</span></th>
                     <th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></th>
+                    <th style="text-align:center;background:var(--info-bg);border-radius:8px 8px 0 0;">Agreed outcome</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -454,81 +455,61 @@
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
+                    <td style="text-align:center;background:var(--info-bg);"><span class="pill pill--pass">Pass</span></td>
                   </tr>
                   <tr style="background:var(--warning-bg);">
                     <td>Identity / DPA completed <span class="pill pill--flag" style="margin-left:4px;">Mandatory</span> <span class="tag nowrap">25%</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--fail">Fail</span></td>
                     <td style="text-align:center;"><span class="pill pill--fail">Fail</span></td>
+                    <td style="text-align:center;background:var(--info-bg);">
+                      <div class="colin-verdict" style="justify-content:center;">
+                        <button type="button" data-v="P">P</button>
+                        <button type="button" data-v="F" class="active">F</button>
+                      </div>
+                    </td>
                   </tr>
                   <tr>
                     <td>Compliance phrasing <span class="tag nowrap">15%</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
+                    <td style="text-align:center;background:var(--info-bg);"><span class="pill pill--pass">Pass</span></td>
                   </tr>
                   <tr>
                     <td>Needs identified <span class="tag nowrap">15%</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
+                    <td style="text-align:center;background:var(--info-bg);"><span class="pill pill--pass">Pass</span></td>
                   </tr>
                   <tr>
                     <td>Resolution / next steps <span class="tag nowrap">20%</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
+                    <td style="text-align:center;background:var(--info-bg);"><span class="pill pill--pass">Pass</span></td>
                   </tr>
                   <tr>
                     <td>Tone &amp; empathy <span class="tag nowrap">15%</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
                     <td style="text-align:center;"><span class="pill pill--pass">Pass</span></td>
+                    <td style="text-align:center;background:var(--info-bg);"><span class="pill pill--pass">Pass</span></td>
                   </tr>
                   <tr>
                     <td class="cell-strong">Total</td>
                     <td style="text-align:center;" class="cell-strong">100/100</td>
                     <td style="text-align:center;" class="cell-strong">75/100</td>
                     <td style="text-align:center;" class="cell-strong">75/100</td>
+                    <td style="text-align:center;background:var(--info-bg);" class="cell-strong">75/100</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <div class="card__body" style="border-top:1px solid var(--border-soft);">
               <button type="button" class="btn btn--dark">Log calibrated outcome</button>
-              <span class="muted small" style="margin-left:10px;">Records the team's agreed score once discussion below is settled.</span>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card__head">
-              <h3>Discussion</h3>
-              <span class="tag">3 comments</span>
-            </div>
-            <div class="card__body">
-              <div class="banner-msg-row">
-                <div class="banner-msg-row__main">
-                  <div class="banner-msg-row__text"><strong>Hannah Price:</strong> I had this as a Fail — she confirmed the balance before asking the second security question. Transcript timestamp 02:14.</div>
-                  <div class="banner-msg-row__meta">Yesterday, 14:02</div>
-                </div>
-              </div>
-              <div class="banner-msg-row">
-                <div class="banner-msg-row__main">
-                  <div class="banner-msg-row__text"><strong>Charlotte Reid:</strong> Agreed with Hannah — same issue we flagged on INT-10471 last week. Might be worth a refresher for the team, not just Grace.</div>
-                  <div class="banner-msg-row__meta">Yesterday, 14:09</div>
-                </div>
-              </div>
-              <div class="banner-msg-row">
-                <div class="banner-msg-row__main">
-                  <div class="banner-msg-row__text"><strong>Priya Nair:</strong> Good catch, missed that on first listen. Happy to go with Fail — updating my note.</div>
-                  <div class="banner-msg-row__meta">Yesterday, 14:15</div>
-                </div>
-              </div>
-              <div class="form-row" style="margin-top:14px;">
-                <label for="calib-comment">Add a comment</label>
-                <textarea id="calib-comment" rows="2" placeholder="Share your reasoning or respond to another reviewer…"></textarea>
-              </div>
-              <button type="button" class="btn btn--primary btn--sm" style="align-self:flex-start;">Post comment</button>
+              <span class="muted small" style="margin-left:10px;">Records the Agreed outcome column above as this call's final calibrated score.</span>
             </div>
           </div>
         </div>
