@@ -497,6 +497,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .banner { border-radius: var(--radius); padding: 18px 22px; display: flex; align-items: center; gap: 16px; font-weight: 600; }
 .banner--pass { background: var(--success-bg); color: var(--success); }
 .banner--fail { background: var(--danger-bg); color: var(--danger); }
+.banner--warn { background: var(--warning-bg); color: var(--warning); }
 .banner__score { font-size: 30px; font-weight: 800; }
 
 /* Modal */
