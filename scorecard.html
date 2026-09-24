@@ -469,9 +469,11 @@
             </div>
           </div>
 
-          <!-- Your review vs AI — only shown once you've submitted a blind scorecard for this call -->
+          <!-- Your review vs AI — only shown once you've submitted a blind scorecard for this call.
+               Retitled "Review history" and restricted to Manager/Admin once the call moves past
+               Manual Review — see applyBlindComparisonVisibility() in js/app.js. -->
           <div class="card blind-hidden" id="blind-comparison-card">
-            <div class="card__head"><h3>Your review vs AI</h3></div>
+            <div class="card__head"><h3 id="blind-comparison-title">Your review vs AI</h3></div>
             <div class="card__body" id="blind-comparison-body"></div>
           </div>
 

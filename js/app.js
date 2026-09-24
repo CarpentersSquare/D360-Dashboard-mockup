@@ -1039,8 +1039,12 @@
      the marker's own mark/comment (instead of the AI's) everywhere the
      agent-facing scorecard renders. */
   function blindReviewDisagreements(review) { return review.perCriterion.filter(function (c) { return !c.agree; }); }
-  function blindReviewFullyTagged(review) {
-    return blindReviewDisagreements(review).every(function (c) { return !!c.verdict; });
+  // "Fully tagged" requires BOTH an AI Correct/Incorrect tag and a
+  // non-empty "Why?" reason on every differing line — either one
+  // missing blocks Submit for Feedback.
+  function blindReviewIncomplete(c) { return !c.verdict || !c.reason || !c.reason.trim(); }
+  function firstIncompleteDisagreement(review) {
+    return blindReviewDisagreements(review).filter(blindReviewIncomplete)[0];
   }
 
   var VERDICT_WORDS = { P: "Pass", F: "Fail", NA: "N/A", PWD: "PWD" };
@@ -1095,8 +1099,9 @@
       '</ul>' +
       '<p class="small muted" style="margin-top:12px;">' + agreeCount + ' of ' + review.perCriterion.length + ' criteria matched the AI’s marking.</p>' +
       (disagreements.length && getQaStatus(review.ref) === QA_STATUS.MANUAL_REVIEW ?
-        '<button type="button" class="btn btn--primary" id="blind-submit-feedback-btn" style="margin-top:6px;" ' + (blindReviewFullyTagged(review) ? "" : "disabled") + '>Submit for Feedback</button>' +
-        '<p class="small muted" style="margin-top:6px;" id="blind-submit-feedback-hint">Tag every differing line above before submitting.</p>'
+        '<button type="button" class="btn btn--primary" id="blind-submit-feedback-btn" style="margin-top:6px;">Submit for Feedback</button>' +
+        '<p class="small muted" style="margin-top:6px;" id="blind-submit-feedback-hint">Tag every differing line above and give a reason before submitting.</p>' +
+        '<p class="small" style="margin-top:6px;color:var(--danger);font-weight:600;display:none;" id="blind-submit-feedback-error">Tag every differing line "AI Correct" or "AI Incorrect" and fill in why before submitting.</p>'
         : disagreements.length ?
         '<p class="small" style="margin-top:6px;color:var(--success);font-weight:600;">Submitted for feedback.</p>'
         : '<p class="small" style="margin-top:6px;color:var(--success);font-weight:600;">Scores matched — status automatically advanced to Requires Feedback.</p>');
@@ -1123,11 +1128,35 @@
         if (!r) return;
         var c = r.perCriterion.filter(function (x) { return x.id === id; })[0];
         if (c) { c.reason = ta.value; saveBlindReviews(reviews); }
+        // Clear the red incomplete outline live as soon as this line has
+        // both a tag and a reason, rather than waiting for the next
+        // submit attempt to re-check it.
+        var li = ta.closest("[data-diff-criterion]");
+        if (li && c && !blindReviewIncomplete(c)) li.classList.remove("blind-diff-row--incomplete");
       });
     });
     var submitFeedbackBtn = document.getElementById("blind-submit-feedback-btn");
     if (submitFeedbackBtn) {
       submitFeedbackBtn.addEventListener("click", function () {
+        var reviews = getBlindReviews();
+        var r = reviews[review.ref];
+        if (!r) return;
+        var incomplete = firstIncompleteDisagreement(r);
+        var errorEl = document.getElementById("blind-submit-feedback-error");
+        if (incomplete) {
+          if (errorEl) errorEl.style.display = "";
+          var li = body.querySelector('[data-diff-criterion="' + incomplete.id + '"]');
+          if (li) {
+            li.classList.add("blind-diff-row--incomplete");
+            li.scrollIntoView({ behavior: "smooth", block: "center" });
+            var target = !incomplete.verdict
+              ? li.querySelector("[data-ai-tag]")
+              : li.querySelector(".ai-tag-reason");
+            if (target) target.focus();
+          }
+          return;
+        }
+        if (errorEl) errorEl.style.display = "none";
         setQaStatus(review.ref, QA_STATUS.REQUIRES_FEEDBACK);
         renderScorecardActions();
       });
@@ -1180,6 +1209,7 @@
       });
     }
     renderBlindComparison(existing);
+    applyBlindComparisonVisibility(status);
   }
 
   function wireBlindScorecard() {
@@ -1412,16 +1442,72 @@
   /* The AI's own Compliance/Operational marking, read back in
      #ai-scorecard-reveal, reuses the same clickable .colin-verdict
      buttons and editable .colin-comment textareas as colin-scorecard
-     .html's live evaluation form (see wireVerdictToggles()) — fine
-     once a call has actually been through review, but while it's
-     still Needs Review there's been no review yet, so it must be
-     read-only rather than silently editable. */
+     .html's live evaluation form (see wireVerdictToggles()) — editable
+     only while the call is in Manual Review (a Manager/Admin looking
+     at the AI's original read before deciding how to route it); locked
+     read-only both before that (Needs Review — no review has happened
+     yet) and after (Requires Feedback onward — see
+     applyFinalScorecardMerge(), which is what fills this section's
+     marks/comments at that point). */
   function applyAiScorecardReadOnly(readOnly) {
     var reveal = document.getElementById("ai-scorecard-reveal");
     if (!reveal) return;
     reveal.querySelectorAll(".colin-verdict button").forEach(function (btn) { btn.disabled = readOnly; });
     reveal.querySelectorAll(".colin-comment textarea").forEach(function (ta) { ta.disabled = readOnly; });
   }
+
+  /* Once a call has moved past Manual Review, the AI's own reveal
+     becomes the single scorecard actually used in the feedback session
+     with the agent: each line shows the AI's mark/comment, UNLESS the
+     blind reviewer tagged it "AI Incorrect", in which case their own
+     mark/comment overrides it (an untagged/no-review line just keeps
+     the AI's own read). Only meaningful once status has moved past
+     Manual Review — applyAiScorecardReadOnly() locks it at the same
+     point, so this is the last content change it'll get. */
+  function applyFinalScorecardMerge(ref, status) {
+    var reveal = document.getElementById("ai-scorecard-reveal");
+    if (!reveal) return;
+    var isFinal = status !== QA_STATUS.NEEDS_REVIEW && status !== QA_STATUS.MANUAL_REVIEW;
+    if (!isFinal) return;
+    var review = getBlindReviews()[ref];
+    if (!review) return;
+    review.perCriterion.forEach(function (c) {
+      var item = reveal.querySelector('[data-criterion="' + c.id + '"]');
+      if (!item) return;
+      var useHuman = c.verdict === "ai-incorrect";
+      var mark = useHuman ? c.human : c.ai;
+      item.querySelectorAll(".colin-verdict button").forEach(function (btn) {
+        btn.classList.toggle("active", btn.getAttribute("data-v") === mark);
+      });
+      var ta = item.querySelector(".colin-comment textarea");
+      if (ta) ta.value = (useHuman ? c.humanComment : c.aiComment) || "";
+    });
+  }
+
+  /* "Your review vs AI" stays visible to the reviewer actively tagging
+     differences during Manual Review, but once a call moves past that
+     — the merged, locked scorecard above is now the record everyone
+     else works from — the diff becomes a Manager/Admin-only "Review
+     history" of what changed and why, rather than something every
+     role keeps seeing. */
+  function applyBlindComparisonVisibility(status) {
+    var card = document.getElementById("blind-comparison-card");
+    if (!card) return;
+    var title = document.getElementById("blind-comparison-title");
+    if (card.classList.contains("blind-hidden")) return;
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var isFinal = status !== QA_STATUS.NEEDS_REVIEW && status !== QA_STATUS.MANUAL_REVIEW;
+    card.style.display = (!isFinal || role === "admin" || role === "manager") ? "" : "none";
+    if (title) title.textContent = isFinal ? "Review history" : "Your review vs AI";
+  }
+
+  /* Transient, in-memory only (not persisted): which routing button a
+     Manager/Admin has clicked on a Needs Review call, while they still
+     have to pick who it goes to before it's confirmed. null shows the
+     initial two routing buttons; "manual"/"feedback" shows the
+     mandatory reviewer picker + Confirm/Cancel instead. Resets on
+     reload, which is fine — an unconfirmed pick was never saved. */
+  var qaPendingRoute = null;
 
   function renderScorecardActions() {
     var wrap = document.getElementById("scorecard-flow");
@@ -1430,7 +1516,9 @@
     var agentName = wrap.getAttribute("data-agent-name") || "the agent";
     var status = getQaStatus(ref);
     var meta = QA_STATUS_META[status];
-    applyAiScorecardReadOnly(status === QA_STATUS.NEEDS_REVIEW);
+    applyFinalScorecardMerge(ref, status);
+    applyAiScorecardReadOnly(status !== QA_STATUS.MANUAL_REVIEW);
+    applyBlindComparisonVisibility(status);
 
     var pill = document.getElementById("scorecard-status-pill");
     if (pill) {
@@ -1445,15 +1533,23 @@
     var html = "";
 
     if (status === QA_STATUS.NEEDS_REVIEW) {
-      html = '<p class="small muted" style="margin:0 0 12px;">This call missed the auto-QA gate (Operational &lt; 85% or a 0 in Compliance). Route it for full manual marking, or trust the AI\'s mark and send straight to a feedback session.</p>' +
-        '<button type="button" class="btn btn--primary" data-action="route-manual" style="width:100%;justify-content:center;margin-bottom:8px;">Send to Manual Review</button>' +
-        '<button type="button" class="btn btn--ghost" data-action="route-feedback" style="width:100%;justify-content:center;">Submit for Feedback</button>' +
-        '<div class="form-row" data-roles="admin,manager" style="margin-top:14px;">' +
-        '<label for="scorecard-assign-reviewer">Assign to reviewer</label>' +
-        '<select id="scorecard-assign-reviewer" data-scorecard-assign="' + ref + '">' +
-        qaTrainerTeamleadOptionsHtml(qaAssignedReviewer(ref)) +
-        '</select>' +
-        '</div>';
+      if (!qaPendingRoute) {
+        html = '<p class="small muted" style="margin:0 0 12px;">This call missed the auto-QA gate (Operational &lt; 85% or a 0 in Compliance). Route it for full manual marking, or trust the AI\'s mark and send straight to a feedback session.</p>' +
+          '<button type="button" class="btn btn--primary" data-action="pick-route-manual" style="width:100%;justify-content:center;margin-bottom:8px;">Send to Manual Review</button>' +
+          '<button type="button" class="btn btn--ghost" data-action="pick-route-feedback" style="width:100%;justify-content:center;">Submit for Feedback</button>';
+      } else {
+        var pendingLabel = qaPendingRoute === "manual" ? "Send to Manual Review" : "Submit for Feedback";
+        html = '<p class="small muted" style="margin:0 0 12px;">Choose who this call is assigned to before you ' + pendingLabel.toLowerCase() + '.</p>' +
+          '<div class="form-row" style="margin-bottom:12px;">' +
+          '<label for="qa-route-reviewer-select">Assign to reviewer</label>' +
+          '<select id="qa-route-reviewer-select">' +
+          '<option value="" disabled' + (qaAssignedReviewer(ref) ? "" : " selected") + '>Select reviewer…</option>' +
+          qaTrainerTeamleadOptionsHtml(qaAssignedReviewer(ref)) +
+          '</select>' +
+          '</div>' +
+          '<button type="button" class="btn btn--primary" id="qa-route-confirm-btn" data-action="confirm-route" style="width:100%;justify-content:center;margin-bottom:8px;"' + (qaAssignedReviewer(ref) ? "" : " disabled") + '>' + pendingLabel + '</button>' +
+          '<button type="button" class="btn btn--ghost" data-action="cancel-route" style="width:100%;justify-content:center;">Cancel</button>';
+      }
     } else if (status === QA_STATUS.MANUAL_REVIEW) {
       html = '<p class="small muted" style="margin:0;">Manual marking in progress — see the blind scorecard above.</p>';
     } else if (status === QA_STATUS.REQUIRES_FEEDBACK) {
@@ -1509,11 +1605,30 @@
       var ref = wrap.getAttribute("data-scorecard-ref");
       var agentName = wrap.getAttribute("data-agent-name") || "the agent";
 
-      var routeManual = e.target.closest('[data-action="route-manual"]');
-      if (routeManual) { setQaStatus(ref, QA_STATUS.MANUAL_REVIEW); refreshBlindState(); renderScorecardActions(); return; }
+      var pickRouteManual = e.target.closest('[data-action="pick-route-manual"]');
+      if (pickRouteManual) { qaPendingRoute = "manual"; renderScorecardActions(); return; }
 
-      var routeFeedback = e.target.closest('[data-action="route-feedback"]');
-      if (routeFeedback) { setQaStatus(ref, QA_STATUS.REQUIRES_FEEDBACK); refreshBlindState(); renderScorecardActions(); return; }
+      var pickRouteFeedback = e.target.closest('[data-action="pick-route-feedback"]');
+      if (pickRouteFeedback) { qaPendingRoute = "feedback"; renderScorecardActions(); return; }
+
+      var cancelRoute = e.target.closest('[data-action="cancel-route"]');
+      if (cancelRoute) { qaPendingRoute = null; renderScorecardActions(); return; }
+
+      var confirmRoute = e.target.closest('[data-action="confirm-route"]');
+      if (confirmRoute) {
+        var reviewerSelect = document.getElementById("qa-route-reviewer-select");
+        var reviewer = reviewerSelect ? reviewerSelect.value : "";
+        if (!reviewer) return; // button is disabled until a reviewer is chosen, but guard anyway
+        var assignments = getQaAssignments();
+        assignments[ref] = reviewer;
+        saveQaAssignments(assignments);
+        setQaStatus(ref, qaPendingRoute === "manual" ? QA_STATUS.MANUAL_REVIEW : QA_STATUS.REQUIRES_FEEDBACK);
+        qaPendingRoute = null;
+        refreshBlindState();
+        renderScorecardActions();
+        renderQaAssignmentAlert();
+        return;
+      }
 
       var startFeedback = e.target.closest('[data-action="start-feedback"]');
       if (startFeedback) {
@@ -1602,13 +1717,10 @@
     });
 
     document.addEventListener("change", function (e) {
-      var assignSelect = e.target.closest("[data-scorecard-assign]");
-      if (!assignSelect) return;
-      var assignments = getQaAssignments();
-      assignments[assignSelect.getAttribute("data-scorecard-assign")] = assignSelect.value;
-      saveQaAssignments(assignments);
-      renderQaAssignmentAlert();
-      refreshBlindState();
+      var reviewerSelect = e.target.closest("#qa-route-reviewer-select");
+      if (!reviewerSelect) return;
+      var confirmBtn = document.getElementById("qa-route-confirm-btn");
+      if (confirmBtn) confirmBtn.disabled = !reviewerSelect.value;
     });
   }
 
@@ -1680,16 +1792,15 @@
 
   /* Same assignment store as the QA Review queue's "Assigned reviewer"
      column (d360-qa-assignments), but narrowed to Trainer/Team lead —
-     the roles who actually do the blind marking — for the "Assign to
-     reviewer" control a Manager/Admin sees on scorecard.html while a
-     call is still Needs Review. */
+     the roles who actually do the blind marking — for the mandatory
+     "Assign to reviewer" picker a Manager/Admin sees when routing a
+     Needs Review call. No "— Unassigned —" option: picking who the
+     call goes to is a required step before it can be routed. */
   function qaTrainerTeamleadOptionsHtml(selected) {
     var reviewers = getUsers().filter(function (u) { return u.role === "trainer" || u.role === "teamlead"; });
-    var html = '<option value=""' + (!selected ? " selected" : "") + '>— Unassigned —</option>';
-    html += reviewers.map(function (u) {
+    return reviewers.map(function (u) {
       return '<option value="' + u.name + '"' + (u.name === selected ? " selected" : "") + '>' + u.name + '</option>';
     }).join("");
-    return html;
   }
 
   /* QA Review's "Assigned reviewer" column is read-only text — actually
