@@ -1373,7 +1373,13 @@
     if (status === QA_STATUS.NEEDS_REVIEW) {
       html = '<p class="small muted" style="margin:0 0 12px;">This call missed the auto-QA gate (Operational &lt; 85% or a 0 in Compliance). Route it for full manual marking, or trust the AI\'s mark and send straight to a feedback session.</p>' +
         '<button type="button" class="btn btn--primary" data-action="route-manual" style="width:100%;justify-content:center;margin-bottom:8px;">Send to Manual Review</button>' +
-        '<button type="button" class="btn btn--ghost" data-action="route-feedback" style="width:100%;justify-content:center;">Submit for Feedback</button>';
+        '<button type="button" class="btn btn--ghost" data-action="route-feedback" style="width:100%;justify-content:center;">Submit for Feedback</button>' +
+        '<div class="form-row" data-roles="admin,manager" style="margin-top:14px;">' +
+        '<label for="scorecard-assign-reviewer">Assign to reviewer</label>' +
+        '<select id="scorecard-assign-reviewer" data-scorecard-assign="' + ref + '">' +
+        qaTrainerTeamleadOptionsHtml(qaAssignedReviewer(ref)) +
+        '</select>' +
+        '</div>';
     } else if (status === QA_STATUS.MANUAL_REVIEW) {
       html = '<p class="small muted" style="margin:0;">Manual marking in progress — see the blind scorecard above.</p>';
     } else if (status === QA_STATUS.REQUIRES_FEEDBACK) {
@@ -1520,6 +1526,15 @@
       d.decisions[id].justification = justification.value;
       saveQaDisputes(disputesMap);
     });
+
+    document.addEventListener("change", function (e) {
+      var assignSelect = e.target.closest("[data-scorecard-assign]");
+      if (!assignSelect) return;
+      var assignments = getQaAssignments();
+      assignments[assignSelect.getAttribute("data-scorecard-assign")] = assignSelect.value;
+      saveQaAssignments(assignments);
+      renderQaAssignmentAlert();
+    });
   }
 
   /* Two Newsfeed alerts simulating the portal notifications the QA flow
@@ -1590,6 +1605,20 @@
 
   function qaReviewerOptionsHtml(selected) {
     var reviewers = getUsers().filter(function (u) { return u.role !== "agent"; });
+    var html = '<option value=""' + (!selected ? " selected" : "") + '>— Unassigned —</option>';
+    html += reviewers.map(function (u) {
+      return '<option value="' + u.name + '"' + (u.name === selected ? " selected" : "") + '>' + u.name + '</option>';
+    }).join("");
+    return html;
+  }
+
+  /* Same assignment store as the QA Review queue's "Assigned reviewer"
+     column (d360-qa-assignments), but narrowed to Trainer/Team lead —
+     the roles who actually do the blind marking — for the "Assign to
+     reviewer" control a Manager/Admin sees on scorecard.html while a
+     call is still Needs Review. */
+  function qaTrainerTeamleadOptionsHtml(selected) {
+    var reviewers = getUsers().filter(function (u) { return u.role === "trainer" || u.role === "teamlead"; });
     var html = '<option value=""' + (!selected ? " selected" : "") + '>— Unassigned —</option>';
     html += reviewers.map(function (u) {
       return '<option value="' + u.name + '"' + (u.name === selected ? " selected" : "") + '>' + u.name + '</option>';
@@ -3596,6 +3625,7 @@
     wireRowLinks();
     wireTemplateCopy();
     wireRangePickers();
+    seedUsers();
     seedQaShoutouts();
     renderQaShoutouts();
     renderColinQueue();
@@ -3613,7 +3643,6 @@
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
-    seedUsers();
     renderQaAssignmentSelects();
     wireQaAssignmentSelects();
     renderQaAssignmentAlert();
