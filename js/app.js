@@ -1335,40 +1335,14 @@
     saveQaStatusOverrides(overrides);
   }
 
-  /* Redraws every [data-status-cell] on the QA Review queue with the
-     current status pill plus whatever action a Manager/Admin can take
-     from here — right now just the initial Needs Review routing
-     decision; everything past that (manual marking, feedback session,
-     disputes) happens on scorecard.html itself. */
+  /* Redraws every [data-status-cell] on the QA Review queue with just
+     the current status pill — the table is read-only; routing a call
+     (Send to Manual Review / Submit for Feedback / Assign to reviewer)
+     all happens on scorecard.html's own Reviewer actions card. */
   function applyQaStatusOverrides() {
     document.querySelectorAll("[data-status-cell]").forEach(function (cell) {
-      var ref = cell.getAttribute("data-status-cell");
-      var status = getQaStatus(ref);
-      var meta = QA_STATUS_META[status];
-      var actions = "";
-      if (status === QA_STATUS.NEEDS_REVIEW) {
-        actions =
-          ' <button class="btn btn--sm btn--ghost" type="button" data-route-manual="' + ref + '" data-roles="admin,manager">Send to Manual Review</button>' +
-          ' <button class="btn btn--sm btn--ghost" type="button" data-route-feedback="' + ref + '" data-roles="admin,manager">Submit for Feedback</button>';
-      }
-      cell.innerHTML = '<span class="pill ' + meta.pill + '">' + meta.label + '</span>' + actions;
-    });
-    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
-  }
-
-  function wireQaStatusActions() {
-    document.addEventListener("click", function (e) {
-      var manualBtn = e.target.closest("[data-route-manual]");
-      if (manualBtn) {
-        setQaStatus(manualBtn.getAttribute("data-route-manual"), QA_STATUS.MANUAL_REVIEW);
-        applyQaStatusOverrides();
-        return;
-      }
-      var feedbackBtn = e.target.closest("[data-route-feedback]");
-      if (feedbackBtn) {
-        setQaStatus(feedbackBtn.getAttribute("data-route-feedback"), QA_STATUS.REQUIRES_FEEDBACK);
-        applyQaStatusOverrides();
-      }
+      var meta = QA_STATUS_META[getQaStatus(cell.getAttribute("data-status-cell"))];
+      cell.innerHTML = '<span class="pill ' + meta.pill + '">' + meta.label + '</span>';
     });
   }
 
@@ -1704,15 +1678,6 @@
     return QA_ASSIGNMENT_DEFAULTS[ref] || "";
   }
 
-  function qaReviewerOptionsHtml(selected) {
-    var reviewers = getUsers().filter(function (u) { return u.role !== "agent"; });
-    var html = '<option value=""' + (!selected ? " selected" : "") + '>— Unassigned —</option>';
-    html += reviewers.map(function (u) {
-      return '<option value="' + u.name + '"' + (u.name === selected ? " selected" : "") + '>' + u.name + '</option>';
-    }).join("");
-    return html;
-  }
-
   /* Same assignment store as the QA Review queue's "Assigned reviewer"
      column (d360-qa-assignments), but narrowed to Trainer/Team lead —
      the roles who actually do the blind marking — for the "Assign to
@@ -1727,25 +1692,14 @@
     return html;
   }
 
-  function renderQaAssignmentSelects() {
-    var cells = document.querySelectorAll("[data-assign-cell]");
-    if (!cells.length) return;
-    cells.forEach(function (cell) {
-      var ref = cell.getAttribute("data-assign-cell");
-      cell.innerHTML = '<select style="padding:6px 10px;font-size:13px;" data-assign-reviewer="' + ref + '">' +
-        qaReviewerOptionsHtml(qaAssignedReviewer(ref)) + '</select>';
-    });
-  }
-
-  function wireQaAssignmentSelects() {
-    document.addEventListener("change", function (e) {
-      var select = e.target.closest("[data-assign-reviewer]");
-      if (!select) return;
-      var assignments = getQaAssignments();
-      assignments[select.getAttribute("data-assign-reviewer")] = select.value;
-      saveQaAssignments(assignments);
-      renderQaAssignmentAlert();
-      scopeQaQueueToReviewer();
+  /* QA Review's "Assigned reviewer" column is read-only text — actually
+     assigning a reviewer happens via scorecard.html's own "Assign to
+     reviewer" control while a call is Needs Review, which writes to
+     the same d360-qa-assignments store this reads. */
+  function renderQaAssignmentCells() {
+    document.querySelectorAll("[data-assign-cell]").forEach(function (cell) {
+      var reviewer = qaAssignedReviewer(cell.getAttribute("data-assign-cell"));
+      cell.innerHTML = reviewer ? esc(reviewer) : '<span class="muted">— Unassigned —</span>';
     });
   }
 
@@ -4204,7 +4158,6 @@
     renderQaShoutouts();
     renderColinQueue();
     applyQaStatusOverrides();
-    wireQaStatusActions();
     wireBlindScorecard();
     renderAiHumanDiff();
     renderScorecardActions();
@@ -4217,8 +4170,7 @@
     seedBannerMessages();
     renderBanner(currentBannerRole());
     wireBannerEditor();
-    renderQaAssignmentSelects();
-    wireQaAssignmentSelects();
+    renderQaAssignmentCells();
     renderQaAssignmentAlert();
     wireCalibrationPage();
     renderDiallerAgents();
