@@ -469,19 +469,20 @@
             </div>
           </div>
 
-          <!-- Your review vs AI — only shown once you've submitted a blind scorecard for this call.
-               Retitled "Review history" and restricted to Manager/Admin once the call moves past
-               Manual Review — see applyBlindComparisonVisibility() in js/app.js. -->
-          <div class="card blind-hidden" id="blind-comparison-card">
-            <div class="card__head"><h3 id="blind-comparison-title">Your review vs AI</h3></div>
-            <div class="card__body" id="blind-comparison-body"></div>
-          </div>
+          <!-- Submitted scorecard / Review history — tabbed; "Submitted" (the AI's marking, merged
+               with any "AI Incorrect" overrides once past Manual Review, read-only per
+               applyAiScorecardReadOnly()) is always the default view. The "Review history" tab
+               (the AI vs Human diff) only appears when relevant — visible to the reviewer while
+               actively tagging during Manual Review, then Manager/Admin only once the call is
+               past that — see applyBlindComparisonVisibility() in js/app.js. -->
+          <div class="blind-reveal blind-hidden">
+          <div data-tabs>
+            <div class="tabs" role="tablist">
+              <button type="button" class="tab active" data-tab="submitted">Submitted</button>
+              <button type="button" class="tab" data-tab="history" id="review-history-tab-btn" style="display:none;">Your review vs AI</button>
+            </div>
 
-          <!-- Evaluation (AI) — same layout as the Interaction Evaluation panel on Colin Scorecard.
-               Read-only while the call is still Needs Review — see applyAiScorecardReadOnly() in
-               js/app.js — so the AI's own marking can't be amended here before it's even been
-               routed for review. -->
-          <div class="blind-reveal blind-hidden" id="ai-scorecard-reveal">
+            <div class="tab-panel active" data-panel="submitted" id="ai-scorecard-reveal">
           <div class="colin-section-bar"><span>Feedback</span></div>
           <div class="colin-section-body">
             <p class="muted small" style="font-style:italic;">"Overall a compliant, well-handled call — one gap on the identification step. Flag for a quick coaching note on the intro script, nothing more."</p>
@@ -596,6 +597,12 @@
                 <div class="colin-verdict"><button type="button" data-v="P" class="active">P</button><button type="button" data-v="F">F</button><button type="button" data-v="PWD">PWD</button><button type="button" data-v="NA">N/A</button></div>
                 <div class="colin-comment"><textarea rows="1" placeholder="Comments"></textarea></div>
               </div>
+            </div>
+          </div>
+            </div>
+
+            <div class="tab-panel" data-panel="history" id="blind-comparison-panel">
+              <div id="blind-comparison-body"></div>
             </div>
           </div>
           </div>
