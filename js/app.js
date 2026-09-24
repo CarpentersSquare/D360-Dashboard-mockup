@@ -1417,6 +1417,20 @@
     return "QA criterion";
   }
 
+  /* The AI's own Compliance/Operational marking, read back in
+     #ai-scorecard-reveal, reuses the same clickable .colin-verdict
+     buttons and editable .colin-comment textareas as colin-scorecard
+     .html's live evaluation form (see wireVerdictToggles()) — fine
+     once a call has actually been through review, but while it's
+     still Needs Review there's been no review yet, so it must be
+     read-only rather than silently editable. */
+  function applyAiScorecardReadOnly(readOnly) {
+    var reveal = document.getElementById("ai-scorecard-reveal");
+    if (!reveal) return;
+    reveal.querySelectorAll(".colin-verdict button").forEach(function (btn) { btn.disabled = readOnly; });
+    reveal.querySelectorAll(".colin-comment textarea").forEach(function (ta) { ta.disabled = readOnly; });
+  }
+
   function renderScorecardActions() {
     var wrap = document.getElementById("scorecard-flow");
     if (!wrap) return;
@@ -1424,6 +1438,7 @@
     var agentName = wrap.getAttribute("data-agent-name") || "the agent";
     var status = getQaStatus(ref);
     var meta = QA_STATUS_META[status];
+    applyAiScorecardReadOnly(status === QA_STATUS.NEEDS_REVIEW);
 
     var pill = document.getElementById("scorecard-status-pill");
     if (pill) {

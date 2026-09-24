@@ -455,8 +455,11 @@
             <div class="card__body" id="blind-comparison-body"></div>
           </div>
 
-          <!-- Evaluation (AI) — same layout as the Interaction Evaluation panel on Colin Scorecard -->
-          <div class="blind-reveal blind-hidden">
+          <!-- Evaluation (AI) — same layout as the Interaction Evaluation panel on Colin Scorecard.
+               Read-only while the call is still Needs Review — see applyAiScorecardReadOnly() in
+               js/app.js — so the AI's own marking can't be amended here before it's even been
+               routed for review. -->
+          <div class="blind-reveal blind-hidden" id="ai-scorecard-reveal">
           <div class="colin-section-bar"><span>Feedback</span></div>
           <div class="colin-section-body">
             <p class="muted small" style="font-style:italic;">"Overall a compliant, well-handled call — one gap on the identification step. Flag for a quick coaching note on the intro script, nothing more."</p>
