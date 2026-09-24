@@ -247,45 +247,15 @@
                   <span class="recording-player__time" id="recording-time-total">3:15</span>
                 </div>
               </div>
-              <hr class="divider" style="margin:16px 0;" />
-              <div class="transcript">
-                <div class="turn turn--agent">
-                  <span class="avatar avatar--sm">DO</span>
-                  <div>
-                    <div class="turn__meta">Daniel Okafor · 02:14</div>
-                    <div class="turn__bubble">Thanks for holding, Tom. I can see your account here — what can I help you with today?</div>
-                  </div>
-                </div>
-                <div class="turn">
-                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
-                  <div>
-                    <div class="turn__meta">Tom Beresford · 02:21</div>
-                    <div class="turn__bubble">I just wanted to check the balance on my account before the renewal goes out.</div>
-                  </div>
-                </div>
-                <div class="turn turn--agent">
-                  <span class="avatar avatar--sm">DO</span>
-                  <div>
-                    <div class="turn__meta">Daniel Okafor · 02:29</div>
-                    <div class="turn__bubble">Of course — your current balance is £148.50, due on the 14th.</div>
-                  </div>
-                </div>
-                <div class="turn">
-                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
-                  <div>
-                    <div class="turn__meta">Tom Beresford · 02:38</div>
-                    <div class="turn__bubble">Great, thanks. Could someone call me back about the renewal options?</div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
-          <!-- Shown to Trainer/Team lead while this call is still Needs Review — waiting on a
-               manager to route it to Manual Review before blind marking can start. -->
+          <!-- Shown to Trainer/Team lead when this call isn't theirs to mark yet — either it's
+               still Needs Review, or it's in Manual Review but assigned to someone else. Text is
+               filled in by refreshBlindState(). -->
           <div class="card blind-hidden" id="blind-waiting-note" data-roles="teamlead,trainer">
             <div class="card__body">
-              <p class="small muted" style="margin:0;">This call is still <strong>Needs Review</strong> — waiting on a Manager/Admin to send it to Manual Review before you can mark it blind.</p>
+              <p class="small muted" style="margin:0;" id="blind-waiting-note-text">This call is still <strong>Needs Review</strong> — waiting on a Manager/Admin to send it to Manual Review before you can mark it blind.</p>
             </div>
           </div>
 
