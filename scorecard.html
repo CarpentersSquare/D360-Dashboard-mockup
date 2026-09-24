@@ -195,7 +195,7 @@
     </header>
 
     <!-- ===== Main ===== -->
-    <main class="main">
+    <main class="main" id="scorecard-flow" data-scorecard-ref="INT-10477">
       <div class="breadcrumb">
         <a href="qa.html">QA Review</a> / INT-10477 scorecard
       </div>
@@ -214,9 +214,9 @@
         </div>
       </div>
 
-      <!-- Flagged banner -->
-      <div class="banner banner--fail mb-18">
-        <span class="banner__score">70/100</span>
+      <!-- Flagged banner — hidden until the reviewer submits their own blind scorecard (or immediately for the Agent viewing their own call) -->
+      <div class="banner banner--fail mb-18 blind-reveal blind-hidden">
+        <span class="banner__score">60/100</span>
         <div>
           <div style="font-size:15px;">Flagged for review — Identification not completed</div>
           <div class="small" style="font-weight:500;margin-top:2px;">Full name and 2 acceptable forms of identification were not taken before account details were discussed.</div>
@@ -227,13 +227,249 @@
         <!-- ===== MAIN COLUMN ===== -->
         <div class="stack">
 
-          <!-- Evaluation — same layout as the Interaction Evaluation panel on Colin Scorecard -->
+          <!-- Call transcript — always visible, no AI annotation, so the reviewer can mark blind -->
+          <div class="card">
+            <div class="card__head">
+              <h3>Call transcript</h3>
+            </div>
+            <div class="card__body">
+              <div class="transcript">
+                <div class="turn turn--agent">
+                  <span class="avatar avatar--sm">DO</span>
+                  <div>
+                    <div class="turn__meta">Daniel Okafor · 02:14</div>
+                    <div class="turn__bubble">Thanks for holding, Tom. I can see your account here — what can I help you with today?</div>
+                  </div>
+                </div>
+                <div class="turn">
+                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
+                  <div>
+                    <div class="turn__meta">Tom Beresford · 02:21</div>
+                    <div class="turn__bubble">I just wanted to check the balance on my account before the renewal goes out.</div>
+                  </div>
+                </div>
+                <div class="turn turn--agent">
+                  <span class="avatar avatar--sm">DO</span>
+                  <div>
+                    <div class="turn__meta">Daniel Okafor · 02:29</div>
+                    <div class="turn__bubble">Of course — your current balance is £148.50, due on the 14th.</div>
+                  </div>
+                </div>
+                <div class="turn">
+                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
+                  <div>
+                    <div class="turn__meta">Tom Beresford · 02:38</div>
+                    <div class="turn__bubble">Great, thanks. Could someone call me back about the renewal options?</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Your scorecard — blind marking form; hidden once submitted (or for the Agent viewing their own call).
+               Same Compliance/Operational rubric as the AI's own reveal below, so the comparison is meaningful. -->
+          <div class="card blind-only" id="blind-scorecard-card">
+            <div class="card__head">
+              <h3>Your scorecard</h3>
+              <span class="tag" title="You won't see the AI's result until you submit">Mark blind · 20 criteria</span>
+            </div>
+            <div class="card__body" id="blind-criteria-list">
+              <h4 class="section-title">Compliance</h4>
+              <div class="colin-checklist-scroll">
+                <div class="colin-compliance-item" data-criterion="c1" data-ai="P">
+                  <div class="colin-compliance-item__q">Proper greeting and introduction given / Ready for all calls</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c2" data-ai="F">
+                  <div class="colin-compliance-item__q">Applicant or authorised 3rd party provided full name &amp; 2 acceptable forms of identification</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c3" data-ai="P">
+                  <div class="colin-compliance-item__q">Agent did not disclose information to an unauthorised third party</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c4" data-ai="P">
+                  <div class="colin-compliance-item__q">Company&rsquo;s Confidentiality Agreement maintained</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c5" data-ai="P">
+                  <div class="colin-compliance-item__q">Avoided excessive calling: 4 calls total (includes 1 VM using script)</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c6" data-ai="F">
+                  <div class="colin-compliance-item__q">Payment options explained</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c7" data-ai="NA">
+                  <div class="colin-compliance-item__q">Used correct Verbiage with disclosing APR (if applicable)</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c8" data-ai="P">
+                  <div class="colin-compliance-item__q">Entered accurate notes into the system to reflect contents of call</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c9" data-ai="F">
+                  <div class="colin-compliance-item__q">Avoid annoying/harassing consumer</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="c10" data-ai="P">
+                  <div class="colin-compliance-item__q">Correct information provided</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+              </div>
+
+              <h4 class="section-title" style="margin-top:18px;">Operational</h4>
+              <div class="colin-checklist-scroll">
+                <div class="colin-compliance-item" data-criterion="o1" data-ai="P">
+                  <div class="colin-compliance-item__q">Knowledge and complete proficiency in the product</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o2" data-ai="P">
+                  <div class="colin-compliance-item__q">Proactivity / All actions completed</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o3" data-ai="P">
+                  <div class="colin-compliance-item__q">Not interrupting/Good vocabulary/No negative language</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o4" data-ai="P">
+                  <div class="colin-compliance-item__q">Empathy &amp; understanding/Using cust name (At least once)</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o5" data-ai="P">
+                  <div class="colin-compliance-item__q">Addressing inquiry/Resolution</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o6" data-ai="P">
+                  <div class="colin-compliance-item__q">Tone of Voice/Rate of speech</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o7" data-ai="PWD">
+                  <div class="colin-compliance-item__q">Active listening/Reading / Not distracted</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o8" data-ai="P">
+                  <div class="colin-compliance-item__q">Hold Time/Permission to place on hold / check in every 2 mins</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o9" data-ai="F">
+                  <div class="colin-compliance-item__q">Efficiency / Call flow /Unconfident</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+                <div class="colin-compliance-item" data-criterion="o10" data-ai="P">
+                  <div class="colin-compliance-item__q">Summarise / Cust satisfaction / other further assistance</div>
+                  <div class="colin-verdict">
+                    <button type="button" class="blind-mark-btn" data-v="P">P</button>
+                    <button type="button" class="blind-mark-btn" data-v="F">F</button>
+                    <button type="button" class="blind-mark-btn" data-v="PWD">PWD</button>
+                    <button type="button" class="blind-mark-btn" data-v="NA">N/A</button>
+                  </div>
+                </div>
+              </div>
+              <p class="small muted" id="blind-scorecard-hint" style="margin:14px 0 0;">Mark all 20 criteria to submit — you won't see the AI's score or flag reason until you do.</p>
+              <button type="button" class="btn btn--primary" id="blind-scorecard-submit" style="margin-top:14px;" disabled>Submit review</button>
+            </div>
+          </div>
+
+          <!-- Your review vs AI — only shown once you've submitted a blind scorecard for this call -->
+          <div class="card blind-hidden" id="blind-comparison-card">
+            <div class="card__head"><h3>Your review vs AI</h3></div>
+            <div class="card__body" id="blind-comparison-body"></div>
+          </div>
+
+          <!-- Evaluation (AI) — same layout as the Interaction Evaluation panel on Colin Scorecard -->
+          <div class="blind-reveal blind-hidden">
           <div class="colin-section-bar"><span>Feedback</span></div>
           <div class="colin-section-body">
             <p class="muted small" style="font-style:italic;">"Overall a compliant, well-handled call — one gap on the identification step. Flag for a quick coaching note on the intro script, nothing more."</p>
           </div>
 
-          <div class="colin-section-bar" style="margin-top:16px;"><span>Compliance <span>(7/10)</span></span></div>
+          <div class="colin-section-bar" style="margin-top:16px;"><span>Compliance <span>(6/10)</span></span></div>
           <div class="colin-section-body">
             <div class="colin-checklist-scroll">
               <div class="colin-compliance-item">
@@ -344,9 +580,10 @@
               </div>
             </div>
           </div>
+          </div>
 
-          <!-- Flagged moment -->
-          <div class="card">
+          <!-- Flagged moment (AI's own annotated excerpt) -->
+          <div class="card blind-reveal blind-hidden">
             <div class="card__head">
               <h3>Flagged moment</h3>
               <span class="pill pill--flag">02:14 – 02:41</span>
@@ -396,8 +633,10 @@
         <!-- ===== SIDEBAR COLUMN ===== -->
         <div class="stack">
 
-          <!-- Reviewer actions — not shown to Agents viewing their own scorecard -->
-          <div class="card" data-roles="admin,manager,teamlead,trainer">
+          <!-- Reviewer actions — not shown to Agents viewing their own scorecard, and hidden from
+               reviewers until they've submitted their own blind scorecard (agreeing/disputing a
+               flag you haven't seen yet doesn't make sense) -->
+          <div class="card blind-reveal blind-hidden" data-roles="admin,manager,teamlead,trainer">
             <div class="card__head"><h3>Reviewer actions</h3></div>
             <div class="card__body">
               <div class="stack" style="gap:10px;">
@@ -429,20 +668,20 @@
             </div>
           </div>
 
-          <!-- Score breakdown -->
-          <div class="card">
+          <!-- Score breakdown (AI) -->
+          <div class="card blind-reveal blind-hidden">
             <div class="card__head"><h3>Score breakdown</h3></div>
             <div class="card__body">
               <dl class="dl" style="grid-template-columns:1fr auto;gap:10px 16px;">
-                <dt>Compliance</dt><dd>7 / 10</dd>
+                <dt>Compliance</dt><dd>6 / 10</dd>
                 <dt>Operational</dt><dd>8 / 10</dd>
               </dl>
               <hr class="divider" style="margin:16px 0;" />
               <div class="row" style="justify-content:space-between;align-items:baseline;">
                 <span class="cell-strong">Compliance score</span>
-                <span class="kpi__value" style="font-size:24px;margin:0;color:var(--warning);">70/100</span>
+                <span class="kpi__value" style="font-size:24px;margin:0;color:var(--danger);">60/100</span>
               </div>
-              <div class="bar bar--warn" style="margin-top:10px;"><span style="width:70%;"></span></div>
+              <div class="bar bar--danger" style="margin-top:10px;"><span style="width:60%;"></span></div>
               <div class="small muted" style="margin-top:8px;">Matches the score shown in QA Review — based on the Compliance pass count only. Operational is tracked separately and isn't part of this total.</div>
             </div>
           </div>
