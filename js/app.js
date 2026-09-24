@@ -49,6 +49,30 @@
     menu.addEventListener("click", function (e) { e.stopPropagation(); });
   }
 
+  /* ---- 3b. Verdict toggles (P/F/N-A/PWD button groups) ----
+     Generic click-to-activate for any .colin-verdict button group present
+     in a page's static HTML (scorecard.html, calibration.html). Runs once
+     at load, so it only wires markup that's already in the DOM — it never
+     touches colin-scorecard.html's own buttons, which js/colin.js creates
+     dynamically (after this runs) and wires itself, with its own
+     verdicts-array + running-score side effects. */
+  function wireVerdictToggles() {
+    document.querySelectorAll(".colin-verdict").forEach(function (group) {
+      // .blind-mark-btn buttons (scorecard.html's blind marking form) get
+      // their own dedicated wiring from wireBlindScorecard(), which also
+      // records the selection and updates the submit button — skip them
+      // here so a click doesn't run both.
+      group.querySelectorAll("button:not(.blind-mark-btn)").forEach(function (btn) {
+        if (btn.dataset.verdictWired) return; // idempotent — safe to call more than once
+        btn.dataset.verdictWired = "1";
+        btn.addEventListener("click", function () {
+          group.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+        });
+      });
+    });
+  }
+
   /* ---- 4. Tabs ----
      [data-tab="x"] buttons toggle [data-panel="x"] panels within a [data-tabs] group. */
   function wireTabs() {
@@ -889,11 +913,9 @@
       var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
       row.innerHTML =
         '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
-        '<td class="cell-strong">' + r.customerName + '</td>' +
         '<td><span class="cell-user">' + r.agentName + '</span></td>' +
         '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
         '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
-        '<td>' + r.topFailReason + '</td>' +
         '<td data-status-cell="' + r.ref + '">' + statusCell + '</td>' +
         '<td data-assign-cell="' + r.ref + '"></td>' +
         '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
@@ -945,24 +967,42 @@
   }
 
   /* ---- 12c. Blind QA scorecard review (prototype only) ----
-     scorecard.html's "Your scorecard" lets a reviewer mark all 6
-     criteria themselves before seeing anything the AI decided — the
-     flagged banner, the AI's own "Scored criteria"/"Score breakdown"/
+     scorecard.html's "Your scorecard" lets a reviewer mark all 20
+     Compliance/Operational criteria themselves — the same rubric as
+     QA Colin's own evaluation — before seeing anything the AI decided.
+     The flagged banner, the AI's own "Evaluation"/"Score breakdown"/
      "Flagged moment" cards, and Reviewer actions all carry
      .blind-reveal.blind-hidden and only reappear once the reviewer
      submits (or immediately for the Agent viewing their own call,
      who isn't doing a fresh review). The comparison is saved to
      d360-blind-reviews, keyed by interaction ref, which also feeds
      the Manager/Admin-only "AI vs Human" column on the QA Review
-     queue below. */
+     queue below. Only the 10 Compliance criteria count toward the
+     headline AI/human score (matching QA Colin's own scoring, where
+     Operational is tracked separately) — all 20 still show in the
+     per-criterion comparison. */
   var BLIND_REVIEWS_KEY = "d360-blind-reviews";
   var CRITERION_LABELS = {
-    greeting: "Greeting & branding",
-    dpa: "Identity / DPA completed",
-    compliance: "Compliance phrasing",
-    needs: "Needs identified",
-    resolution: "Resolution / next steps",
-    tone: "Tone & empathy"
+    c1: "Proper greeting and introduction given / Ready for all calls",
+    c2: "Applicant or authorised 3rd party provided full name & 2 acceptable forms of identification",
+    c3: "Agent did not disclose information to an unauthorised third party",
+    c4: "Company’s Confidentiality Agreement maintained",
+    c5: "Avoided excessive calling: 4 calls total (includes 1 VM using script)",
+    c6: "Payment options explained",
+    c7: "Used correct Verbiage with disclosing APR (if applicable)",
+    c8: "Entered accurate notes into the system to reflect contents of call",
+    c9: "Avoid annoying/harassing consumer",
+    c10: "Correct information provided",
+    o1: "Knowledge and complete proficiency in the product",
+    o2: "Proactivity / All actions completed",
+    o3: "Not interrupting/Good vocabulary/No negative language",
+    o4: "Empathy & understanding/Using cust name (At least once)",
+    o5: "Addressing inquiry/Resolution",
+    o6: "Tone of Voice/Rate of speech",
+    o7: "Active listening/Reading / Not distracted",
+    o8: "Hold Time/Permission to place on hold / check in every 2 mins",
+    o9: "Efficiency / Call flow /Unconfident",
+    o10: "Summarise / Cust satisfaction / other further assistance"
   };
 
   function getBlindReviews() {
@@ -1021,7 +1061,7 @@
         if (!li) return;
         li.querySelectorAll(".blind-mark-btn").forEach(function (b) {
           b.disabled = true;
-          b.classList.toggle("active", b.getAttribute("data-mark") === c.human);
+          b.classList.toggle("active", b.getAttribute("data-v") === c.human);
         });
       });
     }
@@ -1049,7 +1089,7 @@
         btn.addEventListener("click", function () {
           if (btn.disabled) return;
           var li = btn.closest("[data-criterion]");
-          selections[li.getAttribute("data-criterion")] = btn.getAttribute("data-mark");
+          selections[li.getAttribute("data-criterion")] = btn.getAttribute("data-v");
           li.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.classList.remove("active"); });
           btn.classList.add("active");
           updateSubmitState();
@@ -1060,15 +1100,20 @@
     if (submitBtn) {
       submitBtn.addEventListener("click", function () {
         if (!list) return;
+        // Only the 10 Compliance criteria (ids "c1".."c10") count toward
+        // the headline score, one pass = 10 points — same convention as
+        // QA Colin's own submitScorecard(). Operational criteria ("o1"..
+        // "o10") still show in the per-criterion comparison below but
+        // don't add to either score.
         var humanScore = 0, aiScore = 0;
         var perCriterion = [];
         list.querySelectorAll("[data-criterion]").forEach(function (li) {
           var id = li.getAttribute("data-criterion");
-          var weight = parseInt(li.getAttribute("data-weight"), 10);
+          var isCompliance = id.charAt(0) === "c";
           var ai = li.getAttribute("data-ai");
           var human = selections[id];
-          if (human === "pass") humanScore += weight;
-          if (ai === "pass") aiScore += weight;
+          if (isCompliance && human === "P") humanScore += 10;
+          if (isCompliance && ai === "P") aiScore += 10;
           perCriterion.push({ id: id, ai: ai, human: human, agree: ai === human });
         });
         var review = {
@@ -1166,7 +1211,7 @@
      built on newsfeed.html, which never loads qa.html's own DOM. */
   var QA_ASSIGNMENTS_KEY = "d360-qa-assignments";
   var QA_QUEUE = [
-    { ref: "INT-10477", customer: "Liam Foster", score: 48, reason: "Tone" },
+    { ref: "INT-10477", customer: "Liam Foster", score: 60, reason: "Tone" },
     { ref: "INT-10461", customer: "Tom Beresford", score: 52, reason: "DPA not completed" },
     { ref: "INT-10454", customer: "Raj Sharma", score: 55, reason: "Compliance phrase missing" },
     { ref: "INT-10448", customer: "Nadia Hussain", score: 58, reason: "DPA not completed" },
@@ -3204,6 +3249,7 @@
     setActiveNav();
     wireLogin();
     wireAccountMenu();
+    wireVerdictToggles();
     wireTabs();
     wireModals();
     wireEsc();
@@ -3270,4 +3316,5 @@
 
   window.D360 = window.D360 || {};
   window.D360.assignTraining = assignTraining;
+  window.D360.wireVerdictToggles = wireVerdictToggles;
 })();
