@@ -497,6 +497,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .banner { border-radius: var(--radius); padding: 18px 22px; display: flex; align-items: center; gap: 16px; font-weight: 600; }
 .banner--pass { background: var(--success-bg); color: var(--success); }
 .banner--fail { background: var(--danger-bg); color: var(--danger); }
+.banner--warn { background: var(--warning-bg); color: var(--warning); }
 .banner__score { font-size: 30px; font-weight: 800; }
 
 /* Modal */
@@ -974,6 +975,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
   display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;
 }
 .colin-compliance-item:last-child { border-bottom: none; }
+.colin-checklist-scroll { max-height: 360px; overflow-y: auto; }
 .colin-compliance-item__q { flex: 2; min-width: 220px; font-size: 13.5px; color: var(--ink); }
 .colin-verdict { display: flex; gap: 6px; flex: none; }
 .colin-verdict button {
@@ -984,6 +986,8 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .colin-verdict button[data-v="P"].active { background: var(--success-bg); border-color: var(--success); color: var(--success); }
 .colin-verdict button[data-v="F"].active { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
 .colin-verdict button[data-v="NA"].active { background: #EEEEEE; border-color: var(--hairline); color: var(--muted); }
+.colin-verdict button:disabled { cursor: not-allowed; opacity: .55; }
+.colin-comment textarea:disabled { cursor: not-allowed; opacity: .7; background: var(--bg); }
 .colin-comment { flex: 1; min-width: 200px; }
 .colin-comment textarea {
   width: 100%; font-family: var(--font); font-size: 12.5px; border: 1px solid var(--border);
@@ -1222,3 +1226,6 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .agent-pick.active { background: var(--info-bg); border-color: var(--indigo); }
 .agent-pick .check { color: var(--indigo); visibility: hidden; }
 .agent-pick.active .check { visibility: visible; }
+
+.mismatch-flag { display: none; color: var(--danger); font-weight: 700; font-size: 10.5px; margin-left: 4px; vertical-align: 2px; }
+.mismatch-flag.show { display: inline; }

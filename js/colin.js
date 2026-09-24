@@ -32,10 +32,27 @@
     "Company’s Confidentiality Agreement maintained",
     "Avoided excessive calling: 4 calls total (includes 1 VM using script)",
     "Payment options explained",
-    "Dispute rights & validation notice provided where required",
-    "Call recording disclosure given at the start of the call",
-    "No threatening, profane or misleading language used",
-    "Call outcome documented accurately in system notes"
+    "Used correct Verbiage with disclosing APR (if applicable)",
+    "Entered accurate notes into the system to reflect contents of call",
+    "Avoid annoying/harassing consumer",
+    "Correct information provided"
+  ];
+
+  /* Same evaluation, second pass — softer, non-compliance behaviours
+     (product knowledge, call control, tone) rather than hard compliance
+     rules. Scored separately with its own (N/10) counter and its own
+     verdict set, which adds a "PWD" (partial) option alongside P/F/N-A. */
+  var OPERATIONAL_ITEMS = [
+    "Knowledge and complete proficiency in the product",
+    "Proactivity / All actions completed",
+    "Not interrupting/Good vocabulary/No negative language",
+    "Empathy & understanding/Using cust name (At least once)",
+    "Addressing inquiry/Resolution",
+    "Tone of Voice/Rate of speech",
+    "Active listening/Reading / Not distracted",
+    "Hold Time/Permission to place on hold / check in every 2 mins",
+    "Efficiency / Call flow /Unconfident",
+    "Summarise / Cust satisfaction / other further assistance"
   ];
 
   var CLASSIFICATIONS = ["Pay in Full ACH", "Settlement Offer", "Payment Plan Setup", "Dispute Callback", "Statement Request", "Skip Trace Follow-up"];
@@ -89,6 +106,10 @@
       var r = rng();
       return r < 0.72 ? "P" : (r < 0.9 ? "F" : "NA");
     });
+    var opVerdicts = OPERATIONAL_ITEMS.map(function () {
+      var r = rng();
+      return r < 0.65 ? "P" : (r < 0.8 ? "F" : (r < 0.9 ? "PWD" : "NA"));
+    });
 
     var meta = {
       channel: "voice",
@@ -116,7 +137,7 @@
     return {
       ref: ref, guid: guid, when: when, durationSec: durationSec,
       customerName: customerName, meta: meta, summary: summary,
-      transcript: transcript, verdicts: verdicts
+      transcript: transcript, verdicts: verdicts, opVerdicts: opVerdicts
     };
   }
 
@@ -303,18 +324,25 @@
     renderAutoQA(it);
   }
 
-  function renderCompliance(it) {
-    var root = $("#colin-compliance-list");
-    root.innerHTML = COMPLIANCE_ITEMS.map(function (q, i) {
-      var v = it.verdicts[i];
+  /* Renders one scored checklist (Compliance or Operational) into root.
+     verdicts/comments are read and written in place on the interaction
+     object passed in, so edits persist for as long as it stays in
+     state.interactions (this session only — nothing here is saved
+     until Submit). options is the button set for this checklist, e.g.
+     ["P","F","NA"] for Compliance vs. ["P","F","PWD","NA"] for
+     Operational, which also gets its own "PWD" (partial) verdict. */
+  function renderChecklist(root, items, verdicts, comments, options, onChange) {
+    if (!root) return;
+    root.innerHTML = items.map(function (q, i) {
+      var v = verdicts[i];
       return '<div class="colin-compliance-item" data-item-idx="' + i + '">' +
         '<div class="colin-compliance-item__q">' + esc(q) + '</div>' +
         '<div class="colin-verdict">' +
-        ["P", "F", "NA"].map(function (opt) {
+        options.map(function (opt) {
           return '<button type="button" data-v="' + opt + '" class="' + (v === opt ? "active" : "") + '">' + (opt === "NA" ? "N/A" : opt) + '</button>';
         }).join("") +
         '</div>' +
-        '<div class="colin-comment"><textarea rows="1" placeholder="Comments">' + (it.comments && it.comments[i] ? esc(it.comments[i]) : "") + '</textarea></div>' +
+        '<div class="colin-comment"><textarea rows="1" placeholder="Comments">' + (comments[i] ? esc(comments[i]) : "") + '</textarea></div>' +
         '</div>';
     }).join("");
 
@@ -324,26 +352,29 @@
         btn.addEventListener("click", function () {
           $all("button", row).forEach(function (b) { b.classList.remove("active"); });
           btn.classList.add("active");
-          it_verdicts()[i] = btn.getAttribute("data-v");
-          updateScore();
+          verdicts[i] = btn.getAttribute("data-v");
+          onChange();
         });
       });
       var ta = $("textarea", row);
-      ta.addEventListener("input", function () {
-        var it = state.interactions[state.interactionIdx];
-        it.comments = it.comments || [];
-        it.comments[i] = ta.value;
-      });
+      ta.addEventListener("input", function () { comments[i] = ta.value; });
     });
-    function it_verdicts() { return state.interactions[state.interactionIdx].verdicts; }
+  }
+
+  function renderCompliance(it) {
+    it.comments = it.comments || [];
+    it.opComments = it.opComments || [];
+    renderChecklist($("#colin-compliance-list"), COMPLIANCE_ITEMS, it.verdicts, it.comments, ["P", "F", "NA"], updateScore);
+    renderChecklist($("#colin-operational-list"), OPERATIONAL_ITEMS, it.opVerdicts, it.opComments, ["P", "F", "PWD", "NA"], updateScore);
     updateScore();
   }
 
   function updateScore() {
     var it = state.interactions[state.interactionIdx];
-    var score = passCount(it.verdicts);
     var el = $("#colin-score");
-    if (el) el.textContent = "(" + score + "/10)";
+    if (el) el.textContent = "(" + passCount(it.verdicts) + "/10)";
+    var opEl = $("#colin-operational-score");
+    if (opEl) opEl.textContent = "(" + passCount(it.opVerdicts) + "/10)";
   }
 
   function renderAutoQA(it) {
@@ -370,12 +401,14 @@
     var agent = AGENTS[state.agentIdx];
     if (!it || !agent) return;
     var score10 = passCount(it.verdicts);
+    var opScore10 = passCount(it.opVerdicts);
     var record = {
       id: "colin-" + it.ref + "-" + Date.now(),
       ref: it.ref,
       agentName: agent.name,
       customerName: it.knownCustomerName || it.customerName || "Unknown customer",
       score: score10 * 10,
+      operationalScore: opScore10 * 10,
       topFailReason: topFailReason(it),
       submittedAt: new Date().toISOString()
     };
@@ -394,7 +427,7 @@
     var note = $("#colin-submit-note");
     if (note) {
       note.style.display = "block";
-      note.innerHTML = "Scorecard submitted — " + score10 + "/10 sent to <a href=\"qa.html\">QA Review</a>." + trainingNote;
+      note.innerHTML = "Scorecard submitted — Compliance " + score10 + "/10, Operational " + opScore10 + "/10, sent to <a href=\"qa.html\">QA Review</a>." + trainingNote;
     }
   }
 
