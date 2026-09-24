@@ -930,6 +930,7 @@
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
     applyRole(role, employee);
+    renderScorecardActions();
 
     trigger.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -945,6 +946,11 @@
         localStorage.setItem(ROLE_KEY, role);
         localStorage.setItem(EMPLOYEE_KEY, employee);
         applyRole(role, employee);
+        // Reviewer actions' content varies by role for some statuses (e.g.
+        // only a Manager/Admin gets the dispute Uphold/Override decision,
+        // not the Trainer/Team lead who did the marking) — applyRole()
+        // alone doesn't rebuild it, so do that explicitly on every switch.
+        renderScorecardActions();
         menu.classList.remove("open");
       });
     });
@@ -1056,8 +1062,6 @@
   function renderBlindComparison(review) {
     var body = document.getElementById("blind-comparison-body");
     if (!body) return;
-    var card = document.getElementById("blind-comparison-card");
-    if (card) card.classList.remove("blind-hidden");
     var diff = review.humanScore - review.aiScore;
     var diffText = (diff > 0 ? "+" : "") + diff;
     var diffColor = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
@@ -1209,7 +1213,7 @@
       });
     }
     renderBlindComparison(existing);
-    applyBlindComparisonVisibility(status);
+    applyBlindComparisonVisibility(ref, status);
   }
 
   function wireBlindScorecard() {
@@ -1513,15 +1517,26 @@
      else works from — the diff becomes a Manager/Admin-only "Review
      history" of what changed and why, rather than something every
      role keeps seeing. */
-  function applyBlindComparisonVisibility(status) {
-    var card = document.getElementById("blind-comparison-card");
-    if (!card) return;
-    var title = document.getElementById("blind-comparison-title");
-    if (card.classList.contains("blind-hidden")) return;
+  function applyBlindComparisonVisibility(ref, status) {
+    var tabBtn = document.getElementById("review-history-tab-btn");
+    if (!tabBtn) return;
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     var isFinal = status !== QA_STATUS.NEEDS_REVIEW && status !== QA_STATUS.MANUAL_REVIEW;
-    card.style.display = (!isFinal || role === "admin" || role === "manager") ? "" : "none";
-    if (title) title.textContent = isFinal ? "Review history" : "Your review vs AI";
+    var canSeeHistory = !!getBlindReviews()[ref] &&
+      (status === QA_STATUS.MANUAL_REVIEW || (isFinal && (role === "admin" || role === "manager")));
+    tabBtn.style.display = canSeeHistory ? "" : "none";
+    tabBtn.textContent = isFinal ? "Review history" : "Your review vs AI";
+    // If the history tab is hidden but was left active (e.g. a role switch
+    // took it away), fall back to the always-available Submitted tab.
+    if (!canSeeHistory && tabBtn.classList.contains("active")) {
+      var submittedTab = document.querySelector('[data-tab="submitted"]');
+      var historyPanel = document.querySelector('[data-panel="history"]');
+      var submittedPanel = document.querySelector('[data-panel="submitted"]');
+      tabBtn.classList.remove("active");
+      if (historyPanel) historyPanel.classList.remove("active");
+      if (submittedTab) submittedTab.classList.add("active");
+      if (submittedPanel) submittedPanel.classList.add("active");
+    }
   }
 
   /* Transient, in-memory only (not persisted): which routing button a
@@ -1541,7 +1556,7 @@
     var meta = QA_STATUS_META[status];
     applyFinalScorecardMerge(ref, status);
     applyAiScorecardReadOnly(status !== QA_STATUS.MANUAL_REVIEW);
-    applyBlindComparisonVisibility(status);
+    applyBlindComparisonVisibility(ref, status);
 
     var pill = document.getElementById("scorecard-status-pill");
     if (pill) {
@@ -1583,26 +1598,40 @@
         '<button type="button" class="btn btn--primary" data-action="agent-happy" style="width:100%;justify-content:center;margin-bottom:8px;">Agent Happy — Feedback Complete</button>' +
         '<button type="button" class="btn btn--ghost" data-action="agent-disputes" style="width:100%;justify-content:center;">Agent Disputes</button>' +
         '<div id="dispute-form" style="display:none;margin-top:14px;">' +
-        '<div class="form-row"><label>Which lines does ' + agentName + ' dispute?</label>' +
-        '<div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">' +
+        '<div class="form-row"><label>Which lines does ' + agentName + ' dispute? Tick any that apply and say why.</label>' +
+        '<div style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">' +
         Object.keys(CRITERION_LABELS).map(function (id) {
-          return '<label class="row" style="gap:8px;font-size:12.5px;padding:3px 0;"><input type="checkbox" value="' + id + '" class="dispute-line-check" />' + CRITERION_LABELS[id] + '</label>';
+          return '<div class="row" style="gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border-soft);">' +
+            '<label class="row" style="gap:8px;align-items:flex-start;flex:1;min-width:150px;font-size:12.5px;">' +
+            '<input type="checkbox" value="' + id + '" class="dispute-line-check" data-criterion="' + id + '" style="margin-top:2px;" />' +
+            '<span>' + CRITERION_LABELS[id] + '</span>' +
+            '</label>' +
+            '<textarea class="dispute-line-reason" data-criterion="' + id + '" rows="1" placeholder="Why?" style="flex:1;min-width:140px;font-family:var(--font);font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;"></textarea>' +
+            '</div>';
         }).join("") +
         '</div></div>' +
-        '<div class="form-row"><label for="dispute-reason">Reason</label><textarea id="dispute-reason" rows="3" placeholder="Why is the agent disputing these lines?"></textarea></div>' +
-        '<button type="button" class="btn btn--dark" data-action="submit-dispute">Ticket Dispute</button>' +
+        '<button type="button" class="btn btn--dark" data-action="submit-dispute" style="margin-top:10px;">Ticket Dispute</button>' +
         '</div>';
     } else if (status === QA_STATUS.DISPUTE_REVIEW) {
       var dispute = getQaDisputes()[ref];
-      if (!dispute) {
+      var currentRole = localStorage.getItem(ROLE_KEY) || "admin";
+      var isLineManager = currentRole === "admin" || currentRole === "manager";
+      if (!isLineManager) {
+        // Trainer/Team lead did the marking being disputed — Uphold/Override
+        // is their line manager's call, never their own, so they just see
+        // that it's been escalated.
+        html = '<p class="small muted" style="margin:0;">' + agentName + '\'s dispute has been escalated to the marker\'s line manager for review — only a Manager/Admin can Uphold or Override a disputed line.</p>';
+      } else if (!dispute) {
         html = '<p class="small muted" style="margin:0;">No dispute details found.</p>';
       } else {
-        html = '<p class="small muted" style="margin:0 0 4px;">Line manager review — reason given: <em>' + esc(dispute.reason) + '</em></p>' +
+        html = '<p class="small muted" style="margin:0 0 4px;">Line manager review — ' + dispute.lines.length + ' line' + (dispute.lines.length === 1 ? "" : "s") + ' disputed.</p>' +
           '<div class="stack" style="gap:10px;margin-top:10px;">' +
           dispute.lines.map(function (id) {
             var decision = (dispute.decisions && dispute.decisions[id] && dispute.decisions[id].decision) || "";
+            var lineReason = (dispute.reasons && dispute.reasons[id]) || (dispute.reason && dispute.lines.length === 1 ? dispute.reason : "");
             return '<div data-dispute-line="' + id + '" style="border:1px solid var(--border-soft);border-radius:8px;padding:10px;">' +
-              '<div class="cell-strong" style="font-size:12.5px;margin-bottom:6px;">' + CRITERION_LABELS[id] + '</div>' +
+              '<div class="cell-strong" style="font-size:12.5px;margin-bottom:4px;">' + CRITERION_LABELS[id] + '</div>' +
+              '<p class="small muted" style="margin:0 0 8px;font-style:italic;">' + (lineReason ? esc(lineReason) : "No reason given.") + '</p>' +
               '<div class="row" style="gap:8px;">' +
               '<button type="button" class="btn btn--sm ' + (decision === "uphold" ? "btn--dark" : "btn--ghost") + '" data-dispute-decision="uphold" data-line="' + id + '">Uphold</button>' +
               '<button type="button" class="btn btn--sm ' + (decision === "override" ? "btn--dark" : "btn--ghost") + '" data-dispute-decision="override" data-line="' + id + '">Override</button>' +
@@ -1682,9 +1711,13 @@
       if (submitDispute) {
         var checked = Array.prototype.map.call(document.querySelectorAll(".dispute-line-check:checked"), function (cb) { return cb.value; });
         if (!checked.length) { window.alert("Tick at least one disputed line first."); return; }
-        var reasonEl = document.getElementById("dispute-reason");
+        var reasons = {};
+        checked.forEach(function (id) {
+          var ta = document.querySelector('.dispute-line-reason[data-criterion="' + id + '"]');
+          reasons[id] = ta ? ta.value : "";
+        });
         var disputes = getQaDisputes();
-        disputes[ref] = { lines: checked, reason: reasonEl ? reasonEl.value : "", decisions: {}, raisedAt: new Date().toISOString() };
+        disputes[ref] = { lines: checked, reasons: reasons, decisions: {}, raisedAt: new Date().toISOString() };
         saveQaDisputes(disputes);
         setQaStatus(ref, QA_STATUS.DISPUTE_REVIEW);
         renderScorecardActions();
