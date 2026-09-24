@@ -605,6 +605,23 @@
         <!-- ===== SIDEBAR COLUMN ===== -->
         <div class="stack">
 
+          <!-- Prototype-only testing aid — jumps this worked example straight to any QA flow
+               stage, since it's the same single interaction every "Flagged for review" row
+               links to. Not part of the real product flow; wired in wireQaPreviewState(). -->
+          <div class="card" data-roles="admin,manager" style="border:1px dashed var(--border);">
+            <div class="card__head"><h3>Preview state <span class="tag" title="Prototype testing only — jump this example between QA flow stages">Testing</span></h3></div>
+            <div class="card__body">
+              <select id="qa-preview-state-select" style="width:100%;">
+                <option value="needs-review">Needs Review</option>
+                <option value="manual-review">Manual Review</option>
+                <option value="requires-feedback">Requires Feedback</option>
+                <option value="feedback-started">Feedback Session Started</option>
+                <option value="dispute-review">Dispute – Review Required</option>
+                <option value="feedback-complete">Feedback Complete</option>
+              </select>
+            </div>
+          </div>
+
           <!-- Reviewer actions — status-driven; content is rendered by
                renderScorecardActions() in js/app.js based on where this
                call currently sits in the QA flow. Not shown to Agents
