@@ -208,10 +208,14 @@
         <div>
           <strong>Trainer role and above.</strong> QA Review lets Trainers, Managers and Admins go through every
           AI-marked scorecard, see exactly where an agent failed a tracked criterion (DPA, compliance wording, tone,
-          etc.), and record reviewer feedback — agree with the flag, dispute it, or assign coaching. Team leads get
-          the same review scoped to their own team on My Team Performance → QA Review; hidden here, along with the
-          Agent role, in the sidebar's "Viewing as" switcher. Not enforced — this prototype has no real authentication
-          or RBAC; see <a href="settings.html#roles">Team roles</a> for the role definitions.
+          etc.), and record reviewer feedback — agree with the flag, dispute it, or assign coaching. Clicking through
+          to a call's scorecard lets you mark it blind, without seeing the AI's score or flag reason, until you
+          submit your own. Managers and Admins additionally see an "AI vs Human" column comparing the AI's score
+          against a completed blind review, to help decide whether a call needs full human review or the AI's score
+          can stand. Team leads get the same review scoped to their own team on My Team Performance → QA Review;
+          hidden here, along with the Agent role, in the sidebar's "Viewing as" switcher. Not enforced — this
+          prototype has no real authentication or RBAC; see <a href="settings.html#roles">Team roles</a> for the
+          role definitions.
         </div>
       </div>
 
@@ -296,10 +300,12 @@
                 <th>Interaction</th>
                 <th>Customer</th>
                 <th>Agent</th>
+                <th>Date</th>
                 <th>Score</th>
                 <th>Top failure reason</th>
                 <th>Status</th>
                 <th>Assigned reviewer</th>
+                <th data-roles="admin,manager" title="Manager/Admin only — compares the AI's score against a human reviewer's blind scorecard, where one has been done">AI vs Human</th>
               </tr>
             </thead>
             <tbody data-colin-queue>
@@ -307,145 +313,177 @@
                 <td class="cell-mono">INT-10477</td>
                 <td class="cell-strong">Liam Foster</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
+                <td class="cell-mono">Today</td>
                 <td><span class="cell-strong" style="color:var(--danger);">48/100</span></td>
                 <td>Tone</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10477">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10461</td>
                 <td class="cell-strong">Tom Beresford</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
+                <td class="cell-mono">Today</td>
                 <td><span class="cell-strong" style="color:var(--danger);">52/100</span></td>
                 <td>DPA not completed</td>
                 <td><span class="pill pill--info">In review</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10461">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10454</td>
                 <td class="cell-strong">Raj Sharma</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
+                <td class="cell-mono">Yesterday</td>
                 <td><span class="cell-strong" style="color:var(--danger);">55/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10454">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10448</td>
                 <td class="cell-strong">Nadia Hussain</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
+                <td class="cell-mono">Yesterday</td>
                 <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
                 <td>DPA not completed</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10448">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10442</td>
                 <td class="cell-strong">George Hamilton</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
+                <td class="cell-mono">Yesterday</td>
                 <td><span class="cell-strong" style="color:var(--danger);">61/100</span></td>
                 <td>Tone</td>
                 <td><span class="pill pill--info">In review</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10442">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10436</td>
                 <td class="cell-strong">Sophie Clarke</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
+                <td class="cell-mono">2 days ago</td>
                 <td><span class="cell-strong" style="color:var(--danger);">63/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10436">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10429</td>
                 <td class="cell-strong">Oliver Grant</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
+                <td class="cell-mono">2 days ago</td>
                 <td><span class="cell-strong" style="color:var(--danger);">64/100</span></td>
                 <td>DPA not completed</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10429">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10421</td>
                 <td class="cell-strong">Beatrice Coleman</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
+                <td class="cell-mono">2 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">67/100</span></td>
                 <td>Tone</td>
                 <td><span class="pill pill--info">In review</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10421">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10415</td>
                 <td class="cell-strong">William Pearce</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
+                <td class="cell-mono">3 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">69/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10415">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10408</td>
                 <td class="cell-strong">Chloe Sutton</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
+                <td class="cell-mono">3 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">71/100</span></td>
                 <td>DPA not completed</td>
                 <td><span class="pill pill--pass">Resolved</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10408">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10402</td>
                 <td class="cell-strong">Yusuf Demir</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
+                <td class="cell-mono">3 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">73/100</span></td>
                 <td>Tone</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10402">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10396</td>
                 <td class="cell-strong">Catherine Lowe</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
+                <td class="cell-mono">4 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">75/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td><span class="pill pill--info">In review</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10396">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10389</td>
                 <td class="cell-strong">Dominic Reyes</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
+                <td class="cell-mono">4 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">77/100</span></td>
                 <td>DPA not completed</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10389">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10381</td>
                 <td class="cell-strong">Eleanor Davies</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
+                <td class="cell-mono">4 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">79/100</span></td>
                 <td>Tone</td>
                 <td><span class="pill pill--pass">Resolved</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10381">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10374</td>
                 <td class="cell-strong">Priscilla Adeyemi</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
+                <td class="cell-mono">5 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">82/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td><span class="pill pill--info">In review</span></td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10374">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
                 <td class="cell-mono">INT-10367</td>
                 <td class="cell-strong">Nathan Cole</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
+                <td class="cell-mono">5 days ago</td>
                 <td><span class="cell-strong" style="color:var(--warning);">84/100</span></td>
                 <td>DPA not completed</td>
                 <td><span class="pill pill--flag">Needs review</span></td>
                 <td class="muted">Unassigned</td>
+                <td data-roles="admin,manager" data-ai-diff="INT-10367">–</td>
               </tr>
             </tbody>
           </table>

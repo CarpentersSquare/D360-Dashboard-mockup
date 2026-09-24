@@ -191,7 +191,7 @@
     </header>
 
     <!-- ===== Main ===== -->
-    <main class="main">
+    <main class="main" id="scorecard-flow" data-scorecard-ref="INT-10477">
       <div class="breadcrumb">
         <a href="qa.html">QA Review</a> / INT-10477 scorecard
       </div>
@@ -210,9 +210,9 @@
         </div>
       </div>
 
-      <!-- Flagged banner -->
-      <div class="banner banner--fail mb-18">
-        <span class="banner__score">64/100</span>
+      <!-- Flagged banner — hidden until the reviewer submits their own blind scorecard (or immediately for the Agent viewing their own call) -->
+      <div class="banner banner--fail mb-18 blind-reveal blind-hidden">
+        <span class="banner__score">75/100</span>
         <div>
           <div style="font-size:15px;">Flagged for review — DPA not completed</div>
           <div class="small" style="font-weight:500;margin-top:2px;">Identity was not verified before account details were discussed. Mandatory criterion failed.</div>
@@ -223,8 +223,127 @@
         <!-- ===== MAIN COLUMN ===== -->
         <div class="stack">
 
-          <!-- Scored criteria -->
+          <!-- Call transcript — always visible, no AI annotation, so the reviewer can mark blind -->
           <div class="card">
+            <div class="card__head">
+              <h3>Call transcript</h3>
+            </div>
+            <div class="card__body">
+              <div class="transcript">
+                <div class="turn turn--agent">
+                  <span class="avatar avatar--sm">DO</span>
+                  <div>
+                    <div class="turn__meta">Daniel Okafor · 02:14</div>
+                    <div class="turn__bubble">Thanks for holding, Tom. I can see your account here — what can I help you with today?</div>
+                  </div>
+                </div>
+                <div class="turn">
+                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
+                  <div>
+                    <div class="turn__meta">Tom Beresford · 02:21</div>
+                    <div class="turn__bubble">I just wanted to check the balance on my account before the renewal goes out.</div>
+                  </div>
+                </div>
+                <div class="turn turn--agent">
+                  <span class="avatar avatar--sm">DO</span>
+                  <div>
+                    <div class="turn__meta">Daniel Okafor · 02:29</div>
+                    <div class="turn__bubble">Of course — your current balance is £148.50, due on the 14th.</div>
+                  </div>
+                </div>
+                <div class="turn">
+                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
+                  <div>
+                    <div class="turn__meta">Tom Beresford · 02:38</div>
+                    <div class="turn__bubble">Great, thanks. Could someone call me back about the renewal options?</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Your scorecard — blind marking form; hidden once submitted (or for the Agent viewing their own call) -->
+          <div class="card blind-only" id="blind-scorecard-card">
+            <div class="card__head">
+              <h3>Your scorecard</h3>
+              <span class="tag" title="You won't see the AI's result until you submit">Mark blind · 6 criteria</span>
+            </div>
+            <div class="card__body">
+              <ul class="checklist" id="blind-criteria-list">
+                <li data-criterion="greeting" data-weight="10" data-ai="pass">
+                  <div class="checklist__main">
+                    <div class="checklist__title">Greeting &amp; branding</div>
+                    <div class="checklist__desc">Did the agent open with the approved Dial360 greeting and company name?</div>
+                  </div>
+                  <div class="row" style="gap:6px;">
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="pass">Pass</button>
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="fail">Fail</button>
+                  </div>
+                </li>
+                <li data-criterion="dpa" data-weight="25" data-ai="fail">
+                  <div class="checklist__main">
+                    <div class="checklist__title">Identity / DPA completed <span class="pill pill--flag" style="margin-left:6px;">Mandatory</span></div>
+                    <div class="checklist__desc">Was full identity verification (DPA) completed before any account details were discussed?</div>
+                  </div>
+                  <div class="row" style="gap:6px;">
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="pass">Pass</button>
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="fail">Fail</button>
+                  </div>
+                </li>
+                <li data-criterion="compliance" data-weight="15" data-ai="pass">
+                  <div class="checklist__main">
+                    <div class="checklist__title">Compliance phrasing</div>
+                    <div class="checklist__desc">Was the required regulatory wording used when discussing the callback?</div>
+                  </div>
+                  <div class="row" style="gap:6px;">
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="pass">Pass</button>
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="fail">Fail</button>
+                  </div>
+                </li>
+                <li data-criterion="needs" data-weight="15" data-ai="pass">
+                  <div class="checklist__main">
+                    <div class="checklist__title">Needs identified</div>
+                    <div class="checklist__desc">Was the reason for contact correctly captured and confirmed back to the customer?</div>
+                  </div>
+                  <div class="row" style="gap:6px;">
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="pass">Pass</button>
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="fail">Fail</button>
+                  </div>
+                </li>
+                <li data-criterion="resolution" data-weight="20" data-ai="pass">
+                  <div class="checklist__main">
+                    <div class="checklist__title">Resolution / next steps</div>
+                    <div class="checklist__desc">Was a clear next step booked, with expectations set on timing?</div>
+                  </div>
+                  <div class="row" style="gap:6px;">
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="pass">Pass</button>
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="fail">Fail</button>
+                  </div>
+                </li>
+                <li data-criterion="tone" data-weight="15" data-ai="pass">
+                  <div class="checklist__main">
+                    <div class="checklist__title">Tone &amp; empathy</div>
+                    <div class="checklist__desc">Was the agent's tone warm and professional, acknowledging the customer where relevant?</div>
+                  </div>
+                  <div class="row" style="gap:6px;">
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="pass">Pass</button>
+                    <button type="button" class="btn btn--sm btn--ghost blind-mark-btn" data-mark="fail">Fail</button>
+                  </div>
+                </li>
+              </ul>
+              <p class="small muted" id="blind-scorecard-hint" style="margin:14px 0 0;">Mark all 6 criteria to submit — you won't see the AI's score or flag reason until you do.</p>
+              <button type="button" class="btn btn--primary" id="blind-scorecard-submit" style="margin-top:14px;" disabled>Submit review</button>
+            </div>
+          </div>
+
+          <!-- Your review vs AI — only shown once you've submitted a blind scorecard for this call -->
+          <div class="card blind-reveal blind-hidden" id="blind-comparison-card">
+            <div class="card__head"><h3>Your review vs AI</h3></div>
+            <div class="card__body" id="blind-comparison-body"></div>
+          </div>
+
+          <!-- Scored criteria (AI) -->
+          <div class="card blind-reveal blind-hidden">
             <div class="card__head">
               <h3>Scored criteria</h3>
               <span class="tag">6 criteria · weighted</span>
@@ -289,8 +408,8 @@
             </div>
           </div>
 
-          <!-- Flagged moment -->
-          <div class="card">
+          <!-- Flagged moment (AI's own annotated excerpt) -->
+          <div class="card blind-reveal blind-hidden">
             <div class="card__head">
               <h3>Flagged moment</h3>
               <span class="pill pill--flag">02:14 – 02:41</span>
@@ -340,8 +459,10 @@
         <!-- ===== SIDEBAR COLUMN ===== -->
         <div class="stack">
 
-          <!-- Reviewer actions — not shown to Agents viewing their own scorecard -->
-          <div class="card" data-roles="admin,manager,teamlead,trainer">
+          <!-- Reviewer actions — not shown to Agents viewing their own scorecard, and hidden from
+               reviewers until they've submitted their own blind scorecard (agreeing/disputing a
+               flag you haven't seen yet doesn't make sense) -->
+          <div class="card blind-reveal blind-hidden" data-roles="admin,manager,teamlead,trainer">
             <div class="card__head"><h3>Reviewer actions</h3></div>
             <div class="card__body">
               <div class="stack" style="gap:10px;">
@@ -373,8 +494,8 @@
             </div>
           </div>
 
-          <!-- Score breakdown -->
-          <div class="card">
+          <!-- Score breakdown (AI) -->
+          <div class="card blind-reveal blind-hidden">
             <div class="card__head"><h3>Score breakdown</h3></div>
             <div class="card__body">
               <dl class="dl" style="grid-template-columns:1fr auto;gap:10px 16px;">
@@ -388,9 +509,9 @@
               <hr class="divider" style="margin:16px 0;" />
               <div class="row" style="justify-content:space-between;align-items:baseline;">
                 <span class="cell-strong">Total score</span>
-                <span class="kpi__value" style="font-size:24px;margin:0;color:var(--warning);">64/100</span>
+                <span class="kpi__value" style="font-size:24px;margin:0;color:var(--warning);">75/100</span>
               </div>
-              <div class="bar bar--warn" style="margin-top:10px;"><span style="width:64%;"></span></div>
+              <div class="bar bar--warn" style="margin-top:10px;"><span style="width:75%;"></span></div>
               <div class="small muted" style="margin-top:8px;">25 points lost on a mandatory criterion — auto-flagged regardless of total.</div>
             </div>
           </div>

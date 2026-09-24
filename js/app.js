@@ -732,6 +732,8 @@
     renderBanner(role);
     renderMyTeamRoster();
     scopeTeamRowsToLead();
+    refreshBlindState();
+    renderAiHumanDiff();
   }
 
   /* Which team lead's roster the "My Team Performance" pages should
@@ -886,10 +888,12 @@
         '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
         '<td class="cell-strong">' + r.customerName + '</td>' +
         '<td><span class="cell-user">' + r.agentName + '</span></td>' +
+        '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
         '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
         '<td>' + r.topFailReason + '</td>' +
         '<td>' + statusPill + '</td>' +
-        '<td class="muted">Colin (AI-assisted)</td>';
+        '<td class="muted">Colin (AI-assisted)</td>' +
+        '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
       tbody.insertBefore(row, tbody.firstChild);
     });
   }
@@ -934,6 +938,168 @@
       statuses[ref] = { status: "delivered" };
       localStorage.setItem(SCORECARD_STATUS_KEY, JSON.stringify(statuses));
       renderScorecardFeedbackState();
+    });
+  }
+
+  /* ---- 12c. Blind QA scorecard review (prototype only) ----
+     scorecard.html's "Your scorecard" lets a reviewer mark all 6
+     criteria themselves before seeing anything the AI decided — the
+     flagged banner, the AI's own "Scored criteria"/"Score breakdown"/
+     "Flagged moment" cards, and Reviewer actions all carry
+     .blind-reveal.blind-hidden and only reappear once the reviewer
+     submits (or immediately for the Agent viewing their own call,
+     who isn't doing a fresh review). The comparison is saved to
+     d360-blind-reviews, keyed by interaction ref, which also feeds
+     the Manager/Admin-only "AI vs Human" column on the QA Review
+     queue below. */
+  var BLIND_REVIEWS_KEY = "d360-blind-reviews";
+  var CRITERION_LABELS = {
+    greeting: "Greeting & branding",
+    dpa: "Identity / DPA completed",
+    compliance: "Compliance phrasing",
+    needs: "Needs identified",
+    resolution: "Resolution / next steps",
+    tone: "Tone & empathy"
+  };
+
+  function getBlindReviews() {
+    try { return JSON.parse(localStorage.getItem(BLIND_REVIEWS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveBlindReviews(map) { localStorage.setItem(BLIND_REVIEWS_KEY, JSON.stringify(map)); }
+
+  function setBlindRevealed(revealed) {
+    document.querySelectorAll(".blind-reveal").forEach(function (el) { el.classList.toggle("blind-hidden", !revealed); });
+    document.querySelectorAll(".blind-only").forEach(function (el) { el.classList.toggle("blind-hidden", revealed); });
+  }
+
+  function renderBlindComparison(review) {
+    var body = document.getElementById("blind-comparison-body");
+    if (!body) return;
+    var diff = review.humanScore - review.aiScore;
+    var diffText = (diff > 0 ? "+" : "") + diff;
+    var diffColor = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
+    var agreeCount = review.perCriterion.filter(function (c) { return c.agree; }).length;
+    body.innerHTML =
+      '<div class="row" style="justify-content:space-between;align-items:baseline;margin-bottom:14px;">' +
+      '<div><div class="small muted">AI score</div><div class="kpi__value" style="font-size:22px;margin:0;">' + review.aiScore + '<span class="muted" style="font-size:14px;">/100</span></div></div>' +
+      '<div><div class="small muted">Your score</div><div class="kpi__value" style="font-size:22px;margin:0;">' + review.humanScore + '<span class="muted" style="font-size:14px;">/100</span></div></div>' +
+      '<div><div class="small muted">Difference</div><div class="kpi__value" style="font-size:22px;margin:0;color:var(--' + diffColor + ');">' + diffText + '</div></div>' +
+      '</div>' +
+      '<ul class="checklist" style="margin:0;">' +
+      review.perCriterion.map(function (c) {
+        return '<li><div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
+          '<div class="checklist__desc">You marked <strong>' + c.human + '</strong> · AI marked <strong>' + c.ai + '</strong></div></div>' +
+          '<span class="pill ' + (c.agree ? "pill--pass" : "pill--fail") + '">' + (c.agree ? "Agree" : "Disagree") + '</span></li>';
+      }).join("") +
+      '</ul>' +
+      '<p class="small muted" style="margin-top:12px;">' + agreeCount + ' of ' + review.perCriterion.length + ' criteria matched the AI’s marking.</p>';
+  }
+
+  function refreshBlindState() {
+    var wrap = document.getElementById("scorecard-flow");
+    if (!wrap) return;
+    var ref = wrap.getAttribute("data-scorecard-ref");
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var existing = getBlindReviews()[ref];
+    setBlindRevealed(role === "agent" || !!existing);
+    if (!existing) return;
+    var list = document.getElementById("blind-criteria-list");
+    if (list) {
+      existing.perCriterion.forEach(function (c) {
+        var li = list.querySelector('[data-criterion="' + c.id + '"]');
+        if (!li) return;
+        li.querySelectorAll(".blind-mark-btn").forEach(function (b) {
+          b.disabled = true;
+          b.classList.toggle("active", b.getAttribute("data-mark") === c.human);
+        });
+      });
+    }
+    renderBlindComparison(existing);
+  }
+
+  function wireBlindScorecard() {
+    var wrap = document.getElementById("scorecard-flow");
+    if (!wrap) return;
+    var ref = wrap.getAttribute("data-scorecard-ref");
+    var list = document.getElementById("blind-criteria-list");
+    var submitBtn = document.getElementById("blind-scorecard-submit");
+    var selections = {};
+
+    function updateSubmitState() {
+      if (!submitBtn || !list) return;
+      var items = list.querySelectorAll("[data-criterion]");
+      submitBtn.disabled = !Array.prototype.every.call(items, function (li) {
+        return !!selections[li.getAttribute("data-criterion")];
+      });
+    }
+
+    if (list) {
+      list.querySelectorAll(".blind-mark-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (btn.disabled) return;
+          var li = btn.closest("[data-criterion]");
+          selections[li.getAttribute("data-criterion")] = btn.getAttribute("data-mark");
+          li.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          updateSubmitState();
+        });
+      });
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener("click", function () {
+        if (!list) return;
+        var humanScore = 0, aiScore = 0;
+        var perCriterion = [];
+        list.querySelectorAll("[data-criterion]").forEach(function (li) {
+          var id = li.getAttribute("data-criterion");
+          var weight = parseInt(li.getAttribute("data-weight"), 10);
+          var ai = li.getAttribute("data-ai");
+          var human = selections[id];
+          if (human === "pass") humanScore += weight;
+          if (ai === "pass") aiScore += weight;
+          perCriterion.push({ id: id, ai: ai, human: human, agree: ai === human });
+        });
+        var review = {
+          ref: ref, aiScore: aiScore, humanScore: humanScore, perCriterion: perCriterion,
+          reviewedAt: new Date().toISOString()
+        };
+        var reviews = getBlindReviews();
+        reviews[ref] = review;
+        saveBlindReviews(reviews);
+
+        list.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.disabled = true; });
+        renderBlindComparison(review);
+        setBlindRevealed(true);
+        renderAiHumanDiff();
+      });
+    }
+
+    refreshBlindState();
+  }
+
+  /* Manager/Admin-only "AI vs Human" column on the QA Review queue —
+     reads the same d360-blind-reviews store scorecard.html writes to,
+     so a Manager can see at a glance whether the AI's score for a
+     flagged call lines up with a reviewer's blind mark, or whether
+     it's worth sending for full human review. */
+  function renderAiHumanDiff() {
+    var cells = document.querySelectorAll("[data-ai-diff]");
+    if (!cells.length) return;
+    var reviews = getBlindReviews();
+    cells.forEach(function (cell) {
+      var review = reviews[cell.getAttribute("data-ai-diff")];
+      if (!review) {
+        cell.innerHTML = '<span class="small muted">Not yet reviewed</span>';
+        return;
+      }
+      var diff = review.humanScore - review.aiScore;
+      var diffText = (diff > 0 ? "+" : "") + diff;
+      var cls = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
+      var verdict = Math.abs(diff) <= 5 ? "Happy with AI score" : "Recommend human review";
+      cell.innerHTML =
+        '<div class="small">AI ' + review.aiScore + ' · You ' + review.humanScore + '</div>' +
+        '<div class="small" style="color:var(--' + cls + ');font-weight:600;">' + diffText + ' pts · ' + verdict + '</div>';
     });
   }
 
@@ -2887,6 +3053,8 @@
     wireRangePickers();
     renderColinQueue();
     wireScorecardFeedback();
+    wireBlindScorecard();
+    renderAiHumanDiff();
     seedBusinessUpdates();
     renderBusinessUpdates();
     wireBusinessUpdateModal();
