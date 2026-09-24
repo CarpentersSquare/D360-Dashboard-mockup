@@ -202,346 +202,53 @@
           <div class="sub">Score the same interaction independently, then reveal everyone's marks and agree a final outcome</div>
         </div>
         <div class="page-head__actions">
-          <button class="btn btn--dark" type="button">
+          <button class="btn btn--dark" type="button" id="calibration-new-session-btn">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             New session
           </button>
         </div>
       </div>
 
-      <div data-tabs>
-        <div class="tabs" role="tablist">
-          <button class="tab active" data-tab="sessions">Sessions</button>
-          <button class="tab" data-tab="evaluate">Your evaluation (blind)</button>
-          <button class="tab" data-tab="compare">Compare &amp; agree (revealed)</button>
-        </div>
+      <!-- ===== Sessions list ===== -->
+      <div id="calibration-sessions-view">
+        <form class="filterbar" aria-label="Filter calibration sessions" onsubmit="return false;">
+          <div class="field">
+            <label>Status</label>
+            <select><option>All</option><option>Open</option><option>Revealed</option><option>Calibrated</option></select>
+          </div>
+          <div class="field">
+            <label>Team</label>
+            <select><option>All teams</option><option>Team Priya</option></select>
+          </div>
+        </form>
 
-        <!-- ===== Sessions ===== -->
-        <div class="tab-panel active" data-panel="sessions">
-          <form class="filterbar" aria-label="Filter calibration sessions" onsubmit="return false;">
-            <div class="field">
-              <label>Status</label>
-              <select><option>All</option><option>Open</option><option>Awaiting reveal</option><option>Revealed</option><option>Calibrated</option></select>
-            </div>
-            <div class="field">
-              <label>Team</label>
-              <select><option>All teams</option><option>Team Priya</option></select>
-            </div>
-          </form>
-
-          <div class="card">
-            <div class="table-wrap">
-              <table class="data">
-                <thead>
-                  <tr>
-                    <th>Interaction</th>
-                    <th>Agent</th>
-                    <th>Customer</th>
-                    <th>Reviewers</th>
-                    <th>Progress</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="clickable">
-                    <td class="cell-mono">INT-10471</td>
-                    <td>Olivia Hughes</td>
-                    <td>Sam Patel</td>
-                    <td>
-                      <span class="row" style="gap:-6px;">
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">DO</span>
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">HP</span>
-                        <span class="avatar avatar--sm" style="border:2px solid #fff;">CR</span>
-                      </span>
-                    </td>
-                    <td>1 of 3 submitted</td>
-                    <td><span class="pill pill--muted">Open</span></td>
-                    <td>Today, 09:14</td>
-                  </tr>
-                  <tr class="clickable">
-                    <td class="cell-mono">INT-10532</td>
-                    <td>Daniel Okafor</td>
-                    <td>Priya Shah</td>
-                    <td>
-                      <span class="row">
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">DO</span>
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">HP</span>
-                        <span class="avatar avatar--sm" style="border:2px solid #fff;">CR</span>
-                      </span>
-                    </td>
-                    <td>2 of 3 submitted</td>
-                    <td><span class="pill pill--muted">Open</span></td>
-                    <td>Today, 08:02</td>
-                  </tr>
-                  <tr class="clickable">
-                    <td class="cell-mono">INT-10501</td>
-                    <td>James Whitmore</td>
-                    <td>Alex Greer</td>
-                    <td>
-                      <span class="row">
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">GT</span>
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">HP</span>
-                        <span class="avatar avatar--sm" style="border:2px solid #fff;">CR</span>
-                      </span>
-                    </td>
-                    <td>3 of 3 submitted</td>
-                    <td><span class="pill pill--flag">Awaiting reveal</span></td>
-                    <td>Yesterday</td>
-                  </tr>
-                  <tr class="clickable">
-                    <td class="cell-mono">INT-10488</td>
-                    <td>Grace Thompson</td>
-                    <td>Mark Ellison</td>
-                    <td>
-                      <span class="row">
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">PN</span>
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">HP</span>
-                        <span class="avatar avatar--sm" style="border:2px solid #fff;">CR</span>
-                      </span>
-                    </td>
-                    <td>3 of 3 submitted</td>
-                    <td><span class="pill pill--info">Revealed</span></td>
-                    <td>Yesterday</td>
-                  </tr>
-                  <tr class="clickable">
-                    <td class="cell-mono">INT-10422</td>
-                    <td>Marcus Bennett</td>
-                    <td>Nina Torres</td>
-                    <td>
-                      <span class="row">
-                        <span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">DO</span>
-                        <span class="avatar avatar--sm" style="border:2px solid #fff;">GT</span>
-                      </span>
-                    </td>
-                    <td>2 of 2 submitted</td>
-                    <td><span class="pill pill--pass">Calibrated</span></td>
-                    <td>3 days ago</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Interaction</th>
+                  <th>Agent</th>
+                  <th>Customer</th>
+                  <th>Reviewers</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="calibration-sessions-tbody"></tbody>
+            </table>
           </div>
         </div>
+      </div>
 
-        <!-- ===== Your evaluation (blind) ===== -->
-        <div class="tab-panel" data-panel="evaluate">
-          <div class="card mb-18">
-            <div class="card__body row" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
-              <div>
-                <div class="cell-strong" style="font-size:15px;">INT-10532 &middot; Daniel Okafor &middot; Priya Shah</div>
-                <div class="muted small" style="margin-top:2px;">Inbound call &middot; 6m 42s &middot; Today, 08:02</div>
-              </div>
-              <a class="btn btn--ghost btn--sm" href="interaction.html">Open full interaction ↗</a>
-            </div>
-          </div>
-
-          <div class="banner banner--warn mb-18">
-            <span style="font-size:22px;">🙈</span>
-            <div>
-              <div style="font-size:14.5px;">Your evaluation is hidden from other reviewers until this session is revealed</div>
-              <div class="small" style="font-weight:500;margin-top:2px;">2 of 3 reviewers have submitted so far. Waiting on: Charlotte Reid.</div>
-            </div>
-          </div>
-
-          <div class="banner banner--pass mb-18" id="evaluate-locked-banner" style="display:none;">
-            <span style="font-size:22px;">🔒</span>
-            <div>
-              <div style="font-size:14.5px;">Submitted and locked</div>
-              <div class="small" style="font-weight:500;margin-top:2px;">You can't change your marks after submitting. If you made a mistake, ask your session owner.</div>
-            </div>
-          </div>
-
-          <div class="card" id="evaluate-form">
-            <div class="card__head">
-              <h3>Scored criteria</h3>
-              <span class="tag">6 criteria &middot; weighted</span>
-            </div>
-            <div class="card__body">
-              <div class="colin-compliance-item">
-                <div class="colin-compliance-item__q"><strong>Greeting &amp; branding</strong><br /><span class="muted small">Opened with approved Dial360 greeting and company name.</span></div>
-                <div class="colin-verdict">
-                  <button type="button" data-v="P" class="active">P</button>
-                  <button type="button" data-v="F">F</button>
-                </div>
-                <div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)"></textarea></div>
-              </div>
-              <div class="colin-compliance-item">
-                <div class="colin-compliance-item__q"><strong>Identity / DPA completed</strong> <span class="pill pill--flag" style="margin-left:4px;">Mandatory</span><br /><span class="muted small">Customer identity verified before account details discussed.</span></div>
-                <div class="colin-verdict">
-                  <button type="button" data-v="P">P</button>
-                  <button type="button" data-v="F" class="active">F</button>
-                </div>
-                <div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)">Skipped the second ID check before confirming balance.</textarea></div>
-              </div>
-              <div class="colin-compliance-item">
-                <div class="colin-compliance-item__q"><strong>Compliance phrasing</strong><br /><span class="muted small">Used required regulatory wording when discussing the callback.</span></div>
-                <div class="colin-verdict">
-                  <button type="button" data-v="P" class="active">P</button>
-                  <button type="button" data-v="F">F</button>
-                </div>
-                <div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)"></textarea></div>
-              </div>
-              <div class="colin-compliance-item">
-                <div class="colin-compliance-item__q"><strong>Needs identified</strong><br /><span class="muted small">Correctly captured the reason for contact and confirmed it back.</span></div>
-                <div class="colin-verdict">
-                  <button type="button" data-v="P" class="active">P</button>
-                  <button type="button" data-v="F">F</button>
-                </div>
-                <div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)"></textarea></div>
-              </div>
-              <div class="colin-compliance-item">
-                <div class="colin-compliance-item__q"><strong>Resolution / next steps</strong><br /><span class="muted small">Booked a callback and set clear expectations on timing.</span></div>
-                <div class="colin-verdict">
-                  <button type="button" data-v="P" class="active">P</button>
-                  <button type="button" data-v="F">F</button>
-                </div>
-                <div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)"></textarea></div>
-              </div>
-              <div class="colin-compliance-item">
-                <div class="colin-compliance-item__q"><strong>Tone &amp; empathy</strong><br /><span class="muted small">Warm, professional manner throughout; acknowledged frustration.</span></div>
-                <div class="colin-verdict">
-                  <button type="button" data-v="P">P</button>
-                  <button type="button" data-v="F" class="active">F</button>
-                </div>
-                <div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)">Rushed the close, didn't acknowledge how the customer felt.</textarea></div>
-              </div>
-              <div class="colin-submit-bar">
-                <span class="muted small" style="margin-right:auto;align-self:center;">Once submitted, this is locked — you won't be able to go back and change it.</span>
-                <button type="button" class="btn btn--dark" id="evaluate-submit-btn">Submit my evaluation</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ===== Compare & discuss (revealed) ===== -->
-        <div class="tab-panel" data-panel="compare">
-          <div class="card mb-18">
-            <div class="card__body row" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
-              <div>
-                <div class="cell-strong" style="font-size:15px;">INT-10488 &middot; Grace Thompson &middot; Mark Ellison</div>
-                <div class="muted small" style="margin-top:2px;">Inbound call &middot; 8m 05s &middot; Revealed yesterday &middot; 3 of 3 reviewers submitted</div>
-              </div>
-              <span class="pill pill--info">Revealed</span>
-            </div>
-          </div>
-
-          <div class="banner banner--warn mb-18">
-            <span style="font-size:22px;">👑</span>
-            <div>
-              <div style="font-size:14.5px;">You created this session, so you set the Agreed outcome</div>
-              <div class="small" style="font-weight:500;margin-top:2px;">Once the team has talked each question through, pick the correct outcome for every criterion in the column on the right — including ones everyone already agreed on. Other reviewers see this column as read-only, and any mark that differs from it is flagged.</div>
-            </div>
-          </div>
-
-          <div class="card mb-18">
-            <div class="card__head">
-              <h3>Reviewer comparison</h3>
-              <span class="tag">Avg score: 88/100</span>
-            </div>
-            <div class="table-wrap">
-              <table class="data">
-                <thead>
-                  <tr>
-                    <th>Criterion</th>
-                    <th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">PN</span>Priya Nair</span></th>
-                    <th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">HP</span>Hannah Price</span></th>
-                    <th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></th>
-                    <th style="text-align:center;background:var(--info-bg);border-radius:8px 8px 0 0;">
-                      Agreed outcome
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-left:2px;" title="Only the session owner can set this"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr data-criterion-row>
-                    <td>Greeting &amp; branding <span class="tag nowrap">10%</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;background:var(--info-bg);">
-                      <div class="colin-verdict" style="justify-content:center;" data-agreed-toggle>
-                        <button type="button" data-v="P" class="active">P</button>
-                        <button type="button" data-v="F">F</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr data-criterion-row style="background:var(--warning-bg);">
-                    <td>Identity / DPA completed <span class="pill pill--flag" style="margin-left:4px;">Mandatory</span> <span class="tag nowrap">25%</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="fail"><span class="pill pill--fail">Fail</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="fail"><span class="pill pill--fail">Fail</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;background:var(--info-bg);">
-                      <div class="colin-verdict" style="justify-content:center;" data-agreed-toggle>
-                        <button type="button" data-v="P">P</button>
-                        <button type="button" data-v="F" class="active">F</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr data-criterion-row>
-                    <td>Compliance phrasing <span class="tag nowrap">15%</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;background:var(--info-bg);">
-                      <div class="colin-verdict" style="justify-content:center;" data-agreed-toggle>
-                        <button type="button" data-v="P" class="active">P</button>
-                        <button type="button" data-v="F">F</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr data-criterion-row>
-                    <td>Needs identified <span class="tag nowrap">15%</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;background:var(--info-bg);">
-                      <div class="colin-verdict" style="justify-content:center;" data-agreed-toggle>
-                        <button type="button" data-v="P" class="active">P</button>
-                        <button type="button" data-v="F">F</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr data-criterion-row>
-                    <td>Resolution / next steps <span class="tag nowrap">20%</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;background:var(--info-bg);">
-                      <div class="colin-verdict" style="justify-content:center;" data-agreed-toggle>
-                        <button type="button" data-v="P" class="active">P</button>
-                        <button type="button" data-v="F">F</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr data-criterion-row>
-                    <td>Tone &amp; empathy <span class="tag nowrap">15%</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="fail"><span class="pill pill--fail">Fail</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;" data-verdict="pass"><span class="pill pill--pass">Pass</span><span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span></td>
-                    <td style="text-align:center;background:var(--info-bg);">
-                      <div class="colin-verdict" style="justify-content:center;" data-agreed-toggle>
-                        <button type="button" data-v="P" class="active">P</button>
-                        <button type="button" data-v="F">F</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="cell-strong">Total</td>
-                    <td style="text-align:center;" class="cell-strong">100/100</td>
-                    <td style="text-align:center;" class="cell-strong">75/100</td>
-                    <td style="text-align:center;" class="cell-strong">75/100</td>
-                    <td style="text-align:center;background:var(--info-bg);" class="cell-strong">75/100</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="card__body" style="border-top:1px solid var(--border-soft);">
-              <button type="button" class="btn btn--dark">Log calibrated outcome</button>
-              <span class="muted small" style="margin-left:10px;">Records the Agreed outcome column above as this call's final calibrated score.</span>
-            </div>
-          </div>
-        </div>
+      <!-- ===== Session detail: your evaluation (blind) + compare & agree (revealed), one place, no tabs ===== -->
+      <div id="calibration-detail-view" class="blind-hidden">
+        <button type="button" class="btn btn--ghost btn--sm mb-18" id="calibration-back-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          Back to sessions
+        </button>
+        <div id="calibration-detail-body"></div>
       </div>
     </main>
   </div>
@@ -586,47 +293,39 @@
     </div>
   </div>
 
+  <!-- New calibration session modal -->
+  <div class="modal-overlay" id="calibration-new-session-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="calibration-new-session-title">
+      <div class="modal__head">
+        <h3 id="calibration-new-session-title">New calibration session</h3>
+        <button class="icon-btn" data-close-modal aria-label="Close">×</button>
+      </div>
+      <div class="modal__body">
+        <div class="form-row">
+          <label for="cal-new-ref">Interaction reference</label>
+          <input type="text" id="cal-new-ref" placeholder="e.g. INT-10600 (leave blank to auto-generate)" />
+        </div>
+        <div class="form-row">
+          <label for="cal-new-agent">Agent</label>
+          <input type="text" id="cal-new-agent" placeholder="e.g. Daniel Okafor" />
+        </div>
+        <div class="form-row">
+          <label for="cal-new-customer">Customer</label>
+          <input type="text" id="cal-new-customer" placeholder="e.g. Priya Shah" />
+        </div>
+        <div class="form-row">
+          <label>Reviewers</label>
+          <div id="cal-new-reviewers" class="stack" style="gap:8px;"></div>
+          <p class="muted small" style="margin:2px 0 0;">You're automatically included as a reviewer on every session you create.</p>
+        </div>
+      </div>
+      <div class="modal__foot">
+        <button class="btn" data-close-modal>Cancel</button>
+        <button type="button" class="btn btn--primary" id="cal-new-session-create">Create session</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
-  <script>
-    // Wire the P/F toggle groups now (not on DOMContentLoaded) so they're
-    // active before the mismatch-flag listeners below attach — those read
-    // each button's .active state on click, and depend on this running
-    // first. window.D360.wireVerdictToggles is idempotent, so app.js's own
-    // later DOMContentLoaded pass over the same buttons is a harmless no-op.
-    window.D360.wireVerdictToggles();
-
-    // Click-through only: the Agreed outcome column is the session owner's call.
-    // Whichever reviewer cells in that row don't match it get flagged.
-    function refreshMismatchFlags(row) {
-      var agreedBtn = row.querySelector("[data-agreed-toggle] button.active");
-      var agreed = agreedBtn && agreedBtn.getAttribute("data-v") === "P" ? "pass" : "fail";
-      row.querySelectorAll("[data-verdict]").forEach(function (cell) {
-        var flag = cell.querySelector(".mismatch-flag");
-        if (flag) flag.classList.toggle("show", cell.getAttribute("data-verdict") !== agreed);
-      });
-    }
-    document.querySelectorAll("[data-criterion-row]").forEach(function (row) {
-      refreshMismatchFlags(row);
-      row.querySelectorAll("[data-agreed-toggle] button").forEach(function (btn) {
-        btn.addEventListener("click", function () { refreshMismatchFlags(row); });
-      });
-    });
-
-    // Click-through only: once a reviewer submits, their evaluation locks —
-    // they can't come back and amend it.
-    var evaluateSubmitBtn = document.getElementById("evaluate-submit-btn");
-    if (evaluateSubmitBtn) {
-      evaluateSubmitBtn.addEventListener("click", function () {
-        var form = document.getElementById("evaluate-form");
-        form.querySelectorAll(".colin-verdict button, .colin-comment textarea").forEach(function (el) {
-          el.disabled = true;
-        });
-        evaluateSubmitBtn.textContent = "Submitted — locked";
-        evaluateSubmitBtn.disabled = true;
-        var lockedNote = document.getElementById("evaluate-locked-banner");
-        if (lockedNote) lockedNote.style.display = "";
-      });
-    }
-  </script>
 </body>
 </html>
