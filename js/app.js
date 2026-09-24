@@ -49,6 +49,26 @@
     menu.addEventListener("click", function (e) { e.stopPropagation(); });
   }
 
+  /* ---- 3b. Verdict toggles (P/F/N-A/PWD button groups) ----
+     Generic click-to-activate for any .colin-verdict button group present
+     in a page's static HTML (scorecard.html, calibration.html). Runs once
+     at load, so it only wires markup that's already in the DOM — it never
+     touches colin-scorecard.html's own buttons, which js/colin.js creates
+     dynamically (after this runs) and wires itself, with its own
+     verdicts-array + running-score side effects. */
+  function wireVerdictToggles() {
+    document.querySelectorAll(".colin-verdict").forEach(function (group) {
+      group.querySelectorAll("button").forEach(function (btn) {
+        if (btn.dataset.verdictWired) return; // idempotent — safe to call more than once
+        btn.dataset.verdictWired = "1";
+        btn.addEventListener("click", function () {
+          group.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+        });
+      });
+    });
+  }
+
   /* ---- 4. Tabs ----
      [data-tab="x"] buttons toggle [data-panel="x"] panels within a [data-tabs] group. */
   function wireTabs() {
@@ -884,10 +904,8 @@
       var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
       row.innerHTML =
         '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
-        '<td class="cell-strong">' + r.customerName + '</td>' +
         '<td><span class="cell-user">' + r.agentName + '</span></td>' +
         '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
-        '<td>' + r.topFailReason + '</td>' +
         '<td>' + statusPill + '</td>' +
         '<td class="muted">Colin (AI-assisted)</td>';
       tbody.insertBefore(row, tbody.firstChild);
@@ -2879,6 +2897,7 @@
     setActiveNav();
     wireLogin();
     wireAccountMenu();
+    wireVerdictToggles();
     wireTabs();
     wireModals();
     wireEsc();
@@ -2938,4 +2957,5 @@
 
   window.D360 = window.D360 || {};
   window.D360.assignTraining = assignTraining;
+  window.D360.wireVerdictToggles = wireVerdictToggles;
 })();

@@ -588,15 +588,12 @@
 
   <script src="js/app.js"></script>
   <script>
-    // Click-through only: lets you toggle P/F states; nothing is saved to localStorage (this page has no data store yet).
-    document.querySelectorAll(".colin-verdict").forEach(function (group) {
-      group.querySelectorAll("button").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          group.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
-          btn.classList.add("active");
-        });
-      });
-    });
+    // Wire the P/F toggle groups now (not on DOMContentLoaded) so they're
+    // active before the mismatch-flag listeners below attach — those read
+    // each button's .active state on click, and depend on this running
+    // first. window.D360.wireVerdictToggles is idempotent, so app.js's own
+    // later DOMContentLoaded pass over the same buttons is a harmless no-op.
+    window.D360.wireVerdictToggles();
 
     // Click-through only: the Agreed outcome column is the session owner's call.
     // Whichever reviewer cells in that row don't match it get flagged.
