@@ -882,7 +882,10 @@
 
     submissions.forEach(function (r) {
       var row = document.createElement("tr");
-      var statusPill = r.score >= 70 ? '<span class="pill pill--pass">Resolved</span>' : '<span class="pill pill--flag">Needs review</span>';
+      var resolved = r.score >= 70;
+      var statusPill = resolved ? '<span class="pill pill--pass">Resolved</span>' : '<span class="pill pill--flag">Needs review</span>';
+      var statusCell = statusPill + (resolved ? "" :
+        ' <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="' + r.ref + '" data-roles="admin,manager">Mark reviewed</button>');
       var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
       row.innerHTML =
         '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
@@ -891,7 +894,7 @@
         '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
         '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
         '<td>' + r.topFailReason + '</td>' +
-        '<td>' + statusPill + '</td>' +
+        '<td data-status-cell="' + r.ref + '">' + statusCell + '</td>' +
         '<td class="muted">Colin (AI-assisted)</td>' +
         '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
       tbody.insertBefore(row, tbody.firstChild);
@@ -975,6 +978,8 @@
   function renderBlindComparison(review) {
     var body = document.getElementById("blind-comparison-body");
     if (!body) return;
+    var card = document.getElementById("blind-comparison-card");
+    if (card) card.classList.remove("blind-hidden");
     var diff = review.humanScore - review.aiScore;
     var diffText = (diff > 0 ? "+" : "") + diff;
     var diffColor = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
@@ -1001,7 +1006,13 @@
     var ref = wrap.getAttribute("data-scorecard-ref");
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     var existing = getBlindReviews()[ref];
-    setBlindRevealed(role === "agent" || !!existing);
+    // Manager/Admin review the AI's marking directly (that's the job —
+    // decide whether to accept it or send it for full human review, see
+    // the "AI vs Human" queue column). Agents see their own feedback the
+    // same way. Trainer/Team lead — who actually do the blind marking —
+    // get the blank-scorecard flow below until they submit one.
+    var autoReveal = role === "agent" || role === "manager" || role === "admin";
+    setBlindRevealed(autoReveal || !!existing);
     if (!existing) return;
     var list = document.getElementById("blind-criteria-list");
     if (list) {
@@ -1100,6 +1111,46 @@
       cell.innerHTML =
         '<div class="small">AI ' + review.aiScore + ' · You ' + review.humanScore + '</div>' +
         '<div class="small" style="color:var(--' + cls + ');font-weight:600;">' + diffText + ' pts · ' + verdict + '</div>';
+    });
+  }
+
+  /* Manager/Admin-only "Mark reviewed" action on the QA Review queue —
+     flips a flagged call's status pill straight to Resolved once a
+     Manager is happy with it (whether that's from the AI's score alone,
+     or after checking the "AI vs Human" comparison above). Stored in
+     d360-qa-status-overrides, keyed by interaction ref, since the queue
+     rows are otherwise static markup. */
+  var QA_STATUS_OVERRIDES_KEY = "d360-qa-status-overrides";
+
+  function getQaStatusOverrides() {
+    try { return JSON.parse(localStorage.getItem(QA_STATUS_OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveQaStatusOverrides(map) { localStorage.setItem(QA_STATUS_OVERRIDES_KEY, JSON.stringify(map)); }
+
+  function applyQaStatusOverrides() {
+    var overrides = getQaStatusOverrides();
+    Object.keys(overrides).forEach(function (ref) {
+      var cell = document.querySelector('[data-status-cell="' + ref + '"]');
+      if (!cell) return;
+      var pill = cell.querySelector(".pill");
+      if (pill) {
+        pill.className = "pill pill--pass";
+        pill.textContent = "Resolved";
+      }
+      var btn = cell.querySelector("[data-mark-reviewed]");
+      if (btn) btn.remove();
+    });
+  }
+
+  function wireQaStatusActions() {
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-mark-reviewed]");
+      if (!btn) return;
+      var ref = btn.getAttribute("data-mark-reviewed");
+      var overrides = getQaStatusOverrides();
+      overrides[ref] = "resolved";
+      saveQaStatusOverrides(overrides);
+      applyQaStatusOverrides();
     });
   }
 
@@ -3052,6 +3103,8 @@
     wireTemplateCopy();
     wireRangePickers();
     renderColinQueue();
+    applyQaStatusOverrides();
+    wireQaStatusActions();
     wireScorecardFeedback();
     wireBlindScorecard();
     renderAiHumanDiff();
