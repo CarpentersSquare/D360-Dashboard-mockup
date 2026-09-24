@@ -1043,6 +1043,12 @@
     return blindReviewDisagreements(review).every(function (c) { return !!c.verdict; });
   }
 
+  var VERDICT_WORDS = { P: "Pass", F: "Fail", NA: "N/A", PWD: "PWD" };
+  function verdictChipHtml(v) {
+    var cls = v === "P" ? "verdict-chip--p" : v === "F" ? "verdict-chip--f" : v === "PWD" ? "verdict-chip--pwd" : "verdict-chip--na";
+    return '<span class="verdict-chip ' + cls + '">' + (VERDICT_WORDS[v] || v || "–") + '</span>';
+  }
+
   function renderBlindComparison(review) {
     var body = document.getElementById("blind-comparison-body");
     if (!body) return;
@@ -1061,24 +1067,29 @@
       '</div>' +
       '<ul class="checklist" style="margin:0;">' +
       review.perCriterion.map(function (c) {
-        if (c.agree) {
-          return '<li><div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
-            '<div class="checklist__desc">You marked <strong>' + c.human + '</strong> · AI marked <strong>' + c.ai + '</strong></div></div>' +
-            '<span class="pill pill--pass">Agree</span></li>';
-        }
         var tagged = c.verdict === "ai-correct" ? "AI Correct" : c.verdict === "ai-incorrect" ? "AI Incorrect" : "";
-        return '<li data-diff-criterion="' + c.id + '" style="flex-direction:column;align-items:stretch;">' +
-          '<div class="row" style="justify-content:space-between;">' +
-          '<div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
-          '<div class="checklist__desc">You marked <strong>' + c.human + '</strong> · AI marked <strong>' + c.ai + '</strong></div></div>' +
-          '<span class="pill pill--fail">Disagree</span>' +
+        var rightCol = c.agree
+          ? '<span class="pill pill--pass" style="align-self:flex-start;">Agree</span>'
+          : '<div class="stack" style="gap:6px;flex:none;">' +
+            '<button type="button" class="btn btn--sm ' + (c.verdict === "ai-correct" ? "btn--dark" : "btn--ghost") + '" data-ai-tag="ai-correct" data-criterion="' + c.id + '">AI Correct</button>' +
+            '<button type="button" class="btn btn--sm ' + (c.verdict === "ai-incorrect" ? "btn--dark" : "btn--ghost") + '" data-ai-tag="ai-incorrect" data-criterion="' + c.id + '">AI Incorrect</button>' +
+            '</div>';
+        return '<li data-diff-criterion="' + c.id + '" class="' + (c.agree ? "" : "blind-diff-row--flag") + '" style="flex-direction:column;align-items:stretch;padding:14px 16px;">' +
+          '<div class="row" style="justify-content:space-between;align-items:flex-start;gap:16px;">' +
+          '<div class="checklist__title" style="flex:1;min-width:170px;">' + CRITERION_LABELS[c.id] + '</div>' +
+          '<div class="row" style="gap:20px;align-items:flex-start;flex:none;">' +
+          '<div style="text-align:center;"><div class="small muted" style="font-size:10px;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">HUMAN</div>' + verdictChipHtml(c.human) + '</div>' +
+          '<div style="text-align:center;"><div class="small muted" style="font-size:10px;font-weight:700;letter-spacing:.05em;margin-bottom:4px;">AUTO</div>' + verdictChipHtml(c.ai) + '</div>' +
+          rightCol +
           '</div>' +
-          '<div class="row" style="gap:8px;margin-top:8px;">' +
-          '<button type="button" class="btn btn--sm ' + (c.verdict === "ai-correct" ? "btn--dark" : "btn--ghost") + '" data-ai-tag="ai-correct" data-criterion="' + c.id + '">AI Correct</button>' +
-          '<button type="button" class="btn btn--sm ' + (c.verdict === "ai-incorrect" ? "btn--dark" : "btn--ghost") + '" data-ai-tag="ai-incorrect" data-criterion="' + c.id + '">AI Incorrect</button>' +
-          (tagged ? '<span class="small muted" style="align-self:center;">Tagged: ' + tagged + '</span>' : '') +
           '</div>' +
-          '<textarea class="ai-tag-reason" data-criterion="' + c.id + '" rows="1" placeholder="Why?" style="margin-top:6px;width:100%;font-family:var(--font);font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' + (c.reason ? esc(c.reason) : "") + '</textarea>' +
+          '<div class="row" style="gap:20px;margin-top:10px;align-items:flex-start;">' +
+          '<div style="flex:1;min-width:160px;"><div class="small muted" style="font-weight:600;margin-bottom:2px;">Reviewer comment</div><div class="small">' + (c.humanComment ? esc(c.humanComment) : "<span class=\"muted\">—</span>") + '</div></div>' +
+          '<div style="flex:1;min-width:160px;"><div class="small muted" style="font-weight:600;margin-bottom:2px;">AI comment</div><div class="small">' + (c.aiComment ? esc(c.aiComment) : "<span class=\"muted\">—</span>") + '</div></div>' +
+          '</div>' +
+          (c.agree ? "" :
+            '<textarea class="ai-tag-reason" data-criterion="' + c.id + '" rows="1" placeholder="Why?" style="margin-top:10px;width:100%;font-family:var(--font);font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' + (c.reason ? esc(c.reason) : "") + '</textarea>' +
+            (tagged ? '<span class="small muted" style="margin-top:4px;">Tagged: ' + tagged + '</span>' : '')) +
           '</li>';
       }).join("") +
       '</ul>' +
@@ -1217,7 +1228,13 @@
           var human = selections[id];
           if (isCompliance && human === "P") humanScore += 10;
           if (isCompliance && ai === "P") aiScore += 10;
-          perCriterion.push({ id: id, ai: ai, human: human, agree: ai === human });
+          var humanCommentEl = li.querySelector(".blind-comment-input");
+          var aiCommentEl = document.querySelector('#ai-scorecard-reveal [data-criterion="' + id + '"] .colin-comment textarea');
+          perCriterion.push({
+            id: id, ai: ai, human: human, agree: ai === human,
+            humanComment: humanCommentEl ? humanCommentEl.value.trim() : "",
+            aiComment: aiCommentEl ? aiCommentEl.value.trim() : ""
+          });
         });
         var review = {
           ref: ref, aiScore: aiScore, humanScore: humanScore, perCriterion: perCriterion,
@@ -1228,6 +1245,7 @@
         saveBlindReviews(reviews);
 
         list.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.disabled = true; });
+        list.querySelectorAll(".blind-comment-input").forEach(function (ta) { ta.disabled = true; });
         renderBlindComparison(review);
         setBlindRevealed(true);
         renderAiHumanDiff();
