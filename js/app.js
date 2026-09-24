@@ -1365,6 +1365,29 @@
     saveQaStatusOverrides(overrides);
   }
 
+  /* Prototype-only: the 16 static "Flagged for review" rows would
+     otherwise all start Needs Review (getQaStatus()'s default), which
+     makes the queue look identical regardless of how far the flow has
+     actually progressed. Seed a representative spread across the
+     other statuses — once, and only if nothing's been saved yet, so it
+     never overwrites real interaction (clicking through the flow
+     always wins). INT-10477 (the one real worked example every row
+     links to) is deliberately left at the default so the main
+     walkthrough still starts fresh; scorecard.html's own "Preview
+     state" control covers seeing it at other stages. */
+  function seedQaStatusOverrides() {
+    if (localStorage.getItem(QA_STATUS_OVERRIDES_KEY)) return;
+    saveQaStatusOverrides({
+      "INT-10448": QA_STATUS.MANUAL_REVIEW,
+      "INT-10436": QA_STATUS.REQUIRES_FEEDBACK,
+      "INT-10421": QA_STATUS.FEEDBACK_STARTED,
+      "INT-10408": QA_STATUS.DISPUTE_REVIEW,
+      "INT-10396": QA_STATUS.FEEDBACK_COMPLETE,
+      "INT-10381": QA_STATUS.MANUAL_REVIEW,
+      "INT-10367": QA_STATUS.REQUIRES_FEEDBACK
+    });
+  }
+
   /* Redraws every [data-status-cell] on the QA Review queue with just
      the current status pill — the table is read-only; routing a call
      (Send to Manual Review / Submit for Feedback / Assign to reviewer)
@@ -1741,6 +1764,27 @@
     card.style.display = getQaStatus("INT-10477") === QA_STATUS.DISPUTE_REVIEW ? "" : "none";
   }
 
+  /* Prototype testing aid (scorecard.html only) — every "Flagged for
+     review" row links through to this same single worked example, so
+     this lets whoever's exploring the prototype jump it straight to
+     any QA flow stage without having to actually walk the flow each
+     time. Not part of the real product surface. */
+  function wireQaPreviewState() {
+    var select = document.getElementById("qa-preview-state-select");
+    var wrap = document.getElementById("scorecard-flow");
+    if (!select || !wrap) return;
+    var ref = wrap.getAttribute("data-scorecard-ref");
+    select.value = getQaStatus(ref);
+    select.addEventListener("change", function () {
+      setQaStatus(ref, select.value);
+      qaPendingRoute = null;
+      refreshBlindState();
+      renderScorecardActions();
+      renderQaFeedbackReadyAlert();
+      renderQaDisputeAlert();
+    });
+  }
+
   /* Assigning a reviewer to a flagged call (prototype only) ----
      Every flagged row on the QA Review queue — the 16 static ones and
      any Colin-submitted ones — gets a reviewer <select> instead of a
@@ -1773,7 +1817,8 @@
   var QA_ASSIGNMENT_DEFAULTS = {
     "INT-10461": "Priya Nair", "INT-10442": "Rob Ashton", "INT-10421": "Priya Nair",
     "INT-10408": "Rob Ashton", "INT-10396": "Priya Nair", "INT-10381": "Rob Ashton",
-    "INT-10374": "Priya Nair"
+    "INT-10374": "Priya Nair", "INT-10448": "Hannah Price", "INT-10436": "Hannah Price",
+    "INT-10367": "Priya Nair"
   };
 
   function getQaAssignments() {
@@ -4265,6 +4310,7 @@
     wireTemplateCopy();
     wireRangePickers();
     seedUsers();
+    seedQaStatusOverrides();
     seedQaShoutouts();
     renderQaShoutouts();
     renderColinQueue();
@@ -4273,6 +4319,7 @@
     renderAiHumanDiff();
     renderScorecardActions();
     wireScorecardActions();
+    wireQaPreviewState();
     renderQaFeedbackReadyAlert();
     renderQaDisputeAlert();
     seedBusinessUpdates();
