@@ -1647,6 +1647,383 @@
     }
   }
 
+  /* ---- 12b. QA Calibration sessions (calibration.html) ----
+     Multi-reviewer calibration: everyone marks the same call blind, then
+     it's revealed alongside the AI's own read so the room can agree a
+     final outcome. CURRENT_AGENT_NAME is always an implicit reviewer on
+     every session (this is a single-seat prototype) — the named
+     "reviewers" list on a session is the other people calibrating it,
+     whose marks are seeded up front (there's no second real user to
+     actually submit them). A session reveals the moment you submit your
+     own blind scorecard — there's no separate "reveal" step to wait on. */
+  var CALIBRATION_KEY = "d360-calibration-sessions";
+  var CALIBRATION_CRITERIA = [
+    { key: "greeting", label: "Greeting & branding", weight: 10, note: "Opened with approved Dial360 greeting and company name." },
+    { key: "identity", label: "Identity / DPA completed", weight: 25, mandatory: true, note: "Customer identity verified before account details discussed." },
+    { key: "compliance", label: "Compliance phrasing", weight: 15, note: "Used required regulatory wording when discussing the callback." },
+    { key: "needs", label: "Needs identified", weight: 15, note: "Correctly captured the reason for contact and confirmed it back." },
+    { key: "resolution", label: "Resolution / next steps", weight: 20, note: "Booked a callback and set clear expectations on timing." },
+    { key: "tone", label: "Tone & empathy", weight: 15, note: "Warm, professional manner throughout; acknowledged frustration." }
+  ];
+
+  function calibrationRng(seed) {
+    var s = 0;
+    for (var i = 0; i < String(seed).length; i++) s = (s * 31 + String(seed).charCodeAt(i)) >>> 0;
+    return function () {
+      s |= 0; s = (s + 0x6D2B79F5) | 0;
+      var t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function calibrationGenVerdicts(seed, passRate) {
+    var rng = calibrationRng(seed);
+    var out = {};
+    CALIBRATION_CRITERIA.forEach(function (c) { out[c.key] = rng() < (passRate == null ? 0.8 : passRate) ? "pass" : "fail"; });
+    return out;
+  }
+  function calibrationScore(verdicts) {
+    if (!verdicts) return 0;
+    return CALIBRATION_CRITERIA.reduce(function (sum, c) { return sum + (verdicts[c.key] === "pass" ? c.weight : 0); }, 0);
+  }
+
+  function getCalibrationSessions() {
+    try { return JSON.parse(localStorage.getItem(CALIBRATION_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveCalibrationSessions(list) { localStorage.setItem(CALIBRATION_KEY, JSON.stringify(list)); }
+
+  function seedCalibrationSessions() {
+    if (localStorage.getItem(CALIBRATION_KEY)) return;
+    var defs = [
+      { id: "CAL-1001", ref: "INT-10471", agent: "Olivia Hughes", customer: "Sam Patel", duration: "5m 18s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Today, 09:14", createdAt: Date.now() - 3 * 3600e3 },
+      { id: "CAL-1002", ref: "INT-10532", agent: "Daniel Okafor", customer: "Priya Shah", duration: "6m 42s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Today, 08:02", createdAt: Date.now() - 4 * 3600e3 },
+      { id: "CAL-1003", ref: "INT-10501", agent: "James Whitmore", customer: "Alex Greer", duration: "4m 55s", reviewers: ["Grace Thompson", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Yesterday", createdAt: Date.now() - 30 * 3600e3 },
+      { id: "CAL-1004", ref: "INT-10488", agent: "Grace Thompson", customer: "Mark Ellison", duration: "8m 05s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: true, createdLabel: "Yesterday", createdAt: Date.now() - 28 * 3600e3 },
+      { id: "CAL-1005", ref: "INT-10422", agent: "Marcus Bennett", customer: "Nina Torres", duration: "7m 11s", reviewers: ["Daniel Okafor", "Grace Thompson"], ownerIsYou: true, createdLabel: "3 days ago", createdAt: Date.now() - 72 * 3600e3 }
+    ];
+    defs.forEach(function (s) {
+      s.aiVerdicts = calibrationGenVerdicts(s.id + "-ai", 0.82);
+      s.reviewerVerdicts = {};
+      s.reviewers.forEach(function (name, i) { s.reviewerVerdicts[name] = calibrationGenVerdicts(s.id + "-" + name + "-" + i, 0.75); });
+      s.yourVerdicts = null;
+      s.yourComments = {};
+      s.agreedOutcome = null;
+      s.calibrated = false;
+    });
+    // The 5th seed session (INT-10422) is a finished example so the
+    // Sessions list has at least one "Calibrated" row out of the box.
+    defs[4].yourVerdicts = calibrationGenVerdicts("CAL-1005-you", 0.85);
+    defs[4].agreedOutcome = Object.assign({}, defs[4].aiVerdicts);
+    defs[4].calibrated = true;
+    saveCalibrationSessions(defs);
+  }
+
+  function calibrationSessionById(id) {
+    return getCalibrationSessions().filter(function (s) { return s.id === id; })[0] || null;
+  }
+  function updateCalibrationSession(session) {
+    var list = getCalibrationSessions();
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === session.id) { list[i] = session; break; }
+    }
+    saveCalibrationSessions(list);
+  }
+  function calibrationSubmittedCount(session) { return session.reviewers.length + (session.yourVerdicts ? 1 : 0); }
+  function calibrationTotalReviewers(session) { return session.reviewers.length + 1; }
+  function calibrationStatus(session) {
+    if (session.calibrated) return "calibrated";
+    if (session.yourVerdicts) return "revealed";
+    return "open";
+  }
+  function calibrationStatusPill(status) {
+    if (status === "calibrated") return '<span class="pill pill--pass">Calibrated</span>';
+    if (status === "revealed") return '<span class="pill pill--info">Revealed</span>';
+    return '<span class="pill pill--muted">Open</span>';
+  }
+
+  function renderCalibrationSessionsTable() {
+    var tbody = document.getElementById("calibration-sessions-tbody");
+    if (!tbody) return;
+    var sessions = getCalibrationSessions().slice().sort(function (a, b) { return b.createdAt - a.createdAt; });
+    tbody.innerHTML = sessions.map(function (s) {
+      var avatars = s.reviewers.map(function (name) {
+        return '<span class="avatar avatar--sm" style="margin-right:-8px;border:2px solid #fff;">' + esc(userInitials(name)) + '</span>';
+      }).join("");
+      return '<tr class="clickable" data-calibration-row="' + esc(s.id) + '">' +
+        '<td class="cell-mono">' + esc(s.ref) + '</td>' +
+        '<td>' + esc(s.agent) + '</td>' +
+        '<td>' + esc(s.customer) + '</td>' +
+        '<td><span class="row">' + avatars + '</span></td>' +
+        '<td>' + calibrationSubmittedCount(s) + ' of ' + calibrationTotalReviewers(s) + ' submitted</td>' +
+        '<td>' + calibrationStatusPill(calibrationStatus(s)) + '</td>' +
+        '<td>' + esc(s.createdLabel) + '</td>' +
+        '</tr>';
+    }).join("");
+    tbody.querySelectorAll("[data-calibration-row]").forEach(function (row) {
+      row.addEventListener("click", function () { calibrationOpenDetail(row.getAttribute("data-calibration-row")); });
+    });
+  }
+
+  function calibrationShowSessionsList(replace) {
+    var listView = document.getElementById("calibration-sessions-view");
+    var detailView = document.getElementById("calibration-detail-view");
+    if (!listView || !detailView) return;
+    detailView.classList.add("blind-hidden");
+    listView.classList.remove("blind-hidden");
+    renderCalibrationSessionsTable();
+    if (history.pushState) history[replace ? "replaceState" : "pushState"](null, "", "calibration.html");
+  }
+
+  function calibrationOpenDetail(id, replace) {
+    var session = calibrationSessionById(id);
+    var listView = document.getElementById("calibration-sessions-view");
+    var detailView = document.getElementById("calibration-detail-view");
+    if (!session || !listView || !detailView) return;
+    listView.classList.add("blind-hidden");
+    detailView.classList.remove("blind-hidden");
+    if (history.pushState) history[replace ? "replaceState" : "pushState"](null, "", "calibration.html?session=" + encodeURIComponent(id));
+    renderCalibrationDetail(session);
+  }
+
+  function calibrationCriterionRowHtml(c, verdicts, comment, editable) {
+    var v = verdicts ? verdicts[c.key] : null;
+    var mandatoryTag = c.mandatory ? '<span class="pill pill--flag" style="margin-left:4px;">Mandatory</span>' : "";
+    if (editable) {
+      return '<div class="colin-compliance-item" data-crit="' + c.key + '">' +
+        '<div class="colin-compliance-item__q"><strong>' + esc(c.label) + '</strong> ' + mandatoryTag + '<br /><span class="muted small">' + esc(c.note) + '</span></div>' +
+        '<div class="colin-verdict">' +
+        '<button type="button" data-v="P">P</button>' +
+        '<button type="button" data-v="F">F</button>' +
+        '</div>' +
+        '<div class="colin-comment"><textarea rows="1" placeholder="Comments (optional)">' + esc(comment || "") + '</textarea></div>' +
+        '</div>';
+    }
+    return '<div class="colin-compliance-item" data-crit="' + c.key + '">' +
+      '<div class="colin-compliance-item__q"><strong>' + esc(c.label) + '</strong> ' + mandatoryTag + '<br /><span class="muted small">' + esc(c.note) + '</span></div>' +
+      '<div class="colin-verdict">' +
+      '<button type="button" data-v="P"' + (v === "pass" ? " class=\"active\"" : "") + ' disabled>P</button>' +
+      '<button type="button" data-v="F"' + (v === "fail" ? " class=\"active\"" : "") + ' disabled>F</button>' +
+      '</div>' +
+      (comment ? '<div class="colin-comment"><textarea rows="1" disabled>' + esc(comment) + '</textarea></div>' : "") +
+      '</div>';
+  }
+
+  function calibrationComparisonTableHtml(session) {
+    var ownerIsYou = !!session.ownerIsYou;
+    var reviewerCols = session.reviewers;
+    var totalReviewerCount = 2 + reviewerCols.length; // You + AI + named reviewers
+    var head = '<th>Criterion</th>' +
+      '<th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">' + esc(userInitials(CURRENT_AGENT_NAME)) + '</span>You</span></th>' +
+      reviewerCols.map(function (name) {
+        return '<th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">' + esc(userInitials(name)) + '</span>' + esc(name) + '</span></th>';
+      }).join("") +
+      '<th style="text-align:center;">🤖 AI</th>' +
+      '<th style="text-align:center;background:var(--info-bg);border-radius:8px 8px 0 0;">Agreed outcome' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-left:2px;" title="Only the session owner can set this"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+      '</th>';
+
+    var rows = CALIBRATION_CRITERIA.map(function (c) {
+      var agreed = session.agreedOutcome ? session.agreedOutcome[c.key] : session.aiVerdicts[c.key];
+      function cell(verdict) {
+        var pillClass = verdict === "pass" ? "pill--pass" : "pill--fail";
+        var pillLabel = verdict === "pass" ? "Pass" : "Fail";
+        var flag = verdict !== agreed ? '<span class="mismatch-flag show" title="Differs from the agreed outcome">≠ agreed</span>' : '<span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span>';
+        return '<td style="text-align:center;" data-verdict="' + verdict + '"><span class="pill ' + pillClass + '">' + pillLabel + '</span>' + flag + '</td>';
+      }
+      var agreedCell;
+      if (ownerIsYou) {
+        agreedCell = '<td style="text-align:center;background:var(--info-bg);"><div class="colin-verdict" style="justify-content:center;" data-agreed-toggle="' + c.key + '">' +
+          '<button type="button" data-v="P"' + (agreed === "pass" ? ' class="active"' : "") + '>P</button>' +
+          '<button type="button" data-v="F"' + (agreed === "fail" ? ' class="active"' : "") + '>F</button>' +
+          '</div></td>';
+      } else {
+        agreedCell = '<td style="text-align:center;background:var(--info-bg);"><span class="pill ' + (agreed === "pass" ? "pill--pass" : "pill--fail") + '">' + (agreed === "pass" ? "Pass" : "Fail") + '</span></td>';
+      }
+      var mandatoryTag = c.mandatory ? ' <span class="pill pill--flag" style="margin-left:4px;">Mandatory</span>' : "";
+      return '<tr data-criterion-row="' + c.key + '"' + (c.mandatory ? ' style="background:var(--warning-bg);"' : "") + '>' +
+        '<td>' + esc(c.label) + mandatoryTag + ' <span class="tag nowrap">' + c.weight + '%</span></td>' +
+        cell(session.yourVerdicts[c.key]) +
+        reviewerCols.map(function (name) { return cell(session.reviewerVerdicts[name][c.key]); }).join("") +
+        cell(session.aiVerdicts[c.key]) +
+        agreedCell +
+        '</tr>';
+    }).join("");
+
+    var totalRow = '<tr><td class="cell-strong">Total</td>' +
+      '<td style="text-align:center;" class="cell-strong">' + calibrationScore(session.yourVerdicts) + '/100</td>' +
+      reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationScore(session.reviewerVerdicts[name]) + '/100</td>'; }).join("") +
+      '<td style="text-align:center;" class="cell-strong">' + calibrationScore(session.aiVerdicts) + '/100</td>' +
+      '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + calibrationScore(session.agreedOutcome || session.aiVerdicts) + '/100</td>' +
+      '</tr>';
+
+    return { head: head, rows: rows, totalRow: totalRow, totalReviewerCount: totalReviewerCount };
+  }
+
+  function renderCalibrationDetail(session) {
+    var body = document.getElementById("calibration-detail-body");
+    if (!body) return;
+    var status = calibrationStatus(session);
+    var html = '<div class="card mb-18"><div class="card__body row" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">' +
+      '<div><div class="cell-strong" style="font-size:15px;">' + esc(session.ref) + ' &middot; ' + esc(session.agent) + ' &middot; ' + esc(session.customer) + '</div>' +
+      '<div class="muted small" style="margin-top:2px;">Inbound call &middot; ' + esc(session.duration) + ' &middot; ' + esc(session.createdLabel) + '</div></div>' +
+      calibrationStatusPill(status) +
+      '</div></div>';
+
+    if (!session.yourVerdicts) {
+      html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">🙈</span><div>' +
+        '<div style="font-size:14.5px;">Your evaluation is hidden from other reviewers until you submit</div>' +
+        '<div class="small" style="font-weight:500;margin-top:2px;">' + session.reviewers.length + ' of ' + calibrationTotalReviewers(session) + ' reviewers have already submitted. As soon as you submit, this reveals everyone\'s marks alongside the AI\'s own read — right here, no separate tab.</div>' +
+        '</div></div>';
+      html += '<div class="card" id="calibration-evaluate-form">' +
+        '<div class="card__head"><h3>Scored criteria</h3><span class="tag">6 criteria &middot; weighted</span></div>' +
+        '<div class="card__body">' +
+        CALIBRATION_CRITERIA.map(function (c) { return calibrationCriterionRowHtml(c, null, "", true); }).join("") +
+        '<div class="colin-submit-bar"><span class="muted small" style="margin-right:auto;align-self:center;">Once submitted, this is locked — you won\'t be able to go back and change it.</span>' +
+        '<button type="button" class="btn btn--dark" id="calibration-submit-btn">Submit my evaluation</button></div>' +
+        '</div></div>';
+    } else {
+      html += '<div class="banner banner--pass mb-18"><span style="font-size:22px;">🔓</span><div>' +
+        '<div style="font-size:14.5px;">Revealed</div>' +
+        '<div class="small" style="font-weight:500;margin-top:2px;">All ' + calibrationTotalReviewers(session) + ' reviewers have submitted, including the AI\'s own read below.</div>' +
+        '</div></div>';
+      if (session.ownerIsYou && !session.calibrated) {
+        html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">👑</span><div>' +
+          '<div style="font-size:14.5px;">You created this session, so you set the Agreed outcome</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">Talk each question through, then pick the correct outcome for every criterion in the column on the right — including ones everyone already agreed on. Anything that differs from it is flagged.</div>' +
+          '</div></div>';
+      }
+      if (session.calibrated) {
+        html += '<div class="banner banner--pass mb-18"><span style="font-size:22px;">✅</span><div>' +
+          '<div style="font-size:14.5px;">Calibrated outcome logged</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">The Agreed outcome column below is this call\'s final calibrated score.</div>' +
+          '</div></div>';
+      }
+      var table = calibrationComparisonTableHtml(session);
+      html += '<div class="card mb-18"><div class="card__head"><h3>Reviewer comparison</h3><span class="tag">' + table.totalReviewerCount + ' reads &middot; incl. AI</span></div>' +
+        '<div class="table-wrap"><table class="data"><thead><tr>' + table.head + '</tr></thead><tbody>' + table.rows + table.totalRow + '</tbody></table></div>';
+      if (!session.calibrated) {
+        html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
+          '<button type="button" class="btn btn--dark" id="calibration-log-outcome-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can log the calibrated outcome\"") + '>Log calibrated outcome</button>' +
+          '<span class="muted small" style="margin-left:10px;">Records the Agreed outcome column above as this call\'s final calibrated score.</span></div>';
+      }
+      html += '</div>';
+    }
+
+    body.innerHTML = html;
+    window.D360.wireVerdictToggles();
+    wireCalibrationDetailEvents(session);
+  }
+
+  function wireCalibrationDetailEvents(session) {
+    var submitBtn = document.getElementById("calibration-submit-btn");
+    if (submitBtn) {
+      submitBtn.addEventListener("click", function () {
+        var verdicts = {};
+        var comments = {};
+        var incomplete = false;
+        document.querySelectorAll("#calibration-evaluate-form [data-crit]").forEach(function (item) {
+          var key = item.getAttribute("data-crit");
+          var active = item.querySelector(".colin-verdict button.active");
+          if (!active) { incomplete = true; return; }
+          verdicts[key] = active.getAttribute("data-v") === "P" ? "pass" : "fail";
+          var textarea = item.querySelector("textarea");
+          if (textarea && textarea.value.trim()) comments[key] = textarea.value.trim();
+        });
+        if (incomplete) { alert("Mark every criterion before submitting."); return; }
+        session.yourVerdicts = verdicts;
+        session.yourComments = comments;
+        if (!session.agreedOutcome) session.agreedOutcome = Object.assign({}, session.aiVerdicts);
+        updateCalibrationSession(session);
+        renderCalibrationDetail(session);
+      });
+    }
+    document.querySelectorAll("[data-agreed-toggle]").forEach(function (group) {
+      group.querySelectorAll("button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var key = group.getAttribute("data-agreed-toggle");
+          session.agreedOutcome = session.agreedOutcome || {};
+          session.agreedOutcome[key] = btn.getAttribute("data-v") === "P" ? "pass" : "fail";
+          updateCalibrationSession(session);
+          renderCalibrationDetail(session);
+        });
+      });
+    });
+    var logBtn = document.getElementById("calibration-log-outcome-btn");
+    if (logBtn) {
+      logBtn.addEventListener("click", function () {
+        if (!session.ownerIsYou) return;
+        session.calibrated = true;
+        updateCalibrationSession(session);
+        renderCalibrationDetail(session);
+      });
+    }
+  }
+
+  function calibrationReviewerPoolHtml() {
+    return getUsers().filter(function (u) { return u.role !== "agent" && u.name !== CURRENT_AGENT_NAME; }).map(function (u) {
+      return '<label class="row" style="gap:8px;font-weight:500;"><input type="checkbox" value="' + esc(u.name) + '" /> ' + esc(u.name) + '</label>';
+    }).join("");
+  }
+
+  function wireCalibrationPage() {
+    if (!document.getElementById("calibration-sessions-tbody")) return;
+    seedCalibrationSessions();
+    var newSessionBtn = document.getElementById("calibration-new-session-btn");
+    var modal = document.getElementById("calibration-new-session-modal");
+    if (newSessionBtn && modal) {
+      newSessionBtn.addEventListener("click", function () {
+        document.getElementById("cal-new-ref").value = "";
+        document.getElementById("cal-new-agent").value = "";
+        document.getElementById("cal-new-customer").value = "";
+        var pool = document.getElementById("cal-new-reviewers");
+        if (pool) pool.innerHTML = calibrationReviewerPoolHtml();
+        modal.classList.add("open");
+      });
+    }
+    var createBtn = document.getElementById("cal-new-session-create");
+    if (createBtn) {
+      createBtn.addEventListener("click", function () {
+        var ref = document.getElementById("cal-new-ref").value.trim();
+        var agent = document.getElementById("cal-new-agent").value.trim();
+        var customer = document.getElementById("cal-new-customer").value.trim();
+        if (!agent || !customer) { alert("Enter an agent and customer for this session."); return; }
+        var reviewers = Array.prototype.map.call(
+          document.querySelectorAll("#cal-new-reviewers input:checked"),
+          function (cb) { return cb.value; }
+        );
+        var sessions = getCalibrationSessions();
+        var nextNum = 1001 + sessions.length;
+        var id = "CAL-" + nextNum;
+        if (!ref) ref = "INT-" + (10600 + sessions.length);
+        var session = {
+          id: id, ref: ref, agent: agent, customer: customer, duration: "—",
+          reviewers: reviewers, ownerIsYou: true,
+          createdLabel: "Just now", createdAt: Date.now(),
+          aiVerdicts: calibrationGenVerdicts(id + "-ai", 0.82),
+          reviewerVerdicts: {}, yourVerdicts: null, yourComments: {},
+          agreedOutcome: null, calibrated: false
+        };
+        reviewers.forEach(function (name, i) { session.reviewerVerdicts[name] = calibrationGenVerdicts(id + "-" + name + "-" + i, 0.75); });
+        sessions.push(session);
+        saveCalibrationSessions(sessions);
+        modal.classList.remove("open");
+        calibrationOpenDetail(id);
+      });
+    }
+    var backBtn = document.getElementById("calibration-back-btn");
+    if (backBtn) backBtn.addEventListener("click", calibrationShowSessionsList);
+
+    window.addEventListener("popstate", function () {
+      var id = new URLSearchParams(window.location.search).get("session");
+      if (id && calibrationSessionById(id)) calibrationOpenDetail(id);
+      else calibrationShowSessionsList();
+    });
+
+    var initialId = new URLSearchParams(window.location.search).get("session");
+    if (initialId && calibrationSessionById(initialId)) calibrationOpenDetail(initialId, true);
+    else calibrationShowSessionsList(true);
+  }
+
   /* ---- 13. Training & Development (prototype only) ----
      Auto-generates a "training package" whenever a scorecard fails a
      tracked criterion: the failure reason is matched to an Agent
@@ -3617,6 +3994,7 @@
     renderQaAssignmentSelects();
     wireQaAssignmentSelects();
     renderQaAssignmentAlert();
+    wireCalibrationPage();
     renderDiallerAgents();
     renderUpcomingBirthdays();
     wireRoleSwitch();

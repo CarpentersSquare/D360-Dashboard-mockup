@@ -41,7 +41,7 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `interactions.html` | Unified interaction log (call / email / chat) — no sidebar tab; reached via "View all interactions" links on Dashboard / My Team Performance / Interaction Stats |
 | `interaction.html` | Single interaction detail (AI wrap-up, transcript, QA) |
 | `qa.html` | Automated QA review queue |
-| `calibration.html` | QA Calibration — reviewers independently score the same interaction blind (hidden from each other until revealed); the session owner then sets the Agreed outcome per criterion, with any reviewer's mark that differs flagged inline. A submitted evaluation locks and can't be amended (Admin/Manager/Team lead/Trainer) |
+| `calibration.html` | QA Calibration — "New session" creates a real session (interaction + reviewers); clicking a session opens one combined view (no tabs) that starts with your blind scorecard and, the moment you submit it, reveals every reviewer's marks plus the AI's own read side by side. The session owner then sets the Agreed outcome per criterion, with any mark that differs flagged inline, and can log it as the final calibrated outcome. A submitted evaluation locks and can't be amended (Admin/Manager/Team lead/Trainer) |
 | `tasks.html` | Tasks queue — work that needs actioning (complaints, repayment tasks, etc.), Raised / In progress / Resolved / Escalated, filterable by task type |
 | `my-team-performance.html` | A team lead's team performance overview, linking to Interaction Stats and QA Review (Team lead role only) |
 | `my-team-interaction-stats.html` | Team lead sub-page — interaction volume by channel and a per-agent breakdown with wrap-up time |
