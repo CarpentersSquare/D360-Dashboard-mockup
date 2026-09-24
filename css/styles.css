@@ -349,6 +349,13 @@ p { margin: 0 0 12px; }
 .mb-18 { margin-bottom: 18px; }
 .mb-24 { margin-bottom: 24px; }
 
+/* Blind QA review (scorecard.html) — !important so it always wins over the
+   [data-roles] inline display toggle the role switch sets on the same
+   elements (e.g. Reviewer actions is both role-gated and reveal-gated). */
+.blind-hidden { display: none !important; }
+.blind-mark-btn.active[data-mark="pass"] { background: var(--success); border-color: var(--success); color: #fff; }
+.blind-mark-btn.active[data-mark="fail"] { background: var(--danger); border-color: var(--danger); color: #fff; }
+
 /* KPI tile */
 .kpi {
   background: var(--surface);

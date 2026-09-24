@@ -732,6 +732,8 @@
     renderBanner(role);
     renderMyTeamRoster();
     scopeTeamRowsToLead();
+    refreshBlindState();
+    renderAiHumanDiff();
   }
 
   /* Which team lead's roster the "My Team Performance" pages should
@@ -880,16 +882,21 @@
 
     submissions.forEach(function (r) {
       var row = document.createElement("tr");
-      var statusPill = r.score >= 70 ? '<span class="pill pill--pass">Resolved</span>' : '<span class="pill pill--flag">Needs review</span>';
+      var resolved = r.score >= 70;
+      var statusPill = resolved ? '<span class="pill pill--pass">Resolved</span>' : '<span class="pill pill--flag">Needs review</span>';
+      var statusCell = statusPill + (resolved ? "" :
+        ' <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="' + r.ref + '" data-roles="admin,manager">Mark reviewed</button>');
       var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
       row.innerHTML =
         '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
         '<td class="cell-strong">' + r.customerName + '</td>' +
         '<td><span class="cell-user">' + r.agentName + '</span></td>' +
+        '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
         '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
         '<td>' + r.topFailReason + '</td>' +
-        '<td>' + statusPill + '</td>' +
-        '<td class="muted">Colin (AI-assisted)</td>';
+        '<td data-status-cell="' + r.ref + '">' + statusCell + '</td>' +
+        '<td data-assign-cell="' + r.ref + '"></td>' +
+        '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
       tbody.insertBefore(row, tbody.firstChild);
     });
   }
@@ -935,6 +942,324 @@
       localStorage.setItem(SCORECARD_STATUS_KEY, JSON.stringify(statuses));
       renderScorecardFeedbackState();
     });
+  }
+
+  /* ---- 12c. Blind QA scorecard review (prototype only) ----
+     scorecard.html's "Your scorecard" lets a reviewer mark all 6
+     criteria themselves before seeing anything the AI decided — the
+     flagged banner, the AI's own "Scored criteria"/"Score breakdown"/
+     "Flagged moment" cards, and Reviewer actions all carry
+     .blind-reveal.blind-hidden and only reappear once the reviewer
+     submits (or immediately for the Agent viewing their own call,
+     who isn't doing a fresh review). The comparison is saved to
+     d360-blind-reviews, keyed by interaction ref, which also feeds
+     the Manager/Admin-only "AI vs Human" column on the QA Review
+     queue below. */
+  var BLIND_REVIEWS_KEY = "d360-blind-reviews";
+  var CRITERION_LABELS = {
+    greeting: "Greeting & branding",
+    dpa: "Identity / DPA completed",
+    compliance: "Compliance phrasing",
+    needs: "Needs identified",
+    resolution: "Resolution / next steps",
+    tone: "Tone & empathy"
+  };
+
+  function getBlindReviews() {
+    try { return JSON.parse(localStorage.getItem(BLIND_REVIEWS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveBlindReviews(map) { localStorage.setItem(BLIND_REVIEWS_KEY, JSON.stringify(map)); }
+
+  function setBlindRevealed(revealed) {
+    document.querySelectorAll(".blind-reveal").forEach(function (el) { el.classList.toggle("blind-hidden", !revealed); });
+    document.querySelectorAll(".blind-only").forEach(function (el) { el.classList.toggle("blind-hidden", revealed); });
+  }
+
+  function renderBlindComparison(review) {
+    var body = document.getElementById("blind-comparison-body");
+    if (!body) return;
+    var card = document.getElementById("blind-comparison-card");
+    if (card) card.classList.remove("blind-hidden");
+    var diff = review.humanScore - review.aiScore;
+    var diffText = (diff > 0 ? "+" : "") + diff;
+    var diffColor = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
+    var agreeCount = review.perCriterion.filter(function (c) { return c.agree; }).length;
+    body.innerHTML =
+      '<div class="row" style="justify-content:space-between;align-items:baseline;margin-bottom:14px;">' +
+      '<div><div class="small muted">AI score</div><div class="kpi__value" style="font-size:22px;margin:0;">' + review.aiScore + '<span class="muted" style="font-size:14px;">/100</span></div></div>' +
+      '<div><div class="small muted">Your score</div><div class="kpi__value" style="font-size:22px;margin:0;">' + review.humanScore + '<span class="muted" style="font-size:14px;">/100</span></div></div>' +
+      '<div><div class="small muted">Difference</div><div class="kpi__value" style="font-size:22px;margin:0;color:var(--' + diffColor + ');">' + diffText + '</div></div>' +
+      '</div>' +
+      '<ul class="checklist" style="margin:0;">' +
+      review.perCriterion.map(function (c) {
+        return '<li><div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
+          '<div class="checklist__desc">You marked <strong>' + c.human + '</strong> · AI marked <strong>' + c.ai + '</strong></div></div>' +
+          '<span class="pill ' + (c.agree ? "pill--pass" : "pill--fail") + '">' + (c.agree ? "Agree" : "Disagree") + '</span></li>';
+      }).join("") +
+      '</ul>' +
+      '<p class="small muted" style="margin-top:12px;">' + agreeCount + ' of ' + review.perCriterion.length + ' criteria matched the AI’s marking.</p>';
+  }
+
+  function refreshBlindState() {
+    var wrap = document.getElementById("scorecard-flow");
+    if (!wrap) return;
+    var ref = wrap.getAttribute("data-scorecard-ref");
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var existing = getBlindReviews()[ref];
+    // Manager/Admin review the AI's marking directly (that's the job —
+    // decide whether to accept it or send it for full human review, see
+    // the "AI vs Human" queue column). Agents see their own feedback the
+    // same way. Trainer/Team lead — who actually do the blind marking —
+    // get the blank-scorecard flow below until they submit one.
+    var autoReveal = role === "agent" || role === "manager" || role === "admin";
+    setBlindRevealed(autoReveal || !!existing);
+    if (!existing) return;
+    var list = document.getElementById("blind-criteria-list");
+    if (list) {
+      existing.perCriterion.forEach(function (c) {
+        var li = list.querySelector('[data-criterion="' + c.id + '"]');
+        if (!li) return;
+        li.querySelectorAll(".blind-mark-btn").forEach(function (b) {
+          b.disabled = true;
+          b.classList.toggle("active", b.getAttribute("data-mark") === c.human);
+        });
+      });
+    }
+    renderBlindComparison(existing);
+  }
+
+  function wireBlindScorecard() {
+    var wrap = document.getElementById("scorecard-flow");
+    if (!wrap) return;
+    var ref = wrap.getAttribute("data-scorecard-ref");
+    var list = document.getElementById("blind-criteria-list");
+    var submitBtn = document.getElementById("blind-scorecard-submit");
+    var selections = {};
+
+    function updateSubmitState() {
+      if (!submitBtn || !list) return;
+      var items = list.querySelectorAll("[data-criterion]");
+      submitBtn.disabled = !Array.prototype.every.call(items, function (li) {
+        return !!selections[li.getAttribute("data-criterion")];
+      });
+    }
+
+    if (list) {
+      list.querySelectorAll(".blind-mark-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (btn.disabled) return;
+          var li = btn.closest("[data-criterion]");
+          selections[li.getAttribute("data-criterion")] = btn.getAttribute("data-mark");
+          li.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          updateSubmitState();
+        });
+      });
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener("click", function () {
+        if (!list) return;
+        var humanScore = 0, aiScore = 0;
+        var perCriterion = [];
+        list.querySelectorAll("[data-criterion]").forEach(function (li) {
+          var id = li.getAttribute("data-criterion");
+          var weight = parseInt(li.getAttribute("data-weight"), 10);
+          var ai = li.getAttribute("data-ai");
+          var human = selections[id];
+          if (human === "pass") humanScore += weight;
+          if (ai === "pass") aiScore += weight;
+          perCriterion.push({ id: id, ai: ai, human: human, agree: ai === human });
+        });
+        var review = {
+          ref: ref, aiScore: aiScore, humanScore: humanScore, perCriterion: perCriterion,
+          reviewedAt: new Date().toISOString()
+        };
+        var reviews = getBlindReviews();
+        reviews[ref] = review;
+        saveBlindReviews(reviews);
+
+        list.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.disabled = true; });
+        renderBlindComparison(review);
+        setBlindRevealed(true);
+        renderAiHumanDiff();
+      });
+    }
+
+    refreshBlindState();
+  }
+
+  /* Manager/Admin-only "AI vs Human" column on the QA Review queue —
+     reads the same d360-blind-reviews store scorecard.html writes to,
+     so a Manager can see at a glance whether the AI's score for a
+     flagged call lines up with a reviewer's blind mark, or whether
+     it's worth sending for full human review. */
+  function renderAiHumanDiff() {
+    var cells = document.querySelectorAll("[data-ai-diff]");
+    if (!cells.length) return;
+    var reviews = getBlindReviews();
+    cells.forEach(function (cell) {
+      var review = reviews[cell.getAttribute("data-ai-diff")];
+      if (!review) {
+        cell.innerHTML = '<span class="small muted">Not yet reviewed</span>';
+        return;
+      }
+      var diff = review.humanScore - review.aiScore;
+      var diffText = (diff > 0 ? "+" : "") + diff;
+      var cls = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
+      var verdict = Math.abs(diff) <= 5 ? "Happy with AI score" : "Recommend human review";
+      cell.innerHTML =
+        '<div class="small">AI ' + review.aiScore + ' · You ' + review.humanScore + '</div>' +
+        '<div class="small" style="color:var(--' + cls + ');font-weight:600;">' + diffText + ' pts · ' + verdict + '</div>';
+    });
+  }
+
+  /* Manager/Admin-only "Mark reviewed" action on the QA Review queue —
+     flips a flagged call's status pill straight to Resolved once a
+     Manager is happy with it (whether that's from the AI's score alone,
+     or after checking the "AI vs Human" comparison above). Stored in
+     d360-qa-status-overrides, keyed by interaction ref, since the queue
+     rows are otherwise static markup. */
+  var QA_STATUS_OVERRIDES_KEY = "d360-qa-status-overrides";
+
+  function getQaStatusOverrides() {
+    try { return JSON.parse(localStorage.getItem(QA_STATUS_OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveQaStatusOverrides(map) { localStorage.setItem(QA_STATUS_OVERRIDES_KEY, JSON.stringify(map)); }
+
+  function applyQaStatusOverrides() {
+    var overrides = getQaStatusOverrides();
+    Object.keys(overrides).forEach(function (ref) {
+      var cell = document.querySelector('[data-status-cell="' + ref + '"]');
+      if (!cell) return;
+      var pill = cell.querySelector(".pill");
+      if (pill) {
+        pill.className = "pill pill--pass";
+        pill.textContent = "Resolved";
+      }
+      var btn = cell.querySelector("[data-mark-reviewed]");
+      if (btn) btn.remove();
+    });
+  }
+
+  function wireQaStatusActions() {
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-mark-reviewed]");
+      if (!btn) return;
+      var ref = btn.getAttribute("data-mark-reviewed");
+      var overrides = getQaStatusOverrides();
+      overrides[ref] = "resolved";
+      saveQaStatusOverrides(overrides);
+      applyQaStatusOverrides();
+    });
+  }
+
+  /* Assigning a reviewer to a flagged call (prototype only) ----
+     Every flagged row on the QA Review queue — the 16 static ones and
+     any Colin-submitted ones — gets a reviewer <select> instead of a
+     fixed name, populated from every non-Agent user. Assigning
+     "Rob Ashton" (this prototype's single logged-in identity, same
+     convention as My QA/My Performance/guide reads) surfaces the call
+     on Newsfeed's "Assigned to you for QA review" alert, so a
+     reviewer is notified without having to keep checking the queue.
+     QA_QUEUE mirrors the static rows' details so that alert can be
+     built on newsfeed.html, which never loads qa.html's own DOM. */
+  var QA_ASSIGNMENTS_KEY = "d360-qa-assignments";
+  var QA_QUEUE = [
+    { ref: "INT-10477", customer: "Liam Foster", score: 48, reason: "Tone" },
+    { ref: "INT-10461", customer: "Tom Beresford", score: 52, reason: "DPA not completed" },
+    { ref: "INT-10454", customer: "Raj Sharma", score: 55, reason: "Compliance phrase missing" },
+    { ref: "INT-10448", customer: "Nadia Hussain", score: 58, reason: "DPA not completed" },
+    { ref: "INT-10442", customer: "George Hamilton", score: 61, reason: "Tone" },
+    { ref: "INT-10436", customer: "Sophie Clarke", score: 63, reason: "Compliance phrase missing" },
+    { ref: "INT-10429", customer: "Oliver Grant", score: 64, reason: "DPA not completed" },
+    { ref: "INT-10421", customer: "Beatrice Coleman", score: 67, reason: "Tone" },
+    { ref: "INT-10415", customer: "William Pearce", score: 69, reason: "Compliance phrase missing" },
+    { ref: "INT-10408", customer: "Chloe Sutton", score: 71, reason: "DPA not completed" },
+    { ref: "INT-10402", customer: "Yusuf Demir", score: 73, reason: "Tone" },
+    { ref: "INT-10396", customer: "Catherine Lowe", score: 75, reason: "Compliance phrase missing" },
+    { ref: "INT-10389", customer: "Dominic Reyes", score: 77, reason: "DPA not completed" },
+    { ref: "INT-10381", customer: "Eleanor Davies", score: 79, reason: "Tone" },
+    { ref: "INT-10374", customer: "Priscilla Adeyemi", score: 82, reason: "Compliance phrase missing" },
+    { ref: "INT-10367", customer: "Nathan Cole", score: 84, reason: "DPA not completed" }
+  ];
+  var QA_ASSIGNMENT_DEFAULTS = {
+    "INT-10461": "Priya Nair", "INT-10442": "Rob Ashton", "INT-10421": "Priya Nair",
+    "INT-10408": "Rob Ashton", "INT-10396": "Priya Nair", "INT-10381": "Rob Ashton",
+    "INT-10374": "Priya Nair"
+  };
+
+  function getQaAssignments() {
+    try { return JSON.parse(localStorage.getItem(QA_ASSIGNMENTS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveQaAssignments(map) { localStorage.setItem(QA_ASSIGNMENTS_KEY, JSON.stringify(map)); }
+
+  /* An explicit "" (set by picking "— Unassigned —") overrides a
+     seeded default; only fall back to the default when nothing has
+     been saved for this ref at all. */
+  function qaAssignedReviewer(ref) {
+    var assignments = getQaAssignments();
+    if (Object.prototype.hasOwnProperty.call(assignments, ref)) return assignments[ref];
+    return QA_ASSIGNMENT_DEFAULTS[ref] || "";
+  }
+
+  function qaReviewerOptionsHtml(selected) {
+    var reviewers = getUsers().filter(function (u) { return u.role !== "agent"; });
+    var html = '<option value=""' + (!selected ? " selected" : "") + '>— Unassigned —</option>';
+    html += reviewers.map(function (u) {
+      return '<option value="' + u.name + '"' + (u.name === selected ? " selected" : "") + '>' + u.name + '</option>';
+    }).join("");
+    return html;
+  }
+
+  function renderQaAssignmentSelects() {
+    var cells = document.querySelectorAll("[data-assign-cell]");
+    if (!cells.length) return;
+    cells.forEach(function (cell) {
+      var ref = cell.getAttribute("data-assign-cell");
+      cell.innerHTML = '<select style="padding:6px 10px;font-size:13px;" data-assign-reviewer="' + ref + '">' +
+        qaReviewerOptionsHtml(qaAssignedReviewer(ref)) + '</select>';
+    });
+  }
+
+  function wireQaAssignmentSelects() {
+    document.addEventListener("change", function (e) {
+      var select = e.target.closest("[data-assign-reviewer]");
+      if (!select) return;
+      var assignments = getQaAssignments();
+      assignments[select.getAttribute("data-assign-reviewer")] = select.value;
+      saveQaAssignments(assignments);
+      renderQaAssignmentAlert();
+    });
+  }
+
+  /* Newsfeed "Assigned to you for QA review" to-do — visible to the
+     same roles as QA Review itself, listing whichever flagged calls
+     (built-in or Colin-submitted) are currently assigned to
+     CURRENT_AGENT_NAME. */
+  function renderQaAssignmentAlert() {
+    var card = document.getElementById("qa-assignment-alert");
+    if (!card) return;
+    var colinSubmissions = [];
+    try { colinSubmissions = JSON.parse(localStorage.getItem(COLIN_KEY)) || []; } catch (e) { colinSubmissions = []; }
+    var colinEntries = colinSubmissions.map(function (r) {
+      return { ref: r.ref, customer: r.customerName, score: r.score, reason: r.topFailReason };
+    });
+    var mine = QA_QUEUE.concat(colinEntries).filter(function (q) {
+      return qaAssignedReviewer(q.ref) === CURRENT_AGENT_NAME;
+    });
+    if (!mine.length) { card.style.display = "none"; return; }
+    card.style.display = "";
+    var countEl = card.querySelector("[data-qa-assignment-count]");
+    if (countEl) countEl.textContent = mine.length;
+    var list = card.querySelector("[data-qa-assignment-list]");
+    if (list) {
+      list.innerHTML = mine.slice(0, 4).map(function (q) {
+        return '<li><div class="checklist__main"><div class="checklist__title">' + q.ref + ' — ' + q.customer + '</div>' +
+          '<div class="checklist__desc">Flagged for ' + q.reason + ' · ' + q.score + '/100</div></div>' +
+          '<a class="btn btn--sm" href="qa.html">Review</a></li>';
+      }).join("");
+    }
   }
 
   /* ---- 13. Training & Development (prototype only) ----
@@ -2886,7 +3211,11 @@
     wireTemplateCopy();
     wireRangePickers();
     renderColinQueue();
+    applyQaStatusOverrides();
+    wireQaStatusActions();
     wireScorecardFeedback();
+    wireBlindScorecard();
+    renderAiHumanDiff();
     seedBusinessUpdates();
     renderBusinessUpdates();
     wireBusinessUpdateModal();
@@ -2894,6 +3223,9 @@
     renderBanner(currentBannerRole());
     wireBannerEditor();
     seedUsers();
+    renderQaAssignmentSelects();
+    wireQaAssignmentSelects();
+    renderQaAssignmentAlert();
     renderDiallerAgents();
     renderUpcomingBirthdays();
     wireRoleSwitch();
