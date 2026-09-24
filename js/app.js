@@ -7,6 +7,8 @@
 (function () {
   "use strict";
 
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
   /* ---- 1. Active nav state ----
      Each page sets <body data-page="overview"> (or interactions, qa, ...).
      Nav links carry data-nav="overview". */
@@ -904,66 +906,23 @@
     try { submissions = JSON.parse(localStorage.getItem(COLIN_KEY)) || []; } catch (e) { submissions = []; }
     if (!submissions.length) return;
 
-    submissions.forEach(function (r) {
-      var row = document.createElement("tr");
-      var resolved = r.score >= 70;
-      var statusPill = resolved ? '<span class="pill pill--pass">Resolved</span>' : '<span class="pill pill--flag">Needs review</span>';
-      var statusCell = statusPill + (resolved ? "" :
-        ' <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="' + r.ref + '" data-roles="admin,manager">Mark reviewed</button>');
-      var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
-      row.innerHTML =
-        '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
-        '<td><span class="cell-user">' + r.agentName + '</span></td>' +
-        '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
-        '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
-        '<td data-status-cell="' + r.ref + '">' + statusCell + '</td>' +
-        '<td data-assign-cell="' + r.ref + '"></td>' +
-        '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
-      tbody.insertBefore(row, tbody.firstChild);
-    });
-  }
-
-  /* ---- 12b. Scorecard "feedback delivered" confirmation (prototype only) ----
-     scorecard.html's Reviewer actions panel has a "Confirm feedback
-     delivered" button; clicking it flips the status pill next to the
-     page title from "Awaiting feedback" to "Feedback Delivered" and
-     disables the button so it can't be pressed twice. Stored in
-     d360-scorecard-status, keyed by interaction ref, so the confirmed
-     state persists across reloads. */
-  var SCORECARD_STATUS_KEY = "d360-scorecard-status";
-
-  function getScorecardStatuses() {
-    try { return JSON.parse(localStorage.getItem(SCORECARD_STATUS_KEY)) || {}; } catch (e) { return {}; }
-  }
-  function renderScorecardFeedbackState() {
-    var btn = document.getElementById("confirm-feedback-btn");
-    if (!btn) return;
-    var ref = btn.getAttribute("data-scorecard-ref");
-    var delivered = !!getScorecardStatuses()[ref];
-    var pill = document.getElementById("scorecard-status-pill");
-    var note = document.getElementById("feedback-delivered-note");
-    if (delivered) {
-      if (pill) { pill.classList.remove("pill--flag"); pill.classList.add("pill--info"); pill.textContent = "Feedback Delivered"; }
-      btn.disabled = true;
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Feedback delivered';
-      if (note) {
-        var reviewerName = document.querySelector(".account__name");
-        note.style.display = "";
-        note.textContent = "Confirmed by " + (reviewerName ? reviewerName.textContent.trim() : "you") + ".";
-      }
-    }
-  }
-  function wireScorecardFeedback() {
-    var btn = document.getElementById("confirm-feedback-btn");
-    if (!btn) return;
-    renderScorecardFeedbackState();
-    btn.addEventListener("click", function () {
-      var ref = btn.getAttribute("data-scorecard-ref");
-      var statuses = getScorecardStatuses();
-      statuses[ref] = { status: "delivered" };
-      localStorage.setItem(SCORECARD_STATUS_KEY, JSON.stringify(statuses));
-      renderScorecardFeedbackState();
-    });
+    // A submission that clears the auto-QA gate (see qaGatePass above)
+    // never appears here at all — it's silently published to the agent.
+    // Only ones that failed the gate need a manager to route them.
+    submissions.filter(function (r) { return !qaGatePass(r.score / 10, r.operationalScore / 10); })
+      .forEach(function (r) {
+        var row = document.createElement("tr");
+        var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
+        row.innerHTML =
+          '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
+          '<td><span class="cell-user">' + r.agentName + '</span></td>' +
+          '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
+          '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
+          '<td data-status-cell="' + r.ref + '"></td>' +
+          '<td data-assign-cell="' + r.ref + '"></td>' +
+          '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
+        tbody.insertBefore(row, tbody.firstChild);
+      });
   }
 
   /* ---- 12c. Blind QA scorecard review (prototype only) ----
@@ -1015,6 +974,17 @@
     document.querySelectorAll(".blind-only").forEach(function (el) { el.classList.toggle("blind-hidden", revealed); });
   }
 
+  /* Per the QA flow: "Scores match" auto-advances status on its own;
+     "scores differ" requires the marker to tag every differing line
+     'AI Correct' / 'AI Incorrect' with a reason before they can Submit
+     for Feedback. An 'AI Incorrect' tag is what makes that line show
+     the marker's own mark/comment (instead of the AI's) everywhere the
+     agent-facing scorecard renders. */
+  function blindReviewDisagreements(review) { return review.perCriterion.filter(function (c) { return !c.agree; }); }
+  function blindReviewFullyTagged(review) {
+    return blindReviewDisagreements(review).every(function (c) { return !!c.verdict; });
+  }
+
   function renderBlindComparison(review) {
     var body = document.getElementById("blind-comparison-body");
     if (!body) return;
@@ -1024,6 +994,7 @@
     var diffText = (diff > 0 ? "+" : "") + diff;
     var diffColor = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
     var agreeCount = review.perCriterion.filter(function (c) { return c.agree; }).length;
+    var disagreements = blindReviewDisagreements(review);
     body.innerHTML =
       '<div class="row" style="justify-content:space-between;align-items:baseline;margin-bottom:14px;">' +
       '<div><div class="small muted">AI score</div><div class="kpi__value" style="font-size:22px;margin:0;">' + review.aiScore + '<span class="muted" style="font-size:14px;">/100</span></div></div>' +
@@ -1032,12 +1003,66 @@
       '</div>' +
       '<ul class="checklist" style="margin:0;">' +
       review.perCriterion.map(function (c) {
-        return '<li><div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
+        if (c.agree) {
+          return '<li><div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
+            '<div class="checklist__desc">You marked <strong>' + c.human + '</strong> · AI marked <strong>' + c.ai + '</strong></div></div>' +
+            '<span class="pill pill--pass">Agree</span></li>';
+        }
+        var tagged = c.verdict === "ai-correct" ? "AI Correct" : c.verdict === "ai-incorrect" ? "AI Incorrect" : "";
+        return '<li data-diff-criterion="' + c.id + '" style="flex-direction:column;align-items:stretch;">' +
+          '<div class="row" style="justify-content:space-between;">' +
+          '<div class="checklist__main"><div class="checklist__title">' + CRITERION_LABELS[c.id] + '</div>' +
           '<div class="checklist__desc">You marked <strong>' + c.human + '</strong> · AI marked <strong>' + c.ai + '</strong></div></div>' +
-          '<span class="pill ' + (c.agree ? "pill--pass" : "pill--fail") + '">' + (c.agree ? "Agree" : "Disagree") + '</span></li>';
+          '<span class="pill pill--fail">Disagree</span>' +
+          '</div>' +
+          '<div class="row" style="gap:8px;margin-top:8px;">' +
+          '<button type="button" class="btn btn--sm ' + (c.verdict === "ai-correct" ? "btn--dark" : "btn--ghost") + '" data-ai-tag="ai-correct" data-criterion="' + c.id + '">AI Correct</button>' +
+          '<button type="button" class="btn btn--sm ' + (c.verdict === "ai-incorrect" ? "btn--dark" : "btn--ghost") + '" data-ai-tag="ai-incorrect" data-criterion="' + c.id + '">AI Incorrect</button>' +
+          (tagged ? '<span class="small muted" style="align-self:center;">Tagged: ' + tagged + '</span>' : '') +
+          '</div>' +
+          '<textarea class="ai-tag-reason" data-criterion="' + c.id + '" rows="1" placeholder="Why?" style="margin-top:6px;width:100%;font-family:var(--font);font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' + (c.reason ? esc(c.reason) : "") + '</textarea>' +
+          '</li>';
       }).join("") +
       '</ul>' +
-      '<p class="small muted" style="margin-top:12px;">' + agreeCount + ' of ' + review.perCriterion.length + ' criteria matched the AI’s marking.</p>';
+      '<p class="small muted" style="margin-top:12px;">' + agreeCount + ' of ' + review.perCriterion.length + ' criteria matched the AI’s marking.</p>' +
+      (disagreements.length && getQaStatus(review.ref) === QA_STATUS.MANUAL_REVIEW ?
+        '<button type="button" class="btn btn--primary" id="blind-submit-feedback-btn" style="margin-top:6px;" ' + (blindReviewFullyTagged(review) ? "" : "disabled") + '>Submit for Feedback</button>' +
+        '<p class="small muted" style="margin-top:6px;" id="blind-submit-feedback-hint">Tag every differing line above before submitting.</p>'
+        : disagreements.length ?
+        '<p class="small" style="margin-top:6px;color:var(--success);font-weight:600;">Submitted for feedback.</p>'
+        : '<p class="small" style="margin-top:6px;color:var(--success);font-weight:600;">Scores matched — status automatically advanced to Requires Feedback.</p>');
+
+    body.querySelectorAll("[data-ai-tag]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-criterion");
+        var tag = btn.getAttribute("data-ai-tag");
+        var reviews = getBlindReviews();
+        var r = reviews[review.ref];
+        if (!r) return;
+        var c = r.perCriterion.filter(function (x) { return x.id === id; })[0];
+        if (!c) return;
+        c.verdict = tag;
+        saveBlindReviews(reviews);
+        renderBlindComparison(r);
+      });
+    });
+    body.querySelectorAll(".ai-tag-reason").forEach(function (ta) {
+      ta.addEventListener("input", function () {
+        var id = ta.getAttribute("data-criterion");
+        var reviews = getBlindReviews();
+        var r = reviews[review.ref];
+        if (!r) return;
+        var c = r.perCriterion.filter(function (x) { return x.id === id; })[0];
+        if (c) { c.reason = ta.value; saveBlindReviews(reviews); }
+      });
+    });
+    var submitFeedbackBtn = document.getElementById("blind-submit-feedback-btn");
+    if (submitFeedbackBtn) {
+      submitFeedbackBtn.addEventListener("click", function () {
+        setQaStatus(review.ref, QA_STATUS.REQUIRES_FEEDBACK);
+        renderScorecardActions();
+      });
+    }
   }
 
   function refreshBlindState() {
@@ -1045,14 +1070,25 @@
     if (!wrap) return;
     var ref = wrap.getAttribute("data-scorecard-ref");
     var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var status = getQaStatus(ref);
     var existing = getBlindReviews()[ref];
     // Manager/Admin review the AI's marking directly (that's the job —
     // decide whether to accept it or send it for full human review, see
     // the "AI vs Human" queue column). Agents see their own feedback the
     // same way. Trainer/Team lead — who actually do the blind marking —
-    // get the blank-scorecard flow below until they submit one.
+    // only get the blank-scorecard form once a manager has routed this
+    // call to Manual Review; before that (still Needs Review) they see a
+    // waiting note instead, and once it's past marking the AI result is
+    // revealed same as everyone else.
     var autoReveal = role === "agent" || role === "manager" || role === "admin";
-    setBlindRevealed(autoReveal || !!existing);
+    var pastMarking = status !== QA_STATUS.NEEDS_REVIEW && status !== QA_STATUS.MANUAL_REVIEW;
+    setBlindRevealed(autoReveal || !!existing || pastMarking);
+    var blindCard = document.getElementById("blind-scorecard-card");
+    var waitingNote = document.getElementById("blind-waiting-note");
+    var showBlindForm = !autoReveal && !existing && status === QA_STATUS.MANUAL_REVIEW;
+    var showWaiting = !autoReveal && !existing && status === QA_STATUS.NEEDS_REVIEW;
+    if (blindCard) blindCard.classList.toggle("blind-hidden", !showBlindForm);
+    if (waitingNote) waitingNote.classList.toggle("blind-hidden", !showWaiting);
     if (!existing) return;
     var list = document.getElementById("blind-criteria-list");
     if (list) {
@@ -1128,6 +1164,12 @@
         renderBlindComparison(review);
         setBlindRevealed(true);
         renderAiHumanDiff();
+        // "Scores match - Automatically updates status" per the QA flow;
+        // otherwise it stays in Manual Review until every differing line
+        // is tagged AI Correct/Incorrect and "Submit for Feedback" is
+        // clicked (see renderBlindComparison above).
+        if (!blindReviewDisagreements(review).length) setQaStatus(ref, QA_STATUS.REQUIRES_FEEDBACK);
+        renderScorecardActions();
       });
     }
 
@@ -1159,44 +1201,342 @@
     });
   }
 
-  /* Manager/Admin-only "Mark reviewed" action on the QA Review queue —
-     flips a flagged call's status pill straight to Resolved once a
-     Manager is happy with it (whether that's from the AI's score alone,
-     or after checking the "AI vs Human" comparison above). Stored in
-     d360-qa-status-overrides, keyed by interaction ref, since the queue
-     rows are otherwise static markup. */
+  /* ---- QA flow (per the QA_flow.pdf handoff) ----
+     Every AI-marked scorecard is judged against a fixed gate: Operational
+     score must be >=85% AND Compliance must not be a hard 0/10 fail.
+     Pass is silent — auto-published read-only to the agent, never enters
+     the Flagged for review queue. Anything else is Needs Review and
+     lands on qa.html for a manager to route: either straight to
+     Requires Feedback (trusting the AI's mark as-is), or to Manual
+     Review, where a Trainer/Team lead marks the call blind (see the
+     Blind QA scorecard review section above) before the two scorecards
+     are compared. From there the flow moves through a feedback session
+     with the agent, which either completes outright or — if the agent
+     disputes a line — escalates to the marker's line manager to
+     Uphold/Override before completing. Status is stored in
+     d360-qa-status-overrides, keyed by interaction ref, defaulting to
+     "needs-review" for anything not yet touched. */
+  var QA_GATE_OPERATIONAL_THRESHOLD = 85;
+  function qaGatePass(complianceScore10, operationalScore10) {
+    return (operationalScore10 * 10) >= QA_GATE_OPERATIONAL_THRESHOLD && complianceScore10 !== 0;
+  }
+
+  var QA_STATUS = {
+    NEEDS_REVIEW: "needs-review",
+    MANUAL_REVIEW: "manual-review",
+    REQUIRES_FEEDBACK: "requires-feedback",
+    FEEDBACK_STARTED: "feedback-started",
+    DISPUTE_REVIEW: "dispute-review",
+    FEEDBACK_COMPLETE: "feedback-complete"
+  };
+  var QA_STATUS_META = {
+    "needs-review": { label: "Needs Review", pill: "pill--flag" },
+    "manual-review": { label: "Manual Review", pill: "pill--info" },
+    "requires-feedback": { label: "Requires Feedback", pill: "pill--info" },
+    "feedback-started": { label: "Feedback Session Started", pill: "pill--info" },
+    "dispute-review": { label: "Dispute – Review Required", pill: "pill--flag" },
+    "feedback-complete": { label: "Feedback Complete", pill: "pill--pass" }
+  };
   var QA_STATUS_OVERRIDES_KEY = "d360-qa-status-overrides";
 
   function getQaStatusOverrides() {
     try { return JSON.parse(localStorage.getItem(QA_STATUS_OVERRIDES_KEY)) || {}; } catch (e) { return {}; }
   }
   function saveQaStatusOverrides(map) { localStorage.setItem(QA_STATUS_OVERRIDES_KEY, JSON.stringify(map)); }
-
-  function applyQaStatusOverrides() {
+  function getQaStatus(ref) { return getQaStatusOverrides()[ref] || QA_STATUS.NEEDS_REVIEW; }
+  function setQaStatus(ref, status) {
     var overrides = getQaStatusOverrides();
-    Object.keys(overrides).forEach(function (ref) {
-      var cell = document.querySelector('[data-status-cell="' + ref + '"]');
-      if (!cell) return;
-      var pill = cell.querySelector(".pill");
-      if (pill) {
-        pill.className = "pill pill--pass";
-        pill.textContent = "Resolved";
+    overrides[ref] = status;
+    saveQaStatusOverrides(overrides);
+  }
+
+  /* Redraws every [data-status-cell] on the QA Review queue with the
+     current status pill plus whatever action a Manager/Admin can take
+     from here — right now just the initial Needs Review routing
+     decision; everything past that (manual marking, feedback session,
+     disputes) happens on scorecard.html itself. */
+  function applyQaStatusOverrides() {
+    document.querySelectorAll("[data-status-cell]").forEach(function (cell) {
+      var ref = cell.getAttribute("data-status-cell");
+      var status = getQaStatus(ref);
+      var meta = QA_STATUS_META[status];
+      var actions = "";
+      if (status === QA_STATUS.NEEDS_REVIEW) {
+        actions =
+          ' <button class="btn btn--sm btn--ghost" type="button" data-route-manual="' + ref + '" data-roles="admin,manager">Send to Manual Review</button>' +
+          ' <button class="btn btn--sm btn--ghost" type="button" data-route-feedback="' + ref + '" data-roles="admin,manager">Submit for Feedback</button>';
       }
-      var btn = cell.querySelector("[data-mark-reviewed]");
-      if (btn) btn.remove();
+      cell.innerHTML = '<span class="pill ' + meta.pill + '">' + meta.label + '</span>' + actions;
     });
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
   }
 
   function wireQaStatusActions() {
     document.addEventListener("click", function (e) {
-      var btn = e.target.closest("[data-mark-reviewed]");
-      if (!btn) return;
-      var ref = btn.getAttribute("data-mark-reviewed");
-      var overrides = getQaStatusOverrides();
-      overrides[ref] = "resolved";
-      saveQaStatusOverrides(overrides);
-      applyQaStatusOverrides();
+      var manualBtn = e.target.closest("[data-route-manual]");
+      if (manualBtn) {
+        setQaStatus(manualBtn.getAttribute("data-route-manual"), QA_STATUS.MANUAL_REVIEW);
+        applyQaStatusOverrides();
+        return;
+      }
+      var feedbackBtn = e.target.closest("[data-route-feedback]");
+      if (feedbackBtn) {
+        setQaStatus(feedbackBtn.getAttribute("data-route-feedback"), QA_STATUS.REQUIRES_FEEDBACK);
+        applyQaStatusOverrides();
+      }
     });
+  }
+
+  /* "🏆 100% QA Shoutouts" on the newsfeed — seeded with three examples,
+     then a new entry is prepended whenever a scorecard clears the gate
+     with a perfect 10/10 on both Compliance and Operational. */
+  var QA_SHOUTOUTS_KEY = "d360-qa-shoutouts";
+  function getQaShoutouts() {
+    try { return JSON.parse(localStorage.getItem(QA_SHOUTOUTS_KEY)) || []; } catch (e) { return []; }
+  }
+  function saveQaShoutouts(list) { localStorage.setItem(QA_SHOUTOUTS_KEY, JSON.stringify(list)); }
+  function seedQaShoutouts() {
+    if (localStorage.getItem(QA_SHOUTOUTS_KEY)) return;
+    saveQaShoutouts([
+      { agentName: "Sophie Clarke", ref: "INT-10529", note: "Perfect DPA, tone and compliance — 2nd perfect score this month!" },
+      { agentName: "Grace Thompson", ref: "INT-10522", note: "Textbook complaint handling and escalation." },
+      { agentName: "Daniel Okafor", ref: "INT-10517", note: "Flawless DPA verification and a great save. Nice work!" }
+    ]);
+  }
+  function addQaShoutout(agentName, ref, note) {
+    var list = getQaShoutouts();
+    list.unshift({ agentName: agentName, ref: ref, note: note });
+    saveQaShoutouts(list);
+  }
+  function renderQaShoutouts() {
+    var root = document.getElementById("qa-shoutouts-list");
+    if (!root) return;
+    var list = getQaShoutouts();
+    root.innerHTML = list.length ? list.map(function (s) {
+      return '<li><span class="avatar avatar--sm">' + userInitials(s.agentName) + '</span>' +
+        '<div class="checklist__main"><div class="checklist__title">' + s.agentName + ' <span class="pill pill--pass" style="margin-left:6px;">100%</span></div>' +
+        '<div class="checklist__desc">' + s.note + ' (' + s.ref + ')</div></div></li>';
+    }).join("") : '<li class="muted small" style="padding:10px 0;">No perfect scores yet this week.</li>';
+  }
+
+  /* ---- scorecard.html Reviewer actions — status-driven (prototype only) ----
+     Draws whatever action the current QA status calls for into
+     #reviewer-actions-body, and the status pill next to the page title.
+     Everything from here through "Feedback Complete" happens on this
+     one page (the queue only handles the initial Needs Review routing
+     decision) — Start Feedback, Agent Happy/Disputes, the dispute
+     ticket, and the line manager's Uphold/Override decision. Disputes
+     are stored in d360-qa-disputes, keyed by interaction ref. */
+  var QA_DISPUTES_KEY = "d360-qa-disputes";
+  function getQaDisputes() {
+    try { return JSON.parse(localStorage.getItem(QA_DISPUTES_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveQaDisputes(map) { localStorage.setItem(QA_DISPUTES_KEY, JSON.stringify(map)); }
+
+  function scorecardTopFailReasonLabel(ref) {
+    var existing = getBlindReviews()[ref];
+    var overrideMap = {};
+    if (existing) {
+      existing.perCriterion.forEach(function (c) {
+        if (c.verdict === "ai-incorrect") overrideMap[c.id] = c.human;
+      });
+    }
+    var items = document.querySelectorAll('#blind-criteria-list [data-criterion^="c"]');
+    for (var i = 0; i < items.length; i++) {
+      var id = items[i].getAttribute("data-criterion");
+      var mark = overrideMap[id] || items[i].getAttribute("data-ai");
+      if (mark === "F") return CRITERION_LABELS[id];
+    }
+    return "QA criterion";
+  }
+
+  function renderScorecardActions() {
+    var wrap = document.getElementById("scorecard-flow");
+    if (!wrap) return;
+    var ref = wrap.getAttribute("data-scorecard-ref");
+    var agentName = wrap.getAttribute("data-agent-name") || "the agent";
+    var status = getQaStatus(ref);
+    var meta = QA_STATUS_META[status];
+
+    var pill = document.getElementById("scorecard-status-pill");
+    if (pill) {
+      pill.className = "pill " + meta.pill;
+      pill.style.verticalAlign = "middle";
+      pill.style.marginLeft = "6px";
+      pill.textContent = meta.label;
+    }
+
+    var body = document.getElementById("reviewer-actions-body");
+    if (!body) return;
+    var html = "";
+
+    if (status === QA_STATUS.NEEDS_REVIEW) {
+      html = '<p class="small muted" style="margin:0 0 12px;">This call missed the auto-QA gate (Operational &lt; 85% or a 0 in Compliance). Route it for full manual marking, or trust the AI\'s mark and send straight to a feedback session.</p>' +
+        '<button type="button" class="btn btn--primary" data-action="route-manual" style="width:100%;justify-content:center;margin-bottom:8px;">Send to Manual Review</button>' +
+        '<button type="button" class="btn btn--ghost" data-action="route-feedback" style="width:100%;justify-content:center;">Submit for Feedback</button>';
+    } else if (status === QA_STATUS.MANUAL_REVIEW) {
+      html = '<p class="small muted" style="margin:0;">Manual marking in progress — see the blind scorecard above.</p>';
+    } else if (status === QA_STATUS.REQUIRES_FEEDBACK) {
+      html = '<p class="small muted" style="margin:0 0 12px;">Ready for a feedback session with ' + agentName + '.</p>' +
+        '<button type="button" class="btn btn--primary" data-action="start-feedback" style="width:100%;justify-content:center;">Start Feedback</button>';
+    } else if (status === QA_STATUS.FEEDBACK_STARTED) {
+      html = '<p class="small muted" style="margin:0 0 12px;">Talk the scorecard through with ' + agentName + ', then record the outcome.</p>' +
+        '<button type="button" class="btn btn--primary" data-action="agent-happy" style="width:100%;justify-content:center;margin-bottom:8px;">Agent Happy — Feedback Complete</button>' +
+        '<button type="button" class="btn btn--ghost" data-action="agent-disputes" style="width:100%;justify-content:center;">Agent Disputes</button>' +
+        '<div id="dispute-form" style="display:none;margin-top:14px;">' +
+        '<div class="form-row"><label>Which lines does ' + agentName + ' dispute?</label>' +
+        '<div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">' +
+        Object.keys(CRITERION_LABELS).map(function (id) {
+          return '<label class="row" style="gap:8px;font-size:12.5px;padding:3px 0;"><input type="checkbox" value="' + id + '" class="dispute-line-check" />' + CRITERION_LABELS[id] + '</label>';
+        }).join("") +
+        '</div></div>' +
+        '<div class="form-row"><label for="dispute-reason">Reason</label><textarea id="dispute-reason" rows="3" placeholder="Why is the agent disputing these lines?"></textarea></div>' +
+        '<button type="button" class="btn btn--dark" data-action="submit-dispute">Ticket Dispute</button>' +
+        '</div>';
+    } else if (status === QA_STATUS.DISPUTE_REVIEW) {
+      var dispute = getQaDisputes()[ref];
+      if (!dispute) {
+        html = '<p class="small muted" style="margin:0;">No dispute details found.</p>';
+      } else {
+        html = '<p class="small muted" style="margin:0 0 4px;">Line manager review — reason given: <em>' + esc(dispute.reason) + '</em></p>' +
+          '<div class="stack" style="gap:10px;margin-top:10px;">' +
+          dispute.lines.map(function (id) {
+            var decision = (dispute.decisions && dispute.decisions[id] && dispute.decisions[id].decision) || "";
+            return '<div data-dispute-line="' + id + '" style="border:1px solid var(--border-soft);border-radius:8px;padding:10px;">' +
+              '<div class="cell-strong" style="font-size:12.5px;margin-bottom:6px;">' + CRITERION_LABELS[id] + '</div>' +
+              '<div class="row" style="gap:8px;">' +
+              '<button type="button" class="btn btn--sm ' + (decision === "uphold" ? "btn--dark" : "btn--ghost") + '" data-dispute-decision="uphold" data-line="' + id + '">Uphold</button>' +
+              '<button type="button" class="btn btn--sm ' + (decision === "override" ? "btn--dark" : "btn--ghost") + '" data-dispute-decision="override" data-line="' + id + '">Override</button>' +
+              '</div>' +
+              '<textarea class="dispute-justification" data-line="' + id + '" rows="1" placeholder="Justification" style="margin-top:6px;width:100%;font-family:var(--font);font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;">' + ((dispute.decisions && dispute.decisions[id] && esc(dispute.decisions[id].justification)) || "") + '</textarea>' +
+              '</div>';
+          }).join("") +
+          '</div>' +
+          '<button type="button" class="btn btn--primary" data-action="submit-dispute-decision" style="width:100%;justify-content:center;margin-top:14px;">Submit Decision</button>';
+      }
+    } else if (status === QA_STATUS.FEEDBACK_COMPLETE) {
+      html = '<div class="banner banner--pass" style="padding:14px;"><div>Feedback session completed with ' + agentName + '.</div></div>';
+    }
+
+    body.innerHTML = html;
+    applyRole(localStorage.getItem(ROLE_KEY) || "admin", localStorage.getItem(EMPLOYEE_KEY) || "");
+  }
+
+  function wireScorecardActions() {
+    document.addEventListener("click", function (e) {
+      var wrap = document.getElementById("scorecard-flow");
+      if (!wrap) return;
+      var ref = wrap.getAttribute("data-scorecard-ref");
+      var agentName = wrap.getAttribute("data-agent-name") || "the agent";
+
+      var routeManual = e.target.closest('[data-action="route-manual"]');
+      if (routeManual) { setQaStatus(ref, QA_STATUS.MANUAL_REVIEW); refreshBlindState(); renderScorecardActions(); return; }
+
+      var routeFeedback = e.target.closest('[data-action="route-feedback"]');
+      if (routeFeedback) { setQaStatus(ref, QA_STATUS.REQUIRES_FEEDBACK); refreshBlindState(); renderScorecardActions(); return; }
+
+      var startFeedback = e.target.closest('[data-action="start-feedback"]');
+      if (startFeedback) {
+        setQaStatus(ref, QA_STATUS.FEEDBACK_STARTED);
+        renderScorecardActions();
+        renderQaFeedbackReadyAlert();
+        return;
+      }
+
+      var agentHappy = e.target.closest('[data-action="agent-happy"]');
+      if (agentHappy) {
+        setQaStatus(ref, QA_STATUS.FEEDBACK_COMPLETE);
+        var reason = scorecardTopFailReasonLabel(ref);
+        if (window.D360 && window.D360.assignTraining) window.D360.assignTraining(agentName, ref, reason);
+        renderScorecardActions();
+        renderQaFeedbackReadyAlert();
+        return;
+      }
+
+      var agentDisputes = e.target.closest('[data-action="agent-disputes"]');
+      if (agentDisputes) {
+        var form = document.getElementById("dispute-form");
+        if (form) form.style.display = form.style.display === "none" ? "" : "none";
+        return;
+      }
+
+      var submitDispute = e.target.closest('[data-action="submit-dispute"]');
+      if (submitDispute) {
+        var checked = Array.prototype.map.call(document.querySelectorAll(".dispute-line-check:checked"), function (cb) { return cb.value; });
+        if (!checked.length) { window.alert("Tick at least one disputed line first."); return; }
+        var reasonEl = document.getElementById("dispute-reason");
+        var disputes = getQaDisputes();
+        disputes[ref] = { lines: checked, reason: reasonEl ? reasonEl.value : "", decisions: {}, raisedAt: new Date().toISOString() };
+        saveQaDisputes(disputes);
+        setQaStatus(ref, QA_STATUS.DISPUTE_REVIEW);
+        renderScorecardActions();
+        renderQaDisputeAlert();
+        return;
+      }
+
+      var decisionBtn = e.target.closest("[data-dispute-decision]");
+      if (decisionBtn) {
+        var id = decisionBtn.getAttribute("data-line");
+        var decision = decisionBtn.getAttribute("data-dispute-decision");
+        var disputesMap = getQaDisputes();
+        var d = disputesMap[ref];
+        if (!d) return;
+        d.decisions = d.decisions || {};
+        d.decisions[id] = d.decisions[id] || {};
+        d.decisions[id].decision = decision;
+        saveQaDisputes(disputesMap);
+        renderScorecardActions();
+        return;
+      }
+
+      var submitDecision = e.target.closest('[data-action="submit-dispute-decision"]');
+      if (submitDecision) {
+        var disputesMap2 = getQaDisputes();
+        var d2 = disputesMap2[ref];
+        if (!d2 || !d2.lines.every(function (id) { return d2.decisions && d2.decisions[id] && d2.decisions[id].decision; })) {
+          window.alert("Decide Uphold or Override on every disputed line first.");
+          return;
+        }
+        saveQaDisputes(disputesMap2);
+        setQaStatus(ref, QA_STATUS.REQUIRES_FEEDBACK);
+        renderScorecardActions();
+        renderQaDisputeAlert();
+        return;
+      }
+    });
+
+    document.addEventListener("input", function (e) {
+      var justification = e.target.closest(".dispute-justification");
+      if (!justification) return;
+      var wrap = document.getElementById("scorecard-flow");
+      if (!wrap) return;
+      var ref = wrap.getAttribute("data-scorecard-ref");
+      var id = justification.getAttribute("data-line");
+      var disputesMap = getQaDisputes();
+      var d = disputesMap[ref];
+      if (!d) return;
+      d.decisions = d.decisions || {};
+      d.decisions[id] = d.decisions[id] || {};
+      d.decisions[id].justification = justification.value;
+      saveQaDisputes(disputesMap);
+    });
+  }
+
+  /* Two Newsfeed alerts simulating the portal notifications the QA flow
+     calls for: the agent gets a "new feedback ready" pop-up once Start
+     Feedback is pressed, and a Manager/Admin (standing in for the
+     marker's line manager) gets notified when a dispute needs review.
+     This prototype only ever has the one worked example (INT-10477), so
+     both just check its current status rather than scanning a roster. */
+  function renderQaFeedbackReadyAlert() {
+    var card = document.getElementById("qa-feedback-ready-alert");
+    if (!card) return;
+    card.style.display = getQaStatus("INT-10477") === QA_STATUS.FEEDBACK_STARTED ? "" : "none";
+  }
+  function renderQaDisputeAlert() {
+    var card = document.getElementById("qa-dispute-alert");
+    if (!card) return;
+    card.style.display = getQaStatus("INT-10477") === QA_STATUS.DISPUTE_REVIEW ? "" : "none";
   }
 
   /* Assigning a reviewer to a flagged call (prototype only) ----
@@ -3256,12 +3596,17 @@
     wireRowLinks();
     wireTemplateCopy();
     wireRangePickers();
+    seedQaShoutouts();
+    renderQaShoutouts();
     renderColinQueue();
     applyQaStatusOverrides();
     wireQaStatusActions();
-    wireScorecardFeedback();
     wireBlindScorecard();
     renderAiHumanDiff();
+    renderScorecardActions();
+    wireScorecardActions();
+    renderQaFeedbackReadyAlert();
+    renderQaDisputeAlert();
     seedBusinessUpdates();
     renderBusinessUpdates();
     wireBusinessUpdateModal();
@@ -3317,4 +3662,9 @@
   window.D360 = window.D360 || {};
   window.D360.assignTraining = assignTraining;
   window.D360.wireVerdictToggles = wireVerdictToggles;
+  window.D360.qaGatePass = qaGatePass;
+  window.D360.setQaStatus = setQaStatus;
+  window.D360.addQaShoutout = addQaShoutout;
+  window.D360.renderQaShoutouts = renderQaShoutouts;
+  window.D360.QA_STATUS = QA_STATUS;
 })();

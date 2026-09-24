@@ -418,6 +418,20 @@
     all.unshift(record);
     localStorage.setItem(SUBMIT_KEY, JSON.stringify(all));
 
+    // Auto-QA gate: Operational >=85% and Compliance not a hard 0/10
+    // fail. A pass is silent — never enters the Flagged for review
+    // queue (renderColinQueue filters it out) — otherwise it starts at
+    // Needs Review for a manager to route. A perfect 10/10 on both
+    // posts a QA Shoutout to the newsfeed.
+    var gatePass = window.D360 && window.D360.qaGatePass ? window.D360.qaGatePass(score10, opScore10) : score10 * 10 >= 70;
+    if (window.D360 && window.D360.setQaStatus && !gatePass) {
+      window.D360.setQaStatus(it.ref, window.D360.QA_STATUS.NEEDS_REVIEW);
+    }
+    if (gatePass && score10 === 10 && opScore10 === 10 && window.D360 && window.D360.addQaShoutout) {
+      window.D360.addQaShoutout(agent.name, it.ref, "Perfect Compliance and Operational score — great work!");
+      window.D360.renderQaShoutouts();
+    }
+
     var trainingNote = "";
     if (window.D360 && window.D360.assignTraining) {
       var pkg = window.D360.assignTraining(agent.name, it.ref, record.topFailReason);
@@ -427,7 +441,10 @@
     var note = $("#colin-submit-note");
     if (note) {
       note.style.display = "block";
-      note.innerHTML = "Scorecard submitted — Compliance " + score10 + "/10, Operational " + opScore10 + "/10, sent to <a href=\"qa.html\">QA Review</a>." + trainingNote;
+      var outcomeNote = gatePass
+        ? "This clears the auto-QA gate — published straight to " + agent.name + "'s portal, no manual review needed."
+        : "This missed the auto-QA gate — sent to <a href=\"qa.html\">QA Review</a> as Needs Review.";
+      note.innerHTML = "Scorecard submitted — Compliance " + score10 + "/10, Operational " + opScore10 + "/10. " + outcomeNote + trainingNote;
     }
   }
 
