@@ -758,6 +758,7 @@
     renderBanner(role);
     renderMyTeamRoster();
     scopeTeamRowsToLead();
+    scopeQaQueueToReviewer();
     refreshBlindState();
     renderAiHumanDiff();
   }
@@ -862,6 +863,63 @@
       if (row.closest("[data-team-roster]")) return; // already scoped by renderMyTeamRoster()
       row.style.display = names.indexOf(row.getAttribute("data-name")) !== -1 ? "" : "none";
     });
+  }
+
+  /* Same "which named identity is this role-switch view standing in
+     for" pattern as currentTeamLeadName(), but for Trainer — Hannah
+     Price is the only trainer seeded, so she's the default whenever
+     the generic "Trainer" option (no specific employee) is picked. */
+  function currentTrainerName() {
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
+    return (role === "trainer" && employee) ? employee : "Hannah Price";
+  }
+
+  /* null for Admin/Manager (they see the whole queue — assigning and
+     routing calls is their job), otherwise the standing identity for
+     whichever reviewer role is currently being viewed as. */
+  function currentQaReviewerName() {
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    if (role === "teamlead") return currentTeamLeadName();
+    if (role === "trainer") return currentTrainerName();
+    return null;
+  }
+
+  /* QA Review's flagged queue: a Trainer/Team lead only does the
+     marking on calls assigned to them (via the "Assigned reviewer"
+     column, or scorecard.html's own "Assign to reviewer" control while
+     Needs Review) — everything else is someone else's work and stays
+     out of their queue. Gated to data-page="qa" so it never touches
+     the same [data-colin-queue] markup this function reads on
+     newsfeed.html. */
+  function scopeQaQueueToReviewer() {
+    if (document.body.getAttribute("data-page") !== "qa") return;
+    var tbody = document.querySelector("tbody[data-colin-queue]");
+    if (!tbody) return;
+    var emptyRow = tbody.querySelector("[data-qa-queue-empty]");
+    var reviewer = currentQaReviewerName();
+    var visibleCount = 0;
+    Array.prototype.forEach.call(tbody.querySelectorAll("tr:not([data-qa-queue-empty])"), function (row) {
+      var show = true;
+      if (reviewer) {
+        var cell = row.querySelector("[data-status-cell]");
+        var ref = cell ? cell.getAttribute("data-status-cell") : null;
+        show = !!ref && qaAssignedReviewer(ref) === reviewer;
+      }
+      row.style.display = show ? "" : "none";
+      if (show) visibleCount++;
+    });
+    if (reviewer && !visibleCount) {
+      if (!emptyRow) {
+        emptyRow = document.createElement("tr");
+        emptyRow.setAttribute("data-qa-queue-empty", "");
+        emptyRow.innerHTML = '<td colspan="7" class="muted" style="padding:16px;">No calls currently assigned to you for review.</td>';
+        tbody.appendChild(emptyRow);
+      }
+      emptyRow.style.display = "";
+    } else if (emptyRow) {
+      emptyRow.style.display = "none";
+    }
   }
 
   function wireRoleSwitch() {
@@ -1077,18 +1135,27 @@
     // the "AI vs Human" queue column). Agents see their own feedback the
     // same way. Trainer/Team lead — who actually do the blind marking —
     // only get the blank-scorecard form once a manager has routed this
-    // call to Manual Review; before that (still Needs Review) they see a
-    // waiting note instead, and once it's past marking the AI result is
-    // revealed same as everyone else.
+    // call to Manual Review *and* assigned it to them specifically (see
+    // scorecard.html's "Assign to reviewer" control and QA Review's
+    // "Assigned reviewer" column); otherwise they see a waiting note
+    // instead, and once it's past marking the AI result is revealed
+    // same as everyone else.
     var autoReveal = role === "agent" || role === "manager" || role === "admin";
+    var assignedToMe = autoReveal || qaAssignedReviewer(ref) === currentQaReviewerName();
     var pastMarking = status !== QA_STATUS.NEEDS_REVIEW && status !== QA_STATUS.MANUAL_REVIEW;
     setBlindRevealed(autoReveal || !!existing || pastMarking);
     var blindCard = document.getElementById("blind-scorecard-card");
     var waitingNote = document.getElementById("blind-waiting-note");
-    var showBlindForm = !autoReveal && !existing && status === QA_STATUS.MANUAL_REVIEW;
-    var showWaiting = !autoReveal && !existing && status === QA_STATUS.NEEDS_REVIEW;
+    var waitingNoteText = document.getElementById("blind-waiting-note-text");
+    var showBlindForm = !autoReveal && !existing && status === QA_STATUS.MANUAL_REVIEW && assignedToMe;
+    var showWaiting = !autoReveal && !existing && !pastMarking && !showBlindForm;
     if (blindCard) blindCard.classList.toggle("blind-hidden", !showBlindForm);
     if (waitingNote) waitingNote.classList.toggle("blind-hidden", !showWaiting);
+    if (waitingNoteText && showWaiting) {
+      waitingNoteText.innerHTML = status === QA_STATUS.NEEDS_REVIEW
+        ? "This call is still <strong>Needs Review</strong> — waiting on a Manager/Admin to send it to Manual Review before you can mark it blind."
+        : "This call is in <strong>Manual Review</strong>, but it's assigned to someone else — only the assigned reviewer can mark it blind.";
+    }
     if (!existing) return;
     var list = document.getElementById("blind-criteria-list");
     if (list) {
@@ -1534,6 +1601,7 @@
       assignments[assignSelect.getAttribute("data-scorecard-assign")] = assignSelect.value;
       saveQaAssignments(assignments);
       renderQaAssignmentAlert();
+      refreshBlindState();
     });
   }
 
@@ -1644,6 +1712,7 @@
       assignments[select.getAttribute("data-assign-reviewer")] = select.value;
       saveQaAssignments(assignments);
       renderQaAssignmentAlert();
+      scopeQaQueueToReviewer();
     });
   }
 

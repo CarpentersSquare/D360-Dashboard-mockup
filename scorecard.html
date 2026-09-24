@@ -250,11 +250,12 @@
             </div>
           </div>
 
-          <!-- Shown to Trainer/Team lead while this call is still Needs Review — waiting on a
-               manager to route it to Manual Review before blind marking can start. -->
+          <!-- Shown to Trainer/Team lead when this call isn't theirs to mark yet — either it's
+               still Needs Review, or it's in Manual Review but assigned to someone else. Text is
+               filled in by refreshBlindState(). -->
           <div class="card blind-hidden" id="blind-waiting-note" data-roles="teamlead,trainer">
             <div class="card__body">
-              <p class="small muted" style="margin:0;">This call is still <strong>Needs Review</strong> — waiting on a Manager/Admin to send it to Manual Review before you can mark it blind.</p>
+              <p class="small muted" style="margin:0;" id="blind-waiting-note-text">This call is still <strong>Needs Review</strong> — waiting on a Manager/Admin to send it to Manual Review before you can mark it blind.</p>
             </div>
           </div>
 
