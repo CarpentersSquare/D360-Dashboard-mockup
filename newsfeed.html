@@ -224,6 +224,28 @@
         </div>
       </div>
 
+      <!-- New feedback ready pop-up (agent portal) -->
+      <div class="card mb-18" id="qa-feedback-ready-alert" data-roles="agent" style="display:none;border-left:4px solid var(--indigo);">
+        <div class="card__head">
+          <h3>🔔 New feedback ready</h3>
+          <a class="btn btn--sm btn--primary" href="scorecard.html">Open scorecard</a>
+        </div>
+        <div class="card__body">
+          <p class="small muted" style="margin:0;">Your Trainer/Team lead has started a feedback session on one of your recent calls.</p>
+        </div>
+      </div>
+
+      <!-- Dispute needs line-manager review -->
+      <div class="card mb-18" id="qa-dispute-alert" data-roles="admin,manager" style="display:none;border-left:4px solid var(--danger);">
+        <div class="card__head">
+          <h3>⚖️ Dispute needs your review</h3>
+          <a class="btn btn--sm" href="scorecard.html">Review dispute</a>
+        </div>
+        <div class="card__body">
+          <p class="small muted" style="margin:0;">An agent has disputed part of their QA feedback — as their marker's line manager, decide to Uphold or Override each disputed line.</p>
+        </div>
+      </div>
+
       <!-- Shoutouts + Quote of the day + Weather -->
       <div class="grid grid--2-1-1 mb-18">
         <div class="card">
@@ -232,7 +254,7 @@
             <span class="tag">Perfect scores</span>
           </div>
           <div class="card__body">
-            <ul class="checklist">
+            <ul class="checklist" id="qa-shoutouts-list">
               <li>
                 <span class="avatar avatar--sm">SC</span>
                 <div class="checklist__main">

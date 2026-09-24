@@ -349,6 +349,25 @@ p { margin: 0 0 12px; }
 .mb-18 { margin-bottom: 18px; }
 .mb-24 { margin-bottom: 24px; }
 
+/* Call recording player (scorecard.html) — decorative only, no audio
+   file behind it (this prototype has none), same convention as the
+   "Listen to call" / "Play recording" buttons elsewhere. */
+.recording-player__label { font-weight: 700; color: var(--indigo); font-size: 13.5px; margin-bottom: 10px; }
+.recording-player__row { display: flex; align-items: center; gap: 12px; }
+.recording-player__play {
+  width: 30px; height: 30px; flex: none; border-radius: 999px; border: 1px solid var(--border);
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--indigo); cursor: pointer;
+}
+.recording-player__play:hover { background: var(--bg); }
+.recording-player__time { flex: none; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.recording-player__wave { position: relative; flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; gap: 2px; }
+.recording-player__wave span:not(.recording-player__scrub) { flex: 1; min-width: 1px; background: var(--border); border-radius: 1px; }
+.recording-player__scrub {
+  position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 999px;
+  background: var(--indigo); transform: translate(-50%, -50%); box-shadow: 0 0 0 3px #fff;
+}
+
 /* Blind QA review (scorecard.html) — !important so it always wins over the
    [data-roles] inline display toggle the role switch sets on the same
    elements (e.g. Reviewer actions is both role-gated and reveal-gated).
