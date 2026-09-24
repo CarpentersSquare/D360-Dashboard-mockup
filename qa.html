@@ -208,10 +208,12 @@
         <div>
           <strong>Trainer role and above.</strong> QA Review lets Trainers, Managers and Admins go through every
           AI-marked scorecard, see exactly where an agent failed a tracked criterion (DPA, compliance wording, tone,
-          etc.), and record reviewer feedback — agree with the flag, dispute it, or assign coaching. Managers and
-          Admins clicking through to a call see the AI's marking straight away, alongside an "AI vs Human" column on
-          this queue comparing it against a completed blind review, to help decide whether a call needs full human
-          review or the AI's score can stand — and can mark a flagged call "Resolved" directly from here with
+          etc.), and record reviewer feedback — agree with the flag, dispute it, or assign coaching. The
+          <strong>Assigned reviewer</strong> dropdown on each row hands a flagged call to a named reviewer, who then
+          sees it under a "To-do — Assigned to you for QA review" alert on their Newsfeed. Managers and Admins
+          clicking through to a call see the AI's marking straight away, alongside an "AI vs Human" column on this
+          queue comparing it against a completed blind review, to help decide whether a call needs full human review
+          or the AI's score can stand — and can mark a flagged call "Resolved" directly from here with
           <strong>Mark reviewed</strong>. Trainers and Team leads instead land on a blank scorecard to mark blind,
           without seeing the AI's score or flag reason, until they submit their own. Team leads get the same review
           scoped to their own team on My Team Performance → QA Review; hidden here, along with the Agent role, in
@@ -318,7 +320,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">48/100</span></td>
                 <td>Tone</td>
                 <td data-status-cell="INT-10477"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10477" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10477"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10477">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -329,7 +331,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">52/100</span></td>
                 <td>DPA not completed</td>
                 <td data-status-cell="INT-10461"><span class="pill pill--info">In review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10461" data-roles="admin,manager">Mark reviewed</button></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-assign-cell="INT-10461"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10461">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -340,7 +342,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">55/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td data-status-cell="INT-10454"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10454" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10454"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10454">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -351,7 +353,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
                 <td>DPA not completed</td>
                 <td data-status-cell="INT-10448"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10448" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10448"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10448">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -362,7 +364,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">61/100</span></td>
                 <td>Tone</td>
                 <td data-status-cell="INT-10442"><span class="pill pill--info">In review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10442" data-roles="admin,manager">Mark reviewed</button></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+                <td data-assign-cell="INT-10442"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10442">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -373,7 +375,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">63/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td data-status-cell="INT-10436"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10436" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10436"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10436">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -384,7 +386,7 @@
                 <td><span class="cell-strong" style="color:var(--danger);">64/100</span></td>
                 <td>DPA not completed</td>
                 <td data-status-cell="INT-10429"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10429" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10429"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10429">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -395,7 +397,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">67/100</span></td>
                 <td>Tone</td>
                 <td data-status-cell="INT-10421"><span class="pill pill--info">In review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10421" data-roles="admin,manager">Mark reviewed</button></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-assign-cell="INT-10421"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10421">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -406,7 +408,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">69/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td data-status-cell="INT-10415"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10415" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10415"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10415">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -417,7 +419,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">71/100</span></td>
                 <td>DPA not completed</td>
                 <td data-status-cell="INT-10408"><span class="pill pill--pass">Resolved</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+                <td data-assign-cell="INT-10408"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10408">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -428,7 +430,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">73/100</span></td>
                 <td>Tone</td>
                 <td data-status-cell="INT-10402"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10402" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10402"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10402">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -439,7 +441,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">75/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td data-status-cell="INT-10396"><span class="pill pill--info">In review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10396" data-roles="admin,manager">Mark reviewed</button></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-assign-cell="INT-10396"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10396">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -450,7 +452,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">77/100</span></td>
                 <td>DPA not completed</td>
                 <td data-status-cell="INT-10389"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10389" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10389"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10389">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -461,7 +463,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">79/100</span></td>
                 <td>Tone</td>
                 <td data-status-cell="INT-10381"><span class="pill pill--pass">Resolved</span></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">RA</span>Rob Ashton</span></td>
+                <td data-assign-cell="INT-10381"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10381">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -472,7 +474,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">82/100</span></td>
                 <td>Compliance phrase missing</td>
                 <td data-status-cell="INT-10374"><span class="pill pill--info">In review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10374" data-roles="admin,manager">Mark reviewed</button></td>
-                <td><span class="cell-user"><span class="avatar avatar--sm">PN</span>Priya Nair</span></td>
+                <td data-assign-cell="INT-10374"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10374">–</td>
               </tr>
               <tr class="clickable" data-href="scorecard.html">
@@ -483,7 +485,7 @@
                 <td><span class="cell-strong" style="color:var(--warning);">84/100</span></td>
                 <td>DPA not completed</td>
                 <td data-status-cell="INT-10367"><span class="pill pill--flag">Needs review</span> <button class="btn btn--sm btn--ghost" type="button" data-mark-reviewed="INT-10367" data-roles="admin,manager">Mark reviewed</button></td>
-                <td class="muted">Unassigned</td>
+                <td data-assign-cell="INT-10367"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10367">–</td>
               </tr>
             </tbody>

@@ -895,7 +895,7 @@
         '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
         '<td>' + r.topFailReason + '</td>' +
         '<td data-status-cell="' + r.ref + '">' + statusCell + '</td>' +
-        '<td class="muted">Colin (AI-assisted)</td>' +
+        '<td data-assign-cell="' + r.ref + '"></td>' +
         '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
       tbody.insertBefore(row, tbody.firstChild);
     });
@@ -1152,6 +1152,114 @@
       saveQaStatusOverrides(overrides);
       applyQaStatusOverrides();
     });
+  }
+
+  /* Assigning a reviewer to a flagged call (prototype only) ----
+     Every flagged row on the QA Review queue — the 16 static ones and
+     any Colin-submitted ones — gets a reviewer <select> instead of a
+     fixed name, populated from every non-Agent user. Assigning
+     "Rob Ashton" (this prototype's single logged-in identity, same
+     convention as My QA/My Performance/guide reads) surfaces the call
+     on Newsfeed's "Assigned to you for QA review" alert, so a
+     reviewer is notified without having to keep checking the queue.
+     QA_QUEUE mirrors the static rows' details so that alert can be
+     built on newsfeed.html, which never loads qa.html's own DOM. */
+  var QA_ASSIGNMENTS_KEY = "d360-qa-assignments";
+  var QA_QUEUE = [
+    { ref: "INT-10477", customer: "Liam Foster", score: 48, reason: "Tone" },
+    { ref: "INT-10461", customer: "Tom Beresford", score: 52, reason: "DPA not completed" },
+    { ref: "INT-10454", customer: "Raj Sharma", score: 55, reason: "Compliance phrase missing" },
+    { ref: "INT-10448", customer: "Nadia Hussain", score: 58, reason: "DPA not completed" },
+    { ref: "INT-10442", customer: "George Hamilton", score: 61, reason: "Tone" },
+    { ref: "INT-10436", customer: "Sophie Clarke", score: 63, reason: "Compliance phrase missing" },
+    { ref: "INT-10429", customer: "Oliver Grant", score: 64, reason: "DPA not completed" },
+    { ref: "INT-10421", customer: "Beatrice Coleman", score: 67, reason: "Tone" },
+    { ref: "INT-10415", customer: "William Pearce", score: 69, reason: "Compliance phrase missing" },
+    { ref: "INT-10408", customer: "Chloe Sutton", score: 71, reason: "DPA not completed" },
+    { ref: "INT-10402", customer: "Yusuf Demir", score: 73, reason: "Tone" },
+    { ref: "INT-10396", customer: "Catherine Lowe", score: 75, reason: "Compliance phrase missing" },
+    { ref: "INT-10389", customer: "Dominic Reyes", score: 77, reason: "DPA not completed" },
+    { ref: "INT-10381", customer: "Eleanor Davies", score: 79, reason: "Tone" },
+    { ref: "INT-10374", customer: "Priscilla Adeyemi", score: 82, reason: "Compliance phrase missing" },
+    { ref: "INT-10367", customer: "Nathan Cole", score: 84, reason: "DPA not completed" }
+  ];
+  var QA_ASSIGNMENT_DEFAULTS = {
+    "INT-10461": "Priya Nair", "INT-10442": "Rob Ashton", "INT-10421": "Priya Nair",
+    "INT-10408": "Rob Ashton", "INT-10396": "Priya Nair", "INT-10381": "Rob Ashton",
+    "INT-10374": "Priya Nair"
+  };
+
+  function getQaAssignments() {
+    try { return JSON.parse(localStorage.getItem(QA_ASSIGNMENTS_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveQaAssignments(map) { localStorage.setItem(QA_ASSIGNMENTS_KEY, JSON.stringify(map)); }
+
+  /* An explicit "" (set by picking "— Unassigned —") overrides a
+     seeded default; only fall back to the default when nothing has
+     been saved for this ref at all. */
+  function qaAssignedReviewer(ref) {
+    var assignments = getQaAssignments();
+    if (Object.prototype.hasOwnProperty.call(assignments, ref)) return assignments[ref];
+    return QA_ASSIGNMENT_DEFAULTS[ref] || "";
+  }
+
+  function qaReviewerOptionsHtml(selected) {
+    var reviewers = getUsers().filter(function (u) { return u.role !== "agent"; });
+    var html = '<option value=""' + (!selected ? " selected" : "") + '>— Unassigned —</option>';
+    html += reviewers.map(function (u) {
+      return '<option value="' + u.name + '"' + (u.name === selected ? " selected" : "") + '>' + u.name + '</option>';
+    }).join("");
+    return html;
+  }
+
+  function renderQaAssignmentSelects() {
+    var cells = document.querySelectorAll("[data-assign-cell]");
+    if (!cells.length) return;
+    cells.forEach(function (cell) {
+      var ref = cell.getAttribute("data-assign-cell");
+      cell.innerHTML = '<select style="padding:6px 10px;font-size:13px;" data-assign-reviewer="' + ref + '">' +
+        qaReviewerOptionsHtml(qaAssignedReviewer(ref)) + '</select>';
+    });
+  }
+
+  function wireQaAssignmentSelects() {
+    document.addEventListener("change", function (e) {
+      var select = e.target.closest("[data-assign-reviewer]");
+      if (!select) return;
+      var assignments = getQaAssignments();
+      assignments[select.getAttribute("data-assign-reviewer")] = select.value;
+      saveQaAssignments(assignments);
+      renderQaAssignmentAlert();
+    });
+  }
+
+  /* Newsfeed "Assigned to you for QA review" to-do — visible to the
+     same roles as QA Review itself, listing whichever flagged calls
+     (built-in or Colin-submitted) are currently assigned to
+     CURRENT_AGENT_NAME. */
+  function renderQaAssignmentAlert() {
+    var card = document.getElementById("qa-assignment-alert");
+    if (!card) return;
+    var colinSubmissions = [];
+    try { colinSubmissions = JSON.parse(localStorage.getItem(COLIN_KEY)) || []; } catch (e) { colinSubmissions = []; }
+    var colinEntries = colinSubmissions.map(function (r) {
+      return { ref: r.ref, customer: r.customerName, score: r.score, reason: r.topFailReason };
+    });
+    var mine = QA_QUEUE.concat(colinEntries).filter(function (q) {
+      return qaAssignedReviewer(q.ref) === CURRENT_AGENT_NAME;
+    });
+    if (!mine.length) { card.style.display = "none"; return; }
+    card.style.display = "";
+    var countEl = card.querySelector("[data-qa-assignment-count]");
+    if (countEl) countEl.textContent = mine.length;
+    var list = card.querySelector("[data-qa-assignment-list]");
+    if (list) {
+      list.innerHTML = mine.slice(0, 4).map(function (q) {
+        return '<li><div class="checklist__main"><div class="checklist__title">' + q.ref + ' — ' + q.customer + '</div>' +
+          '<div class="checklist__desc">Flagged for ' + q.reason + ' · ' + q.score + '/100</div></div>' +
+          '<a class="btn btn--sm" href="qa.html">Review</a></li>';
+      }).join("");
+    }
   }
 
   /* ---- 13. Training & Development (prototype only) ----
@@ -3115,6 +3223,9 @@
     renderBanner(currentBannerRole());
     wireBannerEditor();
     seedUsers();
+    renderQaAssignmentSelects();
+    wireQaAssignmentSelects();
+    renderQaAssignmentAlert();
     renderDiallerAgents();
     renderUpcomingBirthdays();
     wireRoleSwitch();
