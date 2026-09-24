@@ -233,6 +233,21 @@
               <h3>Call transcript</h3>
             </div>
             <div class="card__body">
+              <div class="recording-player">
+                <div class="recording-player__label">Recordings (offline)</div>
+                <div class="recording-player__row">
+                  <button type="button" class="recording-player__play" id="recording-play-btn" aria-label="Play recording">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  </button>
+                  <span class="recording-player__time" id="recording-time-current">0:00</span>
+                  <div class="recording-player__wave">
+                    <span style="height:11px;"></span><span style="height:13px;"></span><span style="height:9px;"></span><span style="height:14px;"></span><span style="height:14px;"></span><span style="height:7px;"></span><span style="height:5px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:7px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:10px;"></span><span style="height:5px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:6px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:10px;"></span><span style="height:13px;"></span><span style="height:16px;"></span><span style="height:16px;"></span><span style="height:12px;"></span><span style="height:17px;"></span><span style="height:15px;"></span><span style="height:14px;"></span><span style="height:3px;"></span><span style="height:6px;"></span><span style="height:6px;"></span><span style="height:7px;"></span><span style="height:4px;"></span><span style="height:5px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:8px;"></span><span style="height:10px;"></span><span style="height:16px;"></span><span style="height:15px;"></span><span style="height:21px;"></span><span style="height:27px;"></span><span style="height:25px;"></span><span style="height:30px;"></span><span style="height:24px;"></span><span style="height:28px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:4px;"></span><span style="height:10px;"></span><span style="height:13px;"></span><span style="height:10px;"></span>
+                    <span class="recording-player__scrub" style="left:54%;"></span>
+                  </div>
+                  <span class="recording-player__time" id="recording-time-total">3:15</span>
+                </div>
+              </div>
+              <hr class="divider" style="margin:16px 0;" />
               <div class="transcript">
                 <div class="turn turn--agent">
                   <span class="avatar avatar--sm">DO</span>
@@ -580,52 +595,6 @@
               </div>
             </div>
           </div>
-          </div>
-
-          <!-- Flagged moment (AI's own annotated excerpt) -->
-          <div class="card blind-reveal blind-hidden">
-            <div class="card__head">
-              <h3>Flagged moment</h3>
-              <span class="pill pill--flag">02:14 – 02:41</span>
-            </div>
-            <div class="card__body">
-              <div class="transcript">
-                <div class="turn turn--agent">
-                  <span class="avatar avatar--sm">DO</span>
-                  <div>
-                    <div class="turn__meta">Daniel Okafor · 02:14</div>
-                    <div class="turn__bubble">Thanks for holding, Tom. I can see your account here — what can I help you with today?</div>
-                  </div>
-                </div>
-                <div class="turn">
-                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
-                  <div>
-                    <div class="turn__meta">Tom Beresford · 02:21</div>
-                    <div class="turn__bubble">I just wanted to check the balance on my account before the renewal goes out.</div>
-                  </div>
-                </div>
-                <div class="turn turn--agent">
-                  <span class="avatar avatar--sm">DO</span>
-                  <div>
-                    <div class="turn__meta">Daniel Okafor · 02:29</div>
-                    <div class="turn__bubble" style="background:var(--danger-bg);border:1px solid var(--danger);">
-                      Of course — your current balance is £148.50, due on the 14th.
-                      <div class="small" style="color:var(--danger);font-weight:700;margin-top:8px;">⚠ Identity not verified before account details shared — DPA security questions skipped.</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="turn">
-                  <span class="avatar avatar--sm" style="background:var(--muted);">TB</span>
-                  <div>
-                    <div class="turn__meta">Tom Beresford · 02:38</div>
-                    <div class="turn__bubble">Great, thanks. Could someone call me back about the renewal options?</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card__foot">
-              <span class="muted small">Auto-flagged by Dial360 QA · rule “DPA must be completed before disclosing account data”.</span>
-            </div>
           </div>
 
         </div>
