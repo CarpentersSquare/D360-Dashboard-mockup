@@ -930,6 +930,7 @@
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
     applyRole(role, employee);
+    renderScorecardActions();
 
     trigger.addEventListener("click", function (e) {
       e.stopPropagation();
@@ -945,6 +946,11 @@
         localStorage.setItem(ROLE_KEY, role);
         localStorage.setItem(EMPLOYEE_KEY, employee);
         applyRole(role, employee);
+        // Reviewer actions' content varies by role for some statuses (e.g.
+        // only a Manager/Admin gets the dispute Uphold/Override decision,
+        // not the Trainer/Team lead who did the marking) — applyRole()
+        // alone doesn't rebuild it, so do that explicitly on every switch.
+        renderScorecardActions();
         menu.classList.remove("open");
       });
     });
@@ -1056,8 +1062,6 @@
   function renderBlindComparison(review) {
     var body = document.getElementById("blind-comparison-body");
     if (!body) return;
-    var card = document.getElementById("blind-comparison-card");
-    if (card) card.classList.remove("blind-hidden");
     var diff = review.humanScore - review.aiScore;
     var diffText = (diff > 0 ? "+" : "") + diff;
     var diffColor = Math.abs(diff) <= 5 ? "success" : Math.abs(diff) <= 15 ? "warning" : "danger";
@@ -1209,7 +1213,7 @@
       });
     }
     renderBlindComparison(existing);
-    applyBlindComparisonVisibility(status);
+    applyBlindComparisonVisibility(ref, status);
   }
 
   function wireBlindScorecard() {
@@ -1513,15 +1517,26 @@
      else works from — the diff becomes a Manager/Admin-only "Review
      history" of what changed and why, rather than something every
      role keeps seeing. */
-  function applyBlindComparisonVisibility(status) {
-    var card = document.getElementById("blind-comparison-card");
-    if (!card) return;
-    var title = document.getElementById("blind-comparison-title");
-    if (card.classList.contains("blind-hidden")) return;
+  function applyBlindComparisonVisibility(ref, status) {
+    var tabBtn = document.getElementById("review-history-tab-btn");
+    if (!tabBtn) return;
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     var isFinal = status !== QA_STATUS.NEEDS_REVIEW && status !== QA_STATUS.MANUAL_REVIEW;
-    card.style.display = (!isFinal || role === "admin" || role === "manager") ? "" : "none";
-    if (title) title.textContent = isFinal ? "Review history" : "Your review vs AI";
+    var canSeeHistory = !!getBlindReviews()[ref] &&
+      (status === QA_STATUS.MANUAL_REVIEW || (isFinal && (role === "admin" || role === "manager")));
+    tabBtn.style.display = canSeeHistory ? "" : "none";
+    tabBtn.textContent = isFinal ? "Review history" : "Your review vs AI";
+    // If the history tab is hidden but was left active (e.g. a role switch
+    // took it away), fall back to the always-available Submitted tab.
+    if (!canSeeHistory && tabBtn.classList.contains("active")) {
+      var submittedTab = document.querySelector('[data-tab="submitted"]');
+      var historyPanel = document.querySelector('[data-panel="history"]');
+      var submittedPanel = document.querySelector('[data-panel="submitted"]');
+      tabBtn.classList.remove("active");
+      if (historyPanel) historyPanel.classList.remove("active");
+      if (submittedTab) submittedTab.classList.add("active");
+      if (submittedPanel) submittedPanel.classList.add("active");
+    }
   }
 
   /* Transient, in-memory only (not persisted): which routing button a
@@ -1541,7 +1556,7 @@
     var meta = QA_STATUS_META[status];
     applyFinalScorecardMerge(ref, status);
     applyAiScorecardReadOnly(status !== QA_STATUS.MANUAL_REVIEW);
-    applyBlindComparisonVisibility(status);
+    applyBlindComparisonVisibility(ref, status);
 
     var pill = document.getElementById("scorecard-status-pill");
     if (pill) {
@@ -1583,26 +1598,40 @@
         '<button type="button" class="btn btn--primary" data-action="agent-happy" style="width:100%;justify-content:center;margin-bottom:8px;">Agent Happy — Feedback Complete</button>' +
         '<button type="button" class="btn btn--ghost" data-action="agent-disputes" style="width:100%;justify-content:center;">Agent Disputes</button>' +
         '<div id="dispute-form" style="display:none;margin-top:14px;">' +
-        '<div class="form-row"><label>Which lines does ' + agentName + ' dispute?</label>' +
-        '<div style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">' +
+        '<div class="form-row"><label>Which lines does ' + agentName + ' dispute? Tick any that apply and say why.</label>' +
+        '<div style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">' +
         Object.keys(CRITERION_LABELS).map(function (id) {
-          return '<label class="row" style="gap:8px;font-size:12.5px;padding:3px 0;"><input type="checkbox" value="' + id + '" class="dispute-line-check" />' + CRITERION_LABELS[id] + '</label>';
+          return '<div class="row" style="gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border-soft);">' +
+            '<label class="row" style="gap:8px;align-items:flex-start;flex:1;min-width:150px;font-size:12.5px;">' +
+            '<input type="checkbox" value="' + id + '" class="dispute-line-check" data-criterion="' + id + '" style="margin-top:2px;" />' +
+            '<span>' + CRITERION_LABELS[id] + '</span>' +
+            '</label>' +
+            '<textarea class="dispute-line-reason" data-criterion="' + id + '" rows="1" placeholder="Why?" style="flex:1;min-width:140px;font-family:var(--font);font-size:12.5px;border:1px solid var(--border);border-radius:8px;padding:6px 8px;"></textarea>' +
+            '</div>';
         }).join("") +
         '</div></div>' +
-        '<div class="form-row"><label for="dispute-reason">Reason</label><textarea id="dispute-reason" rows="3" placeholder="Why is the agent disputing these lines?"></textarea></div>' +
-        '<button type="button" class="btn btn--dark" data-action="submit-dispute">Ticket Dispute</button>' +
+        '<button type="button" class="btn btn--dark" data-action="submit-dispute" style="margin-top:10px;">Ticket Dispute</button>' +
         '</div>';
     } else if (status === QA_STATUS.DISPUTE_REVIEW) {
       var dispute = getQaDisputes()[ref];
-      if (!dispute) {
+      var currentRole = localStorage.getItem(ROLE_KEY) || "admin";
+      var isLineManager = currentRole === "admin" || currentRole === "manager";
+      if (!isLineManager) {
+        // Trainer/Team lead did the marking being disputed — Uphold/Override
+        // is their line manager's call, never their own, so they just see
+        // that it's been escalated.
+        html = '<p class="small muted" style="margin:0;">' + agentName + '\'s dispute has been escalated to the marker\'s line manager for review — only a Manager/Admin can Uphold or Override a disputed line.</p>';
+      } else if (!dispute) {
         html = '<p class="small muted" style="margin:0;">No dispute details found.</p>';
       } else {
-        html = '<p class="small muted" style="margin:0 0 4px;">Line manager review — reason given: <em>' + esc(dispute.reason) + '</em></p>' +
+        html = '<p class="small muted" style="margin:0 0 4px;">Line manager review — ' + dispute.lines.length + ' line' + (dispute.lines.length === 1 ? "" : "s") + ' disputed.</p>' +
           '<div class="stack" style="gap:10px;margin-top:10px;">' +
           dispute.lines.map(function (id) {
             var decision = (dispute.decisions && dispute.decisions[id] && dispute.decisions[id].decision) || "";
+            var lineReason = (dispute.reasons && dispute.reasons[id]) || (dispute.reason && dispute.lines.length === 1 ? dispute.reason : "");
             return '<div data-dispute-line="' + id + '" style="border:1px solid var(--border-soft);border-radius:8px;padding:10px;">' +
-              '<div class="cell-strong" style="font-size:12.5px;margin-bottom:6px;">' + CRITERION_LABELS[id] + '</div>' +
+              '<div class="cell-strong" style="font-size:12.5px;margin-bottom:4px;">' + CRITERION_LABELS[id] + '</div>' +
+              '<p class="small muted" style="margin:0 0 8px;font-style:italic;">' + (lineReason ? esc(lineReason) : "No reason given.") + '</p>' +
               '<div class="row" style="gap:8px;">' +
               '<button type="button" class="btn btn--sm ' + (decision === "uphold" ? "btn--dark" : "btn--ghost") + '" data-dispute-decision="uphold" data-line="' + id + '">Uphold</button>' +
               '<button type="button" class="btn btn--sm ' + (decision === "override" ? "btn--dark" : "btn--ghost") + '" data-dispute-decision="override" data-line="' + id + '">Override</button>' +
@@ -1682,9 +1711,13 @@
       if (submitDispute) {
         var checked = Array.prototype.map.call(document.querySelectorAll(".dispute-line-check:checked"), function (cb) { return cb.value; });
         if (!checked.length) { window.alert("Tick at least one disputed line first."); return; }
-        var reasonEl = document.getElementById("dispute-reason");
+        var reasons = {};
+        checked.forEach(function (id) {
+          var ta = document.querySelector('.dispute-line-reason[data-criterion="' + id + '"]');
+          reasons[id] = ta ? ta.value : "";
+        });
         var disputes = getQaDisputes();
-        disputes[ref] = { lines: checked, reason: reasonEl ? reasonEl.value : "", decisions: {}, raisedAt: new Date().toISOString() };
+        disputes[ref] = { lines: checked, reasons: reasons, decisions: {}, raisedAt: new Date().toISOString() };
         saveQaDisputes(disputes);
         setQaStatus(ref, QA_STATUS.DISPUTE_REVIEW);
         renderScorecardActions();
@@ -1938,6 +1971,63 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
+  /* The interaction reference entered when creating a session (or
+     auto-generated) is the seed for a deterministic fake transcript +
+     recording length, so the same ref always "pulls through" the same
+     call detail wherever the session is opened — this prototype has no
+     real interaction store to look the ref up against, so it generates
+     one consistently instead. */
+  var CALIBRATION_TRANSCRIPT_LINES = [
+    ["agent", "Thanks for calling, how can I help today?"],
+    ["customer", "Hi, I wanted to check my account balance before the renewal."],
+    ["agent", "Of course — can I take your full name and two forms of ID to verify first?"],
+    ["customer", "Sure, it's John Carter, date of birth 14th March."],
+    ["agent", "Thanks, that's verified. Your current balance is £212.40, due on the 9th."],
+    ["customer", "Great, thank you. Could someone call me back about renewal options?"],
+    ["agent", "Of course, I'll pass that on to the team."],
+    ["customer", "Perfect, thanks for your help."],
+    ["agent", "You're welcome — is there anything else I can help with today?"],
+    ["customer", "No, that's everything."],
+    ["agent", "Thanks for calling, have a great day."]
+  ];
+  function calibrationGenCallDetail(ref) {
+    var rng = calibrationRng(ref + "-call");
+    var lineCount = 6 + Math.floor(rng() * 5);
+    var lines = [];
+    for (var i = 0; i < lineCount; i++) lines.push(CALIBRATION_TRANSCRIPT_LINES[i % CALIBRATION_TRANSCRIPT_LINES.length]);
+    var durationSec = 180 + Math.floor(rng() * 300);
+    return { lines: lines, durationSec: durationSec };
+  }
+  function calibrationFmtDuration(sec) {
+    return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
+  }
+  function calibrationCallDetailHtml(session, agentName) {
+    var detail = calibrationGenCallDetail(session.ref);
+    var transcriptHtml = detail.lines.map(function (line) {
+      var speaker = line[0], text = line[1];
+      var name = speaker === "agent" ? agentName : session.customer;
+      return '<div class="turn' + (speaker === "agent" ? " turn--agent" : "") + '"><div><div class="turn__meta">' + esc(name) + '</div>' +
+        '<div class="turn__bubble">' + esc(text) + '</div></div></div>';
+    }).join("");
+    return '<div class="card mb-18">' +
+      '<div class="card__head"><h3>Call transcript</h3></div>' +
+      '<div class="card__body">' +
+      '<div class="recording-player">' +
+      '<div class="recording-player__label">Recordings (offline)</div>' +
+      '<div class="recording-player__row">' +
+      '<button type="button" class="recording-player__play" aria-label="Play recording"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>' +
+      '<span class="recording-player__time">0:00</span>' +
+      '<div class="recording-player__wave">' +
+      [11, 13, 9, 14, 14, 7, 5, 4, 4, 7, 4, 4, 10, 5, 4, 4, 4, 6, 4, 4, 10, 13, 16, 16, 12, 17, 15, 14, 3, 6, 6, 7, 4, 5, 4, 4, 4, 4, 8, 10, 16, 15, 21, 27, 25, 30, 24, 28, 4, 4, 4, 10, 13, 10]
+        .map(function (h) { return '<span style="height:' + h + 'px;"></span>'; }).join("") +
+      '<span class="recording-player__scrub" style="left:0%;"></span>' +
+      '</div>' +
+      '<span class="recording-player__time">' + calibrationFmtDuration(detail.durationSec) + '</span>' +
+      '</div></div>' +
+      '<hr class="divider" style="margin:16px 0;" />' +
+      '<div class="transcript">' + transcriptHtml + '</div>' +
+      '</div></div>';
+  }
   /* Same 20-item rubric shape as scorecard.html's blind form: 10
      Compliance items (P/F/N-A) + 10 Operational items (P/F/PWD/N-A). */
   function calibrationGenVerdicts(seed) {
@@ -1990,7 +2080,9 @@
       s.reviewerVerdicts = {};
       s.reviewers.forEach(function (name, i) { s.reviewerVerdicts[name] = calibrationGenVerdicts(s.id + "-" + name + "-" + i); });
       s.yourVerdicts = {};
+      s.yourComments = {};
       s.yourSubmitted = false;
+      s.creatorIsReviewer = true;
       s.agreedOutcome = null;
       s.calibrated = false;
     });
@@ -2027,10 +2119,16 @@
     if (status === "in-progress") return '<span class="pill pill--flag">In progress</span>';
     return '<span class="pill pill--muted">Needs to complete</span>';
   }
-  function calibrationCompleteCount(session) { return session.reviewers.length + (session.yourSubmitted ? 1 : 0); }
-  function calibrationTotalReviewers(session) { return session.reviewers.length + 1; }
+  function calibrationCreatorIsReviewer(session) { return session.creatorIsReviewer !== false; }
+  function calibrationCompleteCount(session) {
+    return session.reviewers.length + (calibrationCreatorIsReviewer(session) && session.yourSubmitted ? 1 : 0);
+  }
+  function calibrationTotalReviewers(session) { return session.reviewers.length + (calibrationCreatorIsReviewer(session) ? 1 : 0); }
   function calibrationStatus(session) {
     if (session.calibrated) return "calibrated";
+    // With no blind gate of your own, reveal follows the named reviewers
+    // alone — always pre-seeded Complete in this single-seat prototype.
+    if (!calibrationCreatorIsReviewer(session)) return "revealed";
     if (session.yourSubmitted) return "revealed";
     return calibrationYourStatus(session); // "needs-complete" | "in-progress"
   }
@@ -2086,9 +2184,11 @@
   }
 
   function calibrationReviewerStatusListHtml(session) {
-    var rows = '<div class="row" style="justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-soft);">' +
-      '<span class="cell-user"><span class="avatar avatar--sm">' + esc(userInitials(CURRENT_AGENT_NAME)) + '</span>You</span>' +
-      '<span id="calibration-your-status-pill">' + calibrationReviewerStatusPillHtml(calibrationYourStatus(session)) + '</span></div>';
+    var rows = calibrationCreatorIsReviewer(session)
+      ? '<div class="row" style="justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border-soft);">' +
+        '<span class="cell-user"><span class="avatar avatar--sm">' + esc(userInitials(CURRENT_AGENT_NAME)) + '</span>You</span>' +
+        '<span id="calibration-your-status-pill">' + calibrationReviewerStatusPillHtml(calibrationYourStatus(session)) + '</span></div>'
+      : "";
     session.reviewers.forEach(function (name, i) {
       rows += '<div class="row" style="justify-content:space-between;padding:9px 0;' + (i < session.reviewers.length - 1 ? "border-bottom:1px solid var(--border-soft);" : "") + '">' +
         '<span class="cell-user"><span class="avatar avatar--sm">' + esc(userInitials(name)) + '</span>' + esc(name) + '</span>' +
@@ -2097,20 +2197,22 @@
     return '<div class="card mb-18"><div class="card__head"><h3>Reviewers</h3></div><div class="card__body" style="padding-top:0;">' + rows + '</div></div>';
   }
 
-  function calibrationBlindItemHtml(item, verdictOptions, savedValue) {
+  function calibrationBlindItemHtml(item, verdictOptions, savedValue, savedComment) {
     var buttons = verdictOptions.map(function (v) {
       return '<button type="button" class="blind-mark-btn' + (savedValue === v ? " active" : "") + '" data-v="' + v + '">' + (v === "NA" ? "N/A" : v) + '</button>';
     }).join("");
     return '<div class="colin-compliance-item" data-criterion="' + item.key + '">' +
       '<div class="colin-compliance-item__q">' + esc(item.label) + '</div>' +
       '<div class="colin-verdict">' + buttons + '</div>' +
+      '<div class="colin-comment"><textarea class="calibration-comment-input" rows="1" placeholder="Comment (optional)">' + (savedComment ? esc(savedComment) : "") + '</textarea></div>' +
       '</div>';
   }
 
   function calibrationBlindFormHtml(session) {
     var saved = session.yourVerdicts || {};
-    var complianceHtml = CALIBRATION_COMPLIANCE.map(function (c) { return calibrationBlindItemHtml(c, ["P", "F", "NA"], saved[c.key]); }).join("");
-    var operationalHtml = CALIBRATION_OPERATIONAL.map(function (c) { return calibrationBlindItemHtml(c, ["P", "F", "PWD", "NA"], saved[c.key]); }).join("");
+    var savedComments = session.yourComments || {};
+    var complianceHtml = CALIBRATION_COMPLIANCE.map(function (c) { return calibrationBlindItemHtml(c, ["P", "F", "NA"], saved[c.key], savedComments[c.key]); }).join("");
+    var operationalHtml = CALIBRATION_OPERATIONAL.map(function (c) { return calibrationBlindItemHtml(c, ["P", "F", "PWD", "NA"], saved[c.key], savedComments[c.key]); }).join("");
     return '<div class="card" id="calibration-evaluate-form">' +
       '<div class="card__head"><h3>Your scorecard</h3><span class="tag" title="You won\'t be able to change it after submitting">Mark blind &middot; 20 criteria</span></div>' +
       '<div class="card__body">' +
@@ -2118,17 +2220,19 @@
       '<div class="colin-checklist-scroll">' + complianceHtml + '</div>' +
       '<h4 class="section-title" style="margin-top:18px;">Operational <span id="calibration-operational-count">(' + CALIBRATION_OPERATIONAL.filter(function (c) { return saved[c.key] === "P"; }).length + '/10)</span></h4>' +
       '<div class="colin-checklist-scroll">' + operationalHtml + '</div>' +
-      '<p class="small muted" id="calibration-blind-hint" style="margin:14px 0 0;">Mark all 20 criteria to submit — once submitted, this locks and can\'t be changed.</p>' +
-      '<button type="button" class="btn btn--primary" id="calibration-submit-btn" style="margin-top:14px;" disabled>Submit review</button>' +
+      '<p class="small muted" id="calibration-blind-hint" style="margin:14px 0 0;">Mark all 20 criteria to submit (a comment is optional) — once submitted, this locks and can\'t be changed.</p>' +
+      '<p class="small" id="calibration-submit-error" style="margin:8px 0 0;color:var(--danger);font-weight:600;display:none;">Mark every criterion above before submitting.</p>' +
+      '<button type="button" class="btn btn--primary" id="calibration-submit-btn" style="margin-top:14px;">Submit review</button>' +
       '</div></div>';
   }
 
   function calibrationComparisonTableHtml(session) {
     var ownerIsYou = !!session.ownerIsYou;
+    var creatorIsReviewer = calibrationCreatorIsReviewer(session);
     var reviewerCols = session.reviewers;
-    var totalCols = 3 + reviewerCols.length; // Criterion + You + reviewers + AI + Agreed outcome
+    var totalCols = 2 + reviewerCols.length + (creatorIsReviewer ? 1 : 0); // Criterion + [You] + reviewers + AI + Agreed outcome
     var head = '<th>Criterion</th>' +
-      '<th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">' + esc(userInitials(CURRENT_AGENT_NAME)) + '</span>You</span></th>' +
+      (creatorIsReviewer ? '<th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">' + esc(userInitials(CURRENT_AGENT_NAME)) + '</span>You</span></th>' : "") +
       reviewerCols.map(function (name) {
         return '<th style="text-align:center;"><span class="cell-user" style="justify-content:center;"><span class="avatar avatar--sm">' + esc(userInitials(name)) + '</span>' + esc(name) + '</span></th>';
       }).join("") +
@@ -2147,7 +2251,7 @@
         return '<td style="text-align:center;">' + calibrationVerdictPillHtml(v) + flag + '</td>';
       }
       var agreedCell;
-      if (ownerIsYou) {
+      if (ownerIsYou && !session.calibrated) {
         agreedCell = '<td style="text-align:center;background:var(--info-bg);"><div class="colin-verdict" style="justify-content:center;flex-wrap:wrap;" data-agreed-toggle="' + item.key + '">' +
           verdictOptions.map(function (v) { return '<button type="button" data-v="' + v + '"' + (agreed === v ? ' class="active"' : "") + '>' + (v === "NA" ? "N/A" : v) + '</button>'; }).join("") +
           '</div></td>';
@@ -2156,7 +2260,7 @@
       }
       return '<tr data-criterion-row="' + item.key + '">' +
         '<td>' + esc(item.label) + '</td>' +
-        cell(session.yourVerdicts[item.key]) +
+        (creatorIsReviewer ? cell(session.yourVerdicts[item.key]) : "") +
         reviewerCols.map(function (name) { return cell(session.reviewerVerdicts[name][item.key]); }).join("") +
         cell(session.aiVerdicts[item.key]) +
         agreedCell +
@@ -2169,13 +2273,13 @@
       CALIBRATION_OPERATIONAL.map(function (c) { return itemRow(c, ["P", "F", "PWD", "NA"]); }).join("");
 
     var totalRows = '<tr><td class="cell-strong">Compliance score</td>' +
-      '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.yourVerdicts) + '/100</td>' +
+      (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.yourVerdicts) + '/100</td>' : "") +
       reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.reviewerVerdicts[name]) + '/100</td>'; }).join("") +
       '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.aiVerdicts) + '/100</td>' +
       '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + calibrationComplianceScore(session.agreedOutcome || session.aiVerdicts) + '/100</td>' +
       '</tr>' +
       '<tr><td class="cell-strong">Operational <span class="muted small" style="font-weight:400;">(not part of total)</span></td>' +
-      '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.yourVerdicts) + '/10</td>' +
+      (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.yourVerdicts) + '/10</td>' : "") +
       reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.reviewerVerdicts[name]) + '/10</td>'; }).join("") +
       '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.aiVerdicts) + '/10</td>' +
       '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + calibrationOperationalPasses(session.agreedOutcome || session.aiVerdicts) + '/10</td>' +
@@ -2194,9 +2298,11 @@
       '<span id="calibration-status-pill">' + calibrationStatusPill(status) + '</span>' +
       '</div></div>';
 
+    html += calibrationCallDetailHtml(session, session.agent);
     html += calibrationReviewerStatusListHtml(session);
 
-    if (!session.yourSubmitted) {
+    var creatorIsReviewer = calibrationCreatorIsReviewer(session);
+    if (creatorIsReviewer && !session.yourSubmitted) {
       html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">🙈</span><div>' +
         '<div style="font-size:14.5px;">Your evaluation is hidden from other reviewers until you submit</div>' +
         '<div class="small" style="font-weight:500;margin-top:2px;">' + session.reviewers.length + ' of ' + calibrationTotalReviewers(session) + ' reviewers are already Complete. Once everyone (including you) is Complete, this reveals the Overall scorecard — right here, no separate tab.</div>' +
@@ -2239,11 +2345,6 @@
     var submitBtn = document.getElementById("calibration-submit-btn");
     if (list && submitBtn) {
       var allItems = [].slice.call(list.querySelectorAll("[data-criterion]"));
-      function updateSubmitState() {
-        submitBtn.disabled = !allItems.every(function (li) {
-          return !!(session.yourVerdicts && session.yourVerdicts[li.getAttribute("data-criterion")]);
-        });
-      }
       list.querySelectorAll(".blind-mark-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
           if (btn.disabled) return;
@@ -2253,8 +2354,8 @@
           session.yourVerdicts[key] = btn.getAttribute("data-v");
           li.querySelectorAll(".blind-mark-btn").forEach(function (b) { b.classList.remove("active"); });
           btn.classList.add("active");
+          li.classList.remove("calibration-item--incomplete");
           updateCalibrationSession(session);
-          updateSubmitState();
           var complianceCount = document.getElementById("calibration-compliance-count");
           if (complianceCount) complianceCount.textContent = "(" + CALIBRATION_COMPLIANCE.filter(function (c) { return session.yourVerdicts[c.key] === "P"; }).length + "/10)";
           var operationalCount = document.getElementById("calibration-operational-count");
@@ -2265,17 +2366,38 @@
           if (yourStatusPillWrap) yourStatusPillWrap.innerHTML = calibrationReviewerStatusPillHtml(calibrationYourStatus(session));
         });
       });
+      list.querySelectorAll(".calibration-comment-input").forEach(function (ta) {
+        ta.addEventListener("input", function () {
+          var key = ta.closest("[data-criterion]").getAttribute("data-criterion");
+          session.yourComments = session.yourComments || {};
+          session.yourComments[key] = ta.value;
+          updateCalibrationSession(session);
+        });
+      });
       submitBtn.addEventListener("click", function () {
+        var errorEl = document.getElementById("calibration-submit-error");
+        var firstIncomplete = allItems.filter(function (li) {
+          return !(session.yourVerdicts && session.yourVerdicts[li.getAttribute("data-criterion")]);
+        })[0];
+        if (firstIncomplete) {
+          if (errorEl) errorEl.style.display = "";
+          firstIncomplete.classList.add("calibration-item--incomplete");
+          firstIncomplete.scrollIntoView({ behavior: "smooth", block: "center" });
+          var firstBtn = firstIncomplete.querySelector(".blind-mark-btn");
+          if (firstBtn) firstBtn.focus();
+          return;
+        }
+        if (errorEl) errorEl.style.display = "none";
         session.yourSubmitted = true;
         if (!session.agreedOutcome) session.agreedOutcome = Object.assign({}, session.aiVerdicts);
         updateCalibrationSession(session);
         renderCalibrationDetail(session);
       });
-      updateSubmitState();
     }
     document.querySelectorAll("[data-agreed-toggle]").forEach(function (group) {
       group.querySelectorAll("button").forEach(function (btn) {
         btn.addEventListener("click", function () {
+          if (session.calibrated) return; // locked — logging the outcome is final
           var key = group.getAttribute("data-agreed-toggle");
           session.agreedOutcome = session.agreedOutcome || {};
           session.agreedOutcome[key] = btn.getAttribute("data-v");
@@ -2311,6 +2433,8 @@
         document.getElementById("cal-new-ref").value = "";
         document.getElementById("cal-new-agent").value = "";
         document.getElementById("cal-new-customer").value = "";
+        var skipReview = document.getElementById("cal-new-skip-review");
+        if (skipReview) skipReview.checked = false;
         var pool = document.getElementById("cal-new-reviewers");
         if (pool) pool.innerHTML = calibrationReviewerPoolHtml();
         modal.classList.add("open");
@@ -2331,12 +2455,14 @@
         var nextNum = 1001 + sessions.length;
         var id = "CAL-" + nextNum;
         if (!ref) ref = "INT-" + (10600 + sessions.length);
+        var creatorIsReviewer = !document.getElementById("cal-new-skip-review") || !document.getElementById("cal-new-skip-review").checked;
         var session = {
           id: id, ref: ref, agent: agent, customer: customer, duration: "—",
           reviewers: reviewers, ownerIsYou: true,
           createdLabel: "Just now", createdAt: Date.now(),
           aiVerdicts: calibrationGenVerdicts(id + "-ai"),
-          reviewerVerdicts: {}, yourVerdicts: {}, yourSubmitted: false,
+          reviewerVerdicts: {}, yourVerdicts: {}, yourComments: {}, yourSubmitted: false,
+          creatorIsReviewer: creatorIsReviewer,
           agreedOutcome: null, calibrated: false
         };
         reviewers.forEach(function (name, i) { session.reviewerVerdicts[name] = calibrationGenVerdicts(id + "-" + name + "-" + i); });
