@@ -2000,45 +2000,23 @@
     };
   }
   /* The interaction reference entered when creating a session (or
-     auto-generated) is the seed for a deterministic fake transcript +
-     recording length, so the same ref always "pulls through" the same
-     call detail wherever the session is opened — this prototype has no
-     real interaction store to look the ref up against, so it generates
-     one consistently instead. */
-  var CALIBRATION_TRANSCRIPT_LINES = [
-    ["agent", "Thanks for calling, how can I help today?"],
-    ["customer", "Hi, I wanted to check my account balance before the renewal."],
-    ["agent", "Of course — can I take your full name and two forms of ID to verify first?"],
-    ["customer", "Sure, it's John Carter, date of birth 14th March."],
-    ["agent", "Thanks, that's verified. Your current balance is £212.40, due on the 9th."],
-    ["customer", "Great, thank you. Could someone call me back about renewal options?"],
-    ["agent", "Of course, I'll pass that on to the team."],
-    ["customer", "Perfect, thanks for your help."],
-    ["agent", "You're welcome — is there anything else I can help with today?"],
-    ["customer", "No, that's everything."],
-    ["agent", "Thanks for calling, have a great day."]
-  ];
+     auto-generated) is the seed for a deterministic fake recording
+     length, so the same ref always "pulls through" the same call detail
+     wherever the session is opened — this prototype has no real
+     interaction store to look the ref up against, so it generates one
+     consistently instead. */
   function calibrationGenCallDetail(ref) {
     var rng = calibrationRng(ref + "-call");
-    var lineCount = 6 + Math.floor(rng() * 5);
-    var lines = [];
-    for (var i = 0; i < lineCount; i++) lines.push(CALIBRATION_TRANSCRIPT_LINES[i % CALIBRATION_TRANSCRIPT_LINES.length]);
     var durationSec = 180 + Math.floor(rng() * 300);
-    return { lines: lines, durationSec: durationSec };
+    return { durationSec: durationSec };
   }
   function calibrationFmtDuration(sec) {
     return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0");
   }
-  function calibrationCallDetailHtml(session, agentName) {
+  function calibrationCallDetailHtml(session) {
     var detail = calibrationGenCallDetail(session.ref);
-    var transcriptHtml = detail.lines.map(function (line) {
-      var speaker = line[0], text = line[1];
-      var name = speaker === "agent" ? agentName : session.customer;
-      return '<div class="turn' + (speaker === "agent" ? " turn--agent" : "") + '"><div><div class="turn__meta">' + esc(name) + '</div>' +
-        '<div class="turn__bubble">' + esc(text) + '</div></div></div>';
-    }).join("");
     return '<div class="card mb-18">' +
-      '<div class="card__head"><h3>Call transcript</h3></div>' +
+      '<div class="card__head"><h3>Call recording</h3></div>' +
       '<div class="card__body">' +
       '<div class="recording-player">' +
       '<div class="recording-player__label">Recordings (offline)</div>' +
@@ -2052,8 +2030,6 @@
       '</div>' +
       '<span class="recording-player__time">' + calibrationFmtDuration(detail.durationSec) + '</span>' +
       '</div></div>' +
-      '<hr class="divider" style="margin:16px 0;" />' +
-      '<div class="transcript">' + transcriptHtml + '</div>' +
       '</div></div>';
   }
   /* Same 20-item rubric shape as scorecard.html's blind form: 10
@@ -2326,7 +2302,7 @@
       '<span id="calibration-status-pill">' + calibrationStatusPill(status) + '</span>' +
       '</div></div>';
 
-    html += calibrationCallDetailHtml(session, session.agent);
+    html += calibrationCallDetailHtml(session);
     html += calibrationReviewerStatusListHtml(session);
 
     var creatorIsReviewer = calibrationCreatorIsReviewer(session);
