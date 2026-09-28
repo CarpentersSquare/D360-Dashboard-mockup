@@ -976,6 +976,8 @@
     submissions.filter(function (r) { return !qaGatePass(r.score / 10, r.operationalScore / 10); })
       .forEach(function (r) {
         var row = document.createElement("tr");
+        row.className = "clickable";
+        row.setAttribute("data-href", "scorecard.html?ref=" + encodeURIComponent(r.ref));
         var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
         row.innerHTML =
           '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
@@ -985,6 +987,10 @@
           '<td data-status-cell="' + r.ref + '"></td>' +
           '<td data-assign-cell="' + r.ref + '"></td>' +
           '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
+        row.addEventListener("click", function (e) {
+          if (e.target.closest("a, button, input, select, .toggle")) return;
+          window.location.href = row.getAttribute("data-href");
+        });
         tbody.insertBefore(row, tbody.firstChild);
       });
   }
@@ -1537,6 +1543,28 @@
       if (submittedTab) submittedTab.classList.add("active");
       if (submittedPanel) submittedPanel.classList.add("active");
     }
+  }
+
+  /* Every "Flagged for review" row links to scorecard.html?ref=<REF> so
+     each one opens showing its own actual status/assignment/blind
+     review (whatever's stored against that ref) instead of always the
+     one hardcoded example — the underlying call detail (transcript,
+     AI's Compliance/Operational marks, agent/customer) is still the
+     same single worked example for every ref, since there's only one
+     real scorecard built in this prototype; only the QA-flow status
+     side of the page differs per ref. Run before anything else reads
+     data-scorecard-ref. */
+  function applyScorecardRefFromQuery() {
+    var wrap = document.getElementById("scorecard-flow");
+    if (!wrap) return;
+    var ref = new URLSearchParams(window.location.search).get("ref");
+    if (!ref) return;
+    wrap.setAttribute("data-scorecard-ref", ref);
+    var breadcrumb = document.getElementById("scorecard-ref-breadcrumb");
+    if (breadcrumb) breadcrumb.textContent = ref;
+    var heading = document.getElementById("scorecard-ref-heading");
+    if (heading) heading.textContent = ref;
+    document.title = document.title.replace("INT-10477", ref);
   }
 
   /* Transient, in-memory only (not persisted): which routing button a
@@ -4425,6 +4453,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    applyScorecardRefFromQuery();
     setActiveNav();
     wireLogin();
     wireAccountMenu();
