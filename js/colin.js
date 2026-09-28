@@ -372,21 +372,27 @@
   function updateScore() {
     var it = state.interactions[state.interactionIdx];
     var el = $("#colin-score");
-    if (el) el.textContent = "(" + passCount(it.verdicts) + "/10)";
+    if (el) {
+      var complianceResult = window.D360 && window.D360.qaComplianceResult ? window.D360.qaComplianceResult(it.verdicts) : (it.verdicts.indexOf("F") !== -1 ? "Fail" : "Pass");
+      el.textContent = "(" + complianceResult + ")";
+    }
     var opEl = $("#colin-operational-score");
-    if (opEl) opEl.textContent = "(" + passCount(it.opVerdicts) + "/10)";
+    if (opEl) {
+      var operationalPercent = window.D360 && window.D360.qaOperationalPercent ? window.D360.qaOperationalPercent(it.opVerdicts) : null;
+      opEl.textContent = operationalPercent === null ? "(—)" : "(" + operationalPercent + "%)";
+    }
   }
 
   function renderAutoQA(it) {
     var root = $("#colin-tab-autoqa");
-    var score = passCount(it.verdicts);
+    var complianceResult = window.D360 && window.D360.qaComplianceResult ? window.D360.qaComplianceResult(it.verdicts) : (it.verdicts.indexOf("F") !== -1 ? "Fail" : "Pass");
     root.innerHTML = '<p class="muted small" style="margin-top:0;">Suggested by Dial360 AutoQA — confirm or override in the Evaluation tab.</p>' +
       '<ul class="checklist">' + COMPLIANCE_ITEMS.map(function (q, i) {
         var v = it.verdicts[i];
         var pillClass = v === "P" ? "pill--pass" : v === "F" ? "pill--fail" : "pill--muted";
         return '<li><div class="checklist__main"><div class="checklist__title">' + esc(q) + '</div></div><span class="pill ' + pillClass + '">' + verdictLabel(v) + '</span></li>';
       }).join("") + '</ul>' +
-      '<div class="row" style="justify-content:space-between;margin-top:10px;"><span class="cell-strong">AutoQA suggested score</span><span class="cell-strong">' + score + '/10</span></div>';
+      '<div class="row" style="justify-content:space-between;margin-top:10px;"><span class="cell-strong">AutoQA suggested Compliance</span><span class="cell-strong">' + complianceResult + '</span></div>';
   }
 
   function topFailReason(it) {

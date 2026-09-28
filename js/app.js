@@ -2103,16 +2103,15 @@
     });
     return out;
   }
-  // Same convention as Colin/scorecard.html: only Compliance passes count
-  // toward a score (1 pass = 10 points); Operational is tracked separately
-  // as its own X/10 pass count and never folded into the total.
-  function calibrationComplianceScore(verdicts) {
-    if (!verdicts) return 0;
-    return CALIBRATION_COMPLIANCE.filter(function (c) { return verdicts[c.key] === "P"; }).length * 10;
+  // Same shared rule as qaComplianceResult/qaOperationalPercent (see QA
+  // flow above): Compliance is pass/fail, entirely independent of
+  // Operational, which is its own % (P = whole mark, PWD = half, F =
+  // none, N-A excluded) — never folded into a combined total.
+  function calibrationComplianceResult(verdicts) {
+    return qaComplianceResult(CALIBRATION_COMPLIANCE.map(function (c) { return verdicts ? verdicts[c.key] : null; }));
   }
-  function calibrationOperationalPasses(verdicts) {
-    if (!verdicts) return 0;
-    return CALIBRATION_OPERATIONAL.filter(function (c) { return verdicts[c.key] === "P"; }).length;
+  function calibrationOperationalPercent(verdicts) {
+    return qaOperationalPercent(CALIBRATION_OPERATIONAL.map(function (c) { return verdicts ? verdicts[c.key] : null; }));
   }
   function calibrationVerdictPillHtml(v) {
     if (v === "P") return '<span class="pill pill--pass">P</span>';
@@ -2291,9 +2290,9 @@
     return '<div class="card" id="calibration-evaluate-form">' +
       '<div class="card__head"><h3>Your scorecard</h3><span class="tag" title="You won\'t be able to change it after submitting">Mark blind &middot; 20 criteria</span></div>' +
       '<div class="card__body">' +
-      '<h4 class="section-title">Compliance <span id="calibration-compliance-count">(' + CALIBRATION_COMPLIANCE.filter(function (c) { return saved[c.key] === "P"; }).length + '/10)</span></h4>' +
+      '<h4 class="section-title">Compliance <span id="calibration-compliance-count">(' + calibrationComplianceResult(saved) + ')</span></h4>' +
       '<div class="colin-checklist-scroll">' + complianceHtml + '</div>' +
-      '<h4 class="section-title" style="margin-top:18px;">Operational <span id="calibration-operational-count">(' + CALIBRATION_OPERATIONAL.filter(function (c) { return saved[c.key] === "P"; }).length + '/10)</span></h4>' +
+      '<h4 class="section-title" style="margin-top:18px;">Operational <span id="calibration-operational-count">(' + (calibrationOperationalPercent(saved) === null ? '—' : calibrationOperationalPercent(saved) + '%') + ')</span></h4>' +
       '<div class="colin-checklist-scroll">' + operationalHtml + '</div>' +
       '<p class="small muted" id="calibration-blind-hint" style="margin:14px 0 0;">Mark all 20 criteria to submit (a comment is optional) — once submitted, this locks and can\'t be changed.</p>' +
       '<p class="small" id="calibration-submit-error" style="margin:8px 0 0;color:var(--danger);font-weight:600;display:none;">Mark every criterion above before submitting.</p>' +
@@ -2352,18 +2351,25 @@
       sectionRow("Operational") +
       CALIBRATION_OPERATIONAL.map(function (c) { return itemRow(c, ["P", "F", "PWD", "NA"]); }).join("");
 
-    var agreedComplianceTotal = session.agreedOutcome ? (calibrationComplianceScore(session.agreedOutcome) + '/100') : '—';
-    var agreedOperationalTotal = session.agreedOutcome ? (calibrationOperationalPasses(session.agreedOutcome) + '/10') : '—';
-    var totalRows = '<tr><td class="cell-strong">Compliance score</td>' +
-      (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.yourVerdicts) + '/100</td>' : "") +
-      reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.reviewerVerdicts[name]) + '/100</td>'; }).join("") +
-      '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.aiVerdicts) + '/100</td>' +
+    function complianceResultPillHtml(verdicts) {
+      return calibrationComplianceResult(verdicts) === "Fail" ? '<span class="pill pill--fail">Fail</span>' : '<span class="pill pill--pass">Pass</span>';
+    }
+    function operationalPercentText(verdicts) {
+      var pct = calibrationOperationalPercent(verdicts);
+      return pct === null ? '—' : pct + '%';
+    }
+    var agreedComplianceTotal = session.agreedOutcome ? complianceResultPillHtml(session.agreedOutcome) : '<span class="muted small">—</span>';
+    var agreedOperationalTotal = session.agreedOutcome ? operationalPercentText(session.agreedOutcome) : '—';
+    var totalRows = '<tr><td class="cell-strong">Compliance</td>' +
+      (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + complianceResultPillHtml(session.yourVerdicts) + '</td>' : "") +
+      reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + complianceResultPillHtml(session.reviewerVerdicts[name]) + '</td>'; }).join("") +
+      '<td style="text-align:center;" class="cell-strong">' + complianceResultPillHtml(session.aiVerdicts) + '</td>' +
       '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + agreedComplianceTotal + '</td>' +
       '</tr>' +
-      '<tr><td class="cell-strong">Operational <span class="muted small" style="font-weight:400;">(not part of total)</span></td>' +
-      (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.yourVerdicts) + '/10</td>' : "") +
-      reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.reviewerVerdicts[name]) + '/10</td>'; }).join("") +
-      '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.aiVerdicts) + '/10</td>' +
+      '<tr><td class="cell-strong">Operational Score <span class="muted small" style="font-weight:400;">(independent of Compliance)</span></td>' +
+      (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + operationalPercentText(session.yourVerdicts) + '</td>' : "") +
+      reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + operationalPercentText(session.reviewerVerdicts[name]) + '</td>'; }).join("") +
+      '<td style="text-align:center;" class="cell-strong">' + operationalPercentText(session.aiVerdicts) + '</td>' +
       '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + agreedOperationalTotal + '</td>' +
       '</tr>';
 
@@ -2453,9 +2459,12 @@
           li.classList.remove("calibration-item--incomplete");
           updateCalibrationSession(session);
           var complianceCount = document.getElementById("calibration-compliance-count");
-          if (complianceCount) complianceCount.textContent = "(" + CALIBRATION_COMPLIANCE.filter(function (c) { return session.yourVerdicts[c.key] === "P"; }).length + "/10)";
+          if (complianceCount) complianceCount.textContent = "(" + calibrationComplianceResult(session.yourVerdicts) + ")";
           var operationalCount = document.getElementById("calibration-operational-count");
-          if (operationalCount) operationalCount.textContent = "(" + CALIBRATION_OPERATIONAL.filter(function (c) { return session.yourVerdicts[c.key] === "P"; }).length + "/10)";
+          if (operationalCount) {
+            var opPct = calibrationOperationalPercent(session.yourVerdicts);
+            operationalCount.textContent = "(" + (opPct === null ? "—" : opPct + "%") + ")";
+          }
           var statusPillWrap = document.getElementById("calibration-status-pill");
           if (statusPillWrap) statusPillWrap.innerHTML = calibrationStatusPill(calibrationStatus(session));
           var yourStatusPillWrap = document.getElementById("calibration-your-status-pill");
