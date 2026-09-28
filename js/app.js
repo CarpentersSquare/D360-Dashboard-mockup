@@ -929,9 +929,11 @@
     var menu = wrap.querySelector(".role-switch__menu");
     var role = localStorage.getItem(ROLE_KEY) || "admin";
     var employee = localStorage.getItem(EMPLOYEE_KEY) || "";
-    applyRole(role, employee);
-    renderScorecardActions();
 
+    // Wire the open/close behaviour before doing any rendering below — if
+    // a page-specific render function throws on this page's particular
+    // state, the dropdown must still open and close; it must never depend
+    // on the initial render having succeeded.
     trigger.addEventListener("click", function (e) {
       e.stopPropagation();
       menu.classList.toggle("open");
@@ -939,19 +941,34 @@
     document.addEventListener("click", function () { menu.classList.remove("open"); });
     menu.addEventListener("click", function (e) { e.stopPropagation(); });
 
+    try {
+      applyRole(role, employee);
+      renderScorecardActions();
+    } catch (err) {
+      console.error("Initial role render failed:", err);
+    }
+
     menu.querySelectorAll(".role-switch__option").forEach(function (opt) {
       opt.addEventListener("click", function () {
         role = opt.getAttribute("data-role");
         employee = opt.getAttribute("data-employee") || "";
         localStorage.setItem(ROLE_KEY, role);
         localStorage.setItem(EMPLOYEE_KEY, employee);
-        applyRole(role, employee);
-        // Reviewer actions' content varies by role for some statuses (e.g.
-        // only a Manager/Admin gets the dispute Uphold/Override decision,
-        // not the Trainer/Team lead who did the marking) — applyRole()
-        // alone doesn't rebuild it, so do that explicitly on every switch.
-        renderScorecardActions();
+        // Close the menu and commit the switch to storage first — if
+        // anything below throws (a page-specific render function hitting
+        // unexpected state), the dropdown still closes and reflects the
+        // new role instead of getting stuck open/unresponsive.
         menu.classList.remove("open");
+        try {
+          applyRole(role, employee);
+          // Reviewer actions' content varies by role for some statuses (e.g.
+          // only a Manager/Admin gets the dispute Uphold/Override decision,
+          // not the Trainer/Team lead who did the marking) — applyRole()
+          // alone doesn't rebuild it, so do that explicitly on every switch.
+          renderScorecardActions();
+        } catch (err) {
+          console.error("Role switch render failed:", err);
+        }
       });
     });
   }
@@ -2088,6 +2105,7 @@
       s.yourSubmitted = false;
       s.creatorIsReviewer = true;
       s.agreedOutcome = null;
+      s.calibrationStarted = false;
       s.calibrated = false;
     });
     // The 5th seed session (INT-10422) is a finished example so the
@@ -2095,6 +2113,7 @@
     defs[4].yourVerdicts = calibrationGenVerdicts("CAL-1005-you");
     defs[4].yourSubmitted = true;
     defs[4].agreedOutcome = Object.assign({}, defs[4].aiVerdicts);
+    defs[4].calibrationStarted = true;
     defs[4].calibrated = true;
     saveCalibrationSessions(defs);
   }
@@ -2128,19 +2147,32 @@
     return session.reviewers.length + (calibrationCreatorIsReviewer(session) && session.yourSubmitted ? 1 : 0);
   }
   function calibrationTotalReviewers(session) { return session.reviewers.length + (calibrationCreatorIsReviewer(session) ? 1 : 0); }
+  // Session-level status. Four stages:
+  //  - "in-progress": still waiting for one or more reviewers (including
+  //    you, if you're one) to complete their blind scorecard.
+  //  - "ready-for-calibration": everyone's complete — the side-by-side
+  //    Overall scorecard is viewable, but the Agreed outcome column isn't
+  //    editable yet; the owner starts calibration from here.
+  //  - "calibration-started": the owner pressed Start calibration — the
+  //    Agreed outcome column is now editable (and starts empty/incomplete)
+  //    until the owner presses Calibration Complete.
+  //  - "calibrated": the outcome is logged and the session is read-only,
+  //    until the owner reopens it (back to "calibration-started").
   function calibrationStatus(session) {
     if (session.calibrated) return "calibrated";
+    if (session.calibrationStarted) return "calibration-started";
     // With no blind gate of your own, reveal follows the named reviewers
     // alone — always pre-seeded Complete in this single-seat prototype.
-    if (!calibrationCreatorIsReviewer(session)) return "revealed";
-    if (session.yourSubmitted) return "revealed";
+    if (!calibrationCreatorIsReviewer(session)) return "ready-for-calibration";
+    if (session.yourSubmitted) return "ready-for-calibration";
     return calibrationYourStatus(session); // "needs-complete" | "in-progress"
   }
   function calibrationStatusPill(status) {
     if (status === "calibrated") return '<span class="pill pill--pass">Calibrated</span>';
-    if (status === "revealed") return '<span class="pill pill--info">Revealed</span>';
+    if (status === "calibration-started") return '<span class="pill pill--info">Calibration started</span>';
+    if (status === "ready-for-calibration") return '<span class="pill pill--flag">Ready for Calibration</span>';
     if (status === "in-progress") return '<span class="pill pill--flag">In progress</span>';
-    return '<span class="pill pill--muted">Needs to complete</span>';
+    return '<span class="pill pill--muted">In progress</span>';
   }
 
   function renderCalibrationSessionsTable() {
@@ -2249,18 +2281,23 @@
       return '<tr><td colspan="' + totalCols + '" style="background:var(--indigo);color:#fff;font-weight:700;">' + label + '</td></tr>';
     }
     function itemRow(item, verdictOptions) {
-      var agreed = session.agreedOutcome ? session.agreedOutcome[item.key] : session.aiVerdicts[item.key];
+      // The Agreed outcome column stays empty until calibration is
+      // started, so there's nothing to compare against yet — no mismatch
+      // flags before then.
+      var agreed = session.agreedOutcome ? session.agreedOutcome[item.key] : undefined;
       function cell(v) {
-        var flag = v !== agreed ? '<span class="mismatch-flag show" title="Differs from the agreed outcome">≠ agreed</span>' : '<span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span>';
+        var flag = (agreed && v !== agreed) ? '<span class="mismatch-flag show" title="Differs from the agreed outcome">≠ agreed</span>' : '<span class="mismatch-flag" title="Differs from the agreed outcome">≠ agreed</span>';
         return '<td style="text-align:center;">' + calibrationVerdictPillHtml(v) + flag + '</td>';
       }
       var agreedCell;
-      if (ownerIsYou && !session.calibrated) {
+      if (ownerIsYou && session.calibrationStarted && !session.calibrated) {
         agreedCell = '<td style="text-align:center;background:var(--info-bg);"><div class="colin-verdict" style="justify-content:center;flex-wrap:wrap;" data-agreed-toggle="' + item.key + '">' +
           verdictOptions.map(function (v) { return '<button type="button" data-v="' + v + '"' + (agreed === v ? ' class="active"' : "") + '>' + (v === "NA" ? "N/A" : v) + '</button>'; }).join("") +
           '</div></td>';
-      } else {
+      } else if (agreed) {
         agreedCell = '<td style="text-align:center;background:var(--info-bg);">' + calibrationVerdictPillHtml(agreed) + '</td>';
+      } else {
+        agreedCell = '<td style="text-align:center;background:var(--info-bg);" class="muted small">—</td>';
       }
       return '<tr data-criterion-row="' + item.key + '">' +
         '<td>' + esc(item.label) + '</td>' +
@@ -2276,17 +2313,19 @@
       sectionRow("Operational") +
       CALIBRATION_OPERATIONAL.map(function (c) { return itemRow(c, ["P", "F", "PWD", "NA"]); }).join("");
 
+    var agreedComplianceTotal = session.agreedOutcome ? (calibrationComplianceScore(session.agreedOutcome) + '/100') : '—';
+    var agreedOperationalTotal = session.agreedOutcome ? (calibrationOperationalPasses(session.agreedOutcome) + '/10') : '—';
     var totalRows = '<tr><td class="cell-strong">Compliance score</td>' +
       (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.yourVerdicts) + '/100</td>' : "") +
       reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.reviewerVerdicts[name]) + '/100</td>'; }).join("") +
       '<td style="text-align:center;" class="cell-strong">' + calibrationComplianceScore(session.aiVerdicts) + '/100</td>' +
-      '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + calibrationComplianceScore(session.agreedOutcome || session.aiVerdicts) + '/100</td>' +
+      '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + agreedComplianceTotal + '</td>' +
       '</tr>' +
       '<tr><td class="cell-strong">Operational <span class="muted small" style="font-weight:400;">(not part of total)</span></td>' +
       (creatorIsReviewer ? '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.yourVerdicts) + '/10</td>' : "") +
       reviewerCols.map(function (name) { return '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.reviewerVerdicts[name]) + '/10</td>'; }).join("") +
       '<td style="text-align:center;" class="cell-strong">' + calibrationOperationalPasses(session.aiVerdicts) + '/10</td>' +
-      '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + calibrationOperationalPasses(session.agreedOutcome || session.aiVerdicts) + '/10</td>' +
+      '<td style="text-align:center;background:var(--info-bg);" class="cell-strong">' + agreedOperationalTotal + '</td>' +
       '</tr>';
 
     return { head: head, rows: rows, totalRows: totalRows, totalCols: totalCols };
@@ -2317,25 +2356,39 @@
         '<div style="font-size:14.5px;">Revealed</div>' +
         '<div class="small" style="font-weight:500;margin-top:2px;">All ' + calibrationTotalReviewers(session) + ' reviewers are Complete, including the AI\'s own read below.</div>' +
         '</div></div>';
-      if (session.ownerIsYou && !session.calibrated) {
+      if (status === "ready-for-calibration" && session.ownerIsYou) {
         html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">👑</span><div>' +
-          '<div style="font-size:14.5px;">You created this session, so you set the Agreed outcome</div>' +
-          '<div class="small" style="font-weight:500;margin-top:2px;">Now that everyone\'s submitted their own QA, mark up the Overall scorecard together — pick the correct outcome for every criterion in the column on the right, including ones everyone already agreed on. Anything that differs from it is flagged.</div>' +
+          '<div style="font-size:14.5px;">Ready for Calibration — you created this session</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">Review everyone\'s answers side by side below, then press Start calibration when you\'re ready to agree the final outcome together.</div>' +
           '</div></div>';
       }
-      if (session.calibrated) {
+      if (status === "calibration-started") {
+        html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">🧭</span><div>' +
+          '<div style="font-size:14.5px;">Calibration in progress</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">' + (session.ownerIsYou ? "Pick the correct outcome for every criterion in the Agreed outcome column on the right, including ones everyone already agreed on. Anything that differs from it is flagged." : "The session owner is agreeing the final outcome for each criterion in the Agreed outcome column on the right.") + '</div>' +
+          '</div></div>';
+      }
+      if (status === "calibrated") {
         html += '<div class="banner banner--pass mb-18"><span style="font-size:22px;">✅</span><div>' +
           '<div style="font-size:14.5px;">Calibrated outcome logged</div>' +
-          '<div class="small" style="font-weight:500;margin-top:2px;">The Agreed outcome column below is this call\'s final calibrated score.</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">The Agreed outcome column below is this call\'s final calibrated score. The session is read-only.</div>' +
           '</div></div>';
       }
       var table = calibrationComparisonTableHtml(session);
       html += '<div class="card mb-18"><div class="card__head"><h3>Overall scorecard</h3><span class="tag">' + calibrationTotalReviewers(session) + ' reviewers &middot; incl. AI</span></div>' +
         '<div class="table-wrap"><table class="data"><thead><tr>' + table.head + '</tr></thead><tbody>' + table.rows + table.totalRows + '</tbody></table></div>';
-      if (!session.calibrated) {
+      if (status === "ready-for-calibration") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--dark" id="calibration-log-outcome-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can log the calibrated outcome\"") + '>Log calibrated outcome</button>' +
-          '<span class="muted small" style="margin-left:10px;">Records the Agreed outcome column above as this call\'s final calibrated score.</span></div>';
+          '<button type="button" class="btn btn--dark" id="calibration-start-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can start calibration\"") + '>Start calibration</button>' +
+          '<span class="muted small" style="margin-left:10px;">Opens the Agreed outcome column for editing.</span></div>';
+      } else if (status === "calibration-started") {
+        html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
+          '<button type="button" class="btn btn--dark" id="calibration-complete-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can complete calibration\"") + '>Calibration Complete</button>' +
+          '<span class="muted small" style="margin-left:10px;">Locks the Agreed outcome column above as this call\'s final calibrated score.</span></div>';
+      } else if (status === "calibrated") {
+        html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
+          '<button type="button" class="btn btn--ghost" id="calibration-reopen-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can reopen this session\"") + '>Reopen session</button>' +
+          '<span class="muted small" style="margin-left:10px;">Puts the session back into Calibration started and reopens the Agreed outcome column for editing.</span></div>';
       }
       html += '</div>';
     }
@@ -2393,7 +2446,6 @@
         }
         if (errorEl) errorEl.style.display = "none";
         session.yourSubmitted = true;
-        if (!session.agreedOutcome) session.agreedOutcome = Object.assign({}, session.aiVerdicts);
         updateCalibrationSession(session);
         renderCalibrationDetail(session);
       });
@@ -2410,11 +2462,30 @@
         });
       });
     });
-    var logBtn = document.getElementById("calibration-log-outcome-btn");
-    if (logBtn) {
-      logBtn.addEventListener("click", function () {
+    var startBtn = document.getElementById("calibration-start-btn");
+    if (startBtn) {
+      startBtn.addEventListener("click", function () {
+        if (!session.ownerIsYou) return;
+        session.calibrationStarted = true;
+        session.agreedOutcome = {}; // starts incomplete — the owner sets each criterion below
+        updateCalibrationSession(session);
+        renderCalibrationDetail(session);
+      });
+    }
+    var completeBtn = document.getElementById("calibration-complete-btn");
+    if (completeBtn) {
+      completeBtn.addEventListener("click", function () {
         if (!session.ownerIsYou) return;
         session.calibrated = true;
+        updateCalibrationSession(session);
+        renderCalibrationDetail(session);
+      });
+    }
+    var reopenBtn = document.getElementById("calibration-reopen-btn");
+    if (reopenBtn) {
+      reopenBtn.addEventListener("click", function () {
+        if (!session.ownerIsYou) return;
+        session.calibrated = false;
         updateCalibrationSession(session);
         renderCalibrationDetail(session);
       });
@@ -2467,7 +2538,7 @@
           aiVerdicts: calibrationGenVerdicts(id + "-ai"),
           reviewerVerdicts: {}, yourVerdicts: {}, yourComments: {}, yourSubmitted: false,
           creatorIsReviewer: creatorIsReviewer,
-          agreedOutcome: null, calibrated: false
+          agreedOutcome: null, calibrationStarted: false, calibrated: false
         };
         reviewers.forEach(function (name, i) { session.reviewerVerdicts[name] = calibrationGenVerdicts(id + "-" + name + "-" + i); });
         sessions.push(session);
