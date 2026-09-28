@@ -216,7 +216,7 @@
 
       <!-- Flagged banner — hidden until the reviewer submits their own blind scorecard (or immediately for the Agent viewing their own call) -->
       <div class="banner banner--fail mb-18 blind-reveal blind-hidden">
-        <span class="banner__score">60/100</span>
+        <span class="banner__score">Fail</span>
         <div>
           <div style="font-size:15px;">Flagged for review — Identification not completed</div>
           <div class="small" style="font-weight:500;margin-top:2px;">Full name and 2 acceptable forms of identification were not taken before account details were discussed.</div>
@@ -488,7 +488,7 @@
             <p class="muted small" style="font-style:italic;">"Overall a compliant, well-handled call — one gap on the identification step. Flag for a quick coaching note on the intro script, nothing more."</p>
           </div>
 
-          <div class="colin-section-bar" style="margin-top:16px;"><span>Compliance <span>(6/10)</span></span></div>
+          <div class="colin-section-bar" style="margin-top:16px;"><span>Compliance <span>(Fail)</span></span></div>
           <div class="colin-section-body">
             <div class="colin-checklist-scroll">
               <div class="colin-compliance-item" data-criterion="c1">
@@ -544,7 +544,7 @@
             </div>
           </div>
 
-          <div class="colin-section-bar" style="margin-top:16px;"><span>Operational <span>(8/10)</span></span></div>
+          <div class="colin-section-bar" style="margin-top:16px;"><span>Operational <span>(85%)</span></span></div>
           <div class="colin-section-body">
             <div class="colin-checklist-scroll">
               <div class="colin-compliance-item" data-criterion="o1">
@@ -643,38 +643,26 @@
             <div class="card__head"><h3>Score breakdown</h3></div>
             <div class="card__body">
               <dl class="dl" style="grid-template-columns:1fr auto;gap:10px 16px;">
-                <dt>Compliance</dt><dd>6 / 10</dd>
-                <dt>Operational</dt><dd>8 / 10</dd>
+                <dt>Compliance</dt><dd><span class="pill pill--fail">Fail</span></dd>
+                <dt>Operational</dt><dd class="cell-strong">85%</dd>
               </dl>
               <hr class="divider" style="margin:16px 0;" />
-              <div class="row" style="justify-content:space-between;align-items:baseline;">
-                <span class="cell-strong">Compliance score</span>
-                <span class="kpi__value" style="font-size:24px;margin:0;color:var(--danger);">60/100</span>
-              </div>
-              <div class="bar bar--danger" style="margin-top:10px;"><span style="width:60%;"></span></div>
-              <div class="small muted" style="margin-top:8px;">Matches the score shown in QA Review — based on the Compliance pass count only. Operational is tracked separately and isn't part of this total.</div>
+              <div class="small muted">Matches the score shown in QA Review — Compliance is pass/fail (a single Fail fails the whole section) and Operational is tracked separately as its own %, never folded into a combined total.</div>
             </div>
           </div>
 
-          <!-- Agent context -->
+          <!-- Interaction details -->
           <div class="card">
-            <div class="card__head"><h3>Agent context</h3></div>
+            <div class="card__head"><h3>Interaction details</h3></div>
             <div class="card__body">
-              <div class="cell-user" style="margin-bottom:16px;">
-                <span class="avatar avatar--lg">DO</span>
-                <div>
-                  <div class="cell-strong" style="font-size:15px;">Daniel Okafor</div>
-                  <div class="muted small">Agent</div>
-                  <div class="status-dot online" style="margin-top:4px;">Online</div>
-                </div>
+              <div class="small" style="line-height:1.9;">
+                Channel: <strong>voice</strong><br>
+                Disposition: <strong>Customer Contact</strong><br>
+                Classification Type: <strong>Pay in Full ACH</strong><br>
+                Customer No: <strong>Not Found</strong><br>
+                Customer Name: <strong>Tom Beresford</strong><br>
+                Contact Details: <a href="tel:+18000003586">+18000003586</a>
               </div>
-              <dl class="dl" style="grid-template-columns:1fr auto;gap:10px 16px;">
-                <dt>Avg score · this week</dt><dd>81</dd>
-                <dt>Calls handled · this week</dt><dd>47</dd>
-                <dt>Open flags</dt><dd>2</dd>
-              </dl>
-              <hr class="divider" style="margin:16px 0;" />
-              <a class="btn btn--sm" href="users.html">View user profile</a>
             </div>
           </div>
 

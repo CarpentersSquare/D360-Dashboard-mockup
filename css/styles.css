@@ -175,6 +175,23 @@ p { margin: 0 0 12px; }
 .role-switch__option .check { color: var(--indigo); visibility: hidden; }
 .role-switch__option.active .check { visibility: visible; }
 
+/* ---------- Generic tick-list dropdown (multi-select) ---------- */
+.check-dropdown { position: relative; }
+.check-dropdown__trigger { width: 100%; justify-content: space-between; text-align: left; }
+.check-dropdown__menu {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px);
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+  padding: 6px; display: none; z-index: 40; max-height: 240px; overflow-y: auto;
+}
+.check-dropdown__menu.open { display: block; }
+.check-dropdown__option {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 10px; border-radius: 6px; font-size: 13px; color: var(--ink);
+  cursor: pointer; font-weight: 500;
+}
+.check-dropdown__option:hover { background: var(--bg); }
+
 .env-badge {
   background: var(--magenta);
   color: #fff;
@@ -544,7 +561,7 @@ select:focus, input:focus, textarea:focus { outline: 2px solid var(--indigo); ou
 .modal__foot { padding: 16px 22px; border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-end; gap: 10px; }
 .form-row { display: flex; flex-direction: column; gap: 6px; }
 .form-row label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
-.form-row input, .form-row select, .form-row textarea { width: 100%; }
+.form-row input:not([type="checkbox"]):not([type="radio"]), .form-row select, .form-row textarea { width: 100%; }
 
 /* Agent guide flowchart (inside .modal--guide) */
 .guide-flow { display: flex; flex-direction: column; align-items: center; }

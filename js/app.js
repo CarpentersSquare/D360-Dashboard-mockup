@@ -913,7 +913,7 @@
       if (!emptyRow) {
         emptyRow = document.createElement("tr");
         emptyRow.setAttribute("data-qa-queue-empty", "");
-        emptyRow.innerHTML = '<td colspan="8" class="muted" style="padding:16px;">No calls currently assigned to you for review.</td>';
+        emptyRow.innerHTML = '<td colspan="9" class="muted" style="padding:16px;">No calls currently assigned to you for review.</td>';
         tbody.appendChild(emptyRow);
       }
       emptyRow.style.display = "";
@@ -1014,6 +1014,7 @@
         row.innerHTML =
           '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
           '<td><span class="cell-user">' + r.agentName + '</span></td>' +
+          '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
           '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
           qaComplianceOperationalCellsHtml(r.complianceResult, r.operationalScore) +
           '<td data-status-cell="' + r.ref + '"></td>' +
@@ -2135,8 +2136,31 @@
   }
   function calibrationClassificationPoolHtml() {
     return CALIBRATION_CLASSIFICATIONS.map(function (c) {
-      return '<label class="row" style="gap:8px;font-weight:500;"><input type="checkbox" value="' + esc(c) + '" /> ' + esc(c) + '</label>';
+      return '<label class="check-dropdown__option"><input type="checkbox" value="' + esc(c) + '" /> ' + esc(c) + '</label>';
     }).join("");
+  }
+  function calibrationClassificationTriggerLabel() {
+    var checked = document.querySelectorAll("#cal-new-classifications input:checked");
+    if (!checked.length) return "Any classification";
+    if (checked.length === 1) return checked[0].value;
+    return checked.length + " selected";
+  }
+  /* Generic open/close + label-refresh wiring for the Classification
+     check-dropdown — same trigger/menu/document-click pattern as the
+     role-switch dropdown elsewhere in the app. */
+  function wireCalibrationClassificationDropdown() {
+    var wrap = document.getElementById("cal-new-classifications-dropdown");
+    var trigger = document.getElementById("cal-new-classifications-trigger");
+    var menu = document.getElementById("cal-new-classifications");
+    var label = document.getElementById("cal-new-classifications-label");
+    if (!wrap || !trigger || !menu || !label) return;
+    trigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      menu.classList.toggle("open");
+    });
+    document.addEventListener("click", function () { menu.classList.remove("open"); });
+    menu.addEventListener("click", function (e) { e.stopPropagation(); });
+    menu.addEventListener("change", function () { label.textContent = calibrationClassificationTriggerLabel(); });
   }
   function calibrationGenInteraction(seed, criteria) {
     var rng = calibrationRng(seed + "-interaction");
@@ -2602,14 +2626,20 @@
         document.getElementById("cal-new-duration-min").value = "";
         document.getElementById("cal-new-duration-max").value = "";
         var classificationPool = document.getElementById("cal-new-classifications");
-        if (classificationPool) classificationPool.innerHTML = calibrationClassificationPoolHtml();
+        if (classificationPool) { classificationPool.innerHTML = calibrationClassificationPoolHtml(); classificationPool.classList.remove("open"); }
+        var classificationLabel = document.getElementById("cal-new-classifications-label");
+        if (classificationLabel) classificationLabel.textContent = "Any classification";
         var skipReview = document.getElementById("cal-new-skip-review");
         if (skipReview) skipReview.checked = false;
         var pool = document.getElementById("cal-new-reviewers");
         if (pool) pool.innerHTML = calibrationReviewerPoolHtml();
+        // Reset to the first tab ("Use a reference") every time the modal opens.
+        var firstTab = modal.querySelector(".tab");
+        if (firstTab) firstTab.click();
         modal.classList.add("open");
       });
     }
+    wireCalibrationClassificationDropdown();
     var createBtn = document.getElementById("cal-new-session-create");
     if (createBtn) {
       createBtn.addEventListener("click", function () {
