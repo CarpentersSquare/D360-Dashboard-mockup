@@ -2120,6 +2120,39 @@
     return '<span class="pill pill--muted">N/A</span>';
   }
 
+  /* New-session "find a random interaction" criteria — no real interaction
+     store to search, so a matching one is generated deterministically from
+     the session id instead (same pattern as calibrationGenVerdicts/
+     calibrationGenCallDetail): agent and customer are always picked for
+     you (no manual Agent/Customer boxes), and type/duration/classification
+     honour whatever criteria were given, falling back to fully random
+     when none were. */
+  var CALIBRATION_INTERACTION_TYPES = ["Inbound", "Outbound", "Livechat"];
+  var CALIBRATION_CLASSIFICATIONS = ["Pay in Full ACH", "Settlement Offer", "Payment Plan Setup", "Dispute Callback", "Statement Request", "Skip Trace Follow-up"];
+  var CALIBRATION_CUSTOMER_NAMES = ["Sam Patel", "Priya Shah", "Alex Greer", "Mark Ellison", "Nina Torres", "Tom Beresford", "Raj Sharma", "Nadia Hussain", "George Hamilton", "Sophie Clarke", "Oliver Grant", "Beatrice Coleman"];
+  function calibrationRandomFrom(rng, list) {
+    return list[Math.floor(rng() * list.length)];
+  }
+  function calibrationClassificationPoolHtml() {
+    return CALIBRATION_CLASSIFICATIONS.map(function (c) {
+      return '<label class="row" style="gap:8px;font-weight:500;"><input type="checkbox" value="' + esc(c) + '" /> ' + esc(c) + '</label>';
+    }).join("");
+  }
+  function calibrationGenInteraction(seed, criteria) {
+    var rng = calibrationRng(seed + "-interaction");
+    var agentPool = getUsers().filter(function (u) { return u.role === "agent"; }).map(function (u) { return u.name; });
+    var agent = calibrationRandomFrom(rng, agentPool.length ? agentPool : ["Daniel Okafor"]);
+    var customer = calibrationRandomFrom(rng, CALIBRATION_CUSTOMER_NAMES);
+    var type = (criteria && criteria.interactionType) || calibrationRandomFrom(rng, CALIBRATION_INTERACTION_TYPES);
+    var classificationPool = (criteria && criteria.classifications && criteria.classifications.length) ? criteria.classifications : CALIBRATION_CLASSIFICATIONS;
+    var classification = calibrationRandomFrom(rng, classificationPool);
+    var minSec = ((criteria && criteria.minDuration) || 2) * 60;
+    var maxSec = ((criteria && criteria.maxDuration) || 15) * 60;
+    if (maxSec < minSec) maxSec = minSec;
+    var durationSec = minSec + Math.floor(rng() * (maxSec - minSec + 1));
+    return { agent: agent, customer: customer, type: type, classification: classification, duration: calibrationFmtDuration(durationSec) };
+  }
+
   function getCalibrationSessions() {
     try { return JSON.parse(localStorage.getItem(CALIBRATION_KEY)) || []; } catch (e) { return []; }
   }
@@ -2128,11 +2161,11 @@
   function seedCalibrationSessions() {
     if (localStorage.getItem(CALIBRATION_KEY)) return;
     var defs = [
-      { id: "CAL-1001", ref: "INT-10471", agent: "Olivia Hughes", customer: "Sam Patel", duration: "5m 18s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Today, 09:14", createdAt: Date.now() - 3 * 3600e3 },
-      { id: "CAL-1002", ref: "INT-10532", agent: "Daniel Okafor", customer: "Priya Shah", duration: "6m 42s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Today, 08:02", createdAt: Date.now() - 4 * 3600e3 },
-      { id: "CAL-1003", ref: "INT-10501", agent: "James Whitmore", customer: "Alex Greer", duration: "4m 55s", reviewers: ["Grace Thompson", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Yesterday", createdAt: Date.now() - 30 * 3600e3 },
-      { id: "CAL-1004", ref: "INT-10488", agent: "Grace Thompson", customer: "Mark Ellison", duration: "8m 05s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: true, createdLabel: "Yesterday", createdAt: Date.now() - 28 * 3600e3 },
-      { id: "CAL-1005", ref: "INT-10422", agent: "Marcus Bennett", customer: "Nina Torres", duration: "7m 11s", reviewers: ["Daniel Okafor", "Grace Thompson"], ownerIsYou: true, createdLabel: "3 days ago", createdAt: Date.now() - 72 * 3600e3 }
+      { id: "CAL-1001", ref: "INT-10471", agent: "Olivia Hughes", customer: "Sam Patel", type: "Inbound", classification: "Payment Plan Setup", duration: "5m 18s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Today, 09:14", createdAt: Date.now() - 3 * 3600e3 },
+      { id: "CAL-1002", ref: "INT-10532", agent: "Daniel Okafor", customer: "Priya Shah", type: "Outbound", classification: "Settlement Offer", duration: "6m 42s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Today, 08:02", createdAt: Date.now() - 4 * 3600e3 },
+      { id: "CAL-1003", ref: "INT-10501", agent: "James Whitmore", customer: "Alex Greer", type: "Livechat", classification: "Statement Request", duration: "4m 55s", reviewers: ["Grace Thompson", "Hannah Price", "Charlotte Reid"], ownerIsYou: false, createdLabel: "Yesterday", createdAt: Date.now() - 30 * 3600e3 },
+      { id: "CAL-1004", ref: "INT-10488", agent: "Grace Thompson", customer: "Mark Ellison", type: "Inbound", classification: "Dispute Callback", duration: "8m 05s", reviewers: ["Priya Nair", "Hannah Price", "Charlotte Reid"], ownerIsYou: true, createdLabel: "Yesterday", createdAt: Date.now() - 28 * 3600e3 },
+      { id: "CAL-1005", ref: "INT-10422", agent: "Marcus Bennett", customer: "Nina Torres", type: "Outbound", classification: "Pay in Full ACH", duration: "7m 11s", reviewers: ["Daniel Okafor", "Grace Thompson"], ownerIsYou: true, createdLabel: "3 days ago", createdAt: Date.now() - 72 * 3600e3 }
     ];
     defs.forEach(function (s) {
       s.aiVerdicts = calibrationGenVerdicts(s.id + "-ai");
@@ -2181,6 +2214,16 @@
     return '<span class="pill pill--muted">Needs to complete</span>';
   }
   function calibrationCreatorIsReviewer(session) { return session.creatorIsReviewer !== false; }
+  /* Who can run a calibration session (Start/Complete/Reopen, and set the
+     Agreed outcome) — any Manager/Admin, not just whoever happens to have
+     created it. Calibration is a QA Manager's job across the whole team,
+     not a per-session ownership thing, and gating it to the creator alone
+     left most seeded demo sessions permanently locked to a Manager/Admin
+     viewer who didn't happen to create them. */
+  function calibrationCanManage() {
+    var role = localStorage.getItem(ROLE_KEY) || "admin";
+    return role === "admin" || role === "manager";
+  }
   function calibrationCompleteCount(session) {
     return session.reviewers.length + (calibrationCreatorIsReviewer(session) && session.yourSubmitted ? 1 : 0);
   }
@@ -2301,7 +2344,7 @@
   }
 
   function calibrationComparisonTableHtml(session) {
-    var ownerIsYou = !!session.ownerIsYou;
+    var canManage = calibrationCanManage();
     var creatorIsReviewer = calibrationCreatorIsReviewer(session);
     var reviewerCols = session.reviewers;
     var totalCols = 2 + reviewerCols.length + (creatorIsReviewer ? 1 : 0); // Criterion + [You] + reviewers + AI + Agreed outcome
@@ -2312,7 +2355,7 @@
       }).join("") +
       '<th style="text-align:center;">🤖 AI</th>' +
       '<th style="text-align:center;background:var(--info-bg);border-radius:8px 8px 0 0;">Agreed outcome' +
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-left:2px;" title="Only the session owner can set this"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-left:2px;" title="Only a Manager/Admin can set this"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
       '</th>';
 
     function sectionRow(label) {
@@ -2328,7 +2371,7 @@
         return '<td style="text-align:center;">' + calibrationVerdictPillHtml(v) + flag + '</td>';
       }
       var agreedCell;
-      if (ownerIsYou && session.calibrationStarted && !session.calibrated) {
+      if (canManage && session.calibrationStarted && !session.calibrated) {
         agreedCell = '<td style="text-align:center;background:var(--info-bg);"><div class="colin-verdict" style="justify-content:center;flex-wrap:wrap;" data-agreed-toggle="' + item.key + '">' +
           verdictOptions.map(function (v) { return '<button type="button" data-v="' + v + '"' + (agreed === v ? ' class="active"' : "") + '>' + (v === "NA" ? "N/A" : v) + '</button>'; }).join("") +
           '</div></td>';
@@ -2380,9 +2423,10 @@
     var body = document.getElementById("calibration-detail-body");
     if (!body) return;
     var status = calibrationStatus(session);
+    var canManage = calibrationCanManage();
     var html = '<div class="card mb-18"><div class="card__body row" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">' +
       '<div><div class="cell-strong" style="font-size:15px;">' + esc(session.ref) + ' &middot; ' + esc(session.agent) + ' &middot; ' + esc(session.customer) + '</div>' +
-      '<div class="muted small" style="margin-top:2px;">Inbound call &middot; ' + esc(session.duration) + ' &middot; ' + esc(session.createdLabel) + '</div></div>' +
+      '<div class="muted small" style="margin-top:2px;">' + esc(session.type || "Inbound") + ' call &middot; ' + esc(session.classification || "—") + ' &middot; ' + esc(session.duration) + ' &middot; ' + esc(session.createdLabel) + '</div></div>' +
       '<span id="calibration-status-pill">' + calibrationStatusPill(status) + '</span>' +
       '</div></div>';
 
@@ -2401,16 +2445,16 @@
         '<div style="font-size:14.5px;">Revealed</div>' +
         '<div class="small" style="font-weight:500;margin-top:2px;">All ' + calibrationTotalReviewers(session) + ' reviewers are Complete, including the AI\'s own read below.</div>' +
         '</div></div>';
-      if (status === "ready-for-calibration" && session.ownerIsYou) {
+      if (status === "ready-for-calibration" && canManage) {
         html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">👑</span><div>' +
-          '<div style="font-size:14.5px;">Ready for Calibration — you created this session</div>' +
+          '<div style="font-size:14.5px;">Ready for Calibration</div>' +
           '<div class="small" style="font-weight:500;margin-top:2px;">Review everyone\'s answers side by side below, then press Start calibration when you\'re ready to agree the final outcome together.</div>' +
           '</div></div>';
       }
       if (status === "calibration-started") {
         html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">🧭</span><div>' +
           '<div style="font-size:14.5px;">Calibration in progress</div>' +
-          '<div class="small" style="font-weight:500;margin-top:2px;">' + (session.ownerIsYou ? "Pick the correct outcome for every criterion in the Agreed outcome column on the right, including ones everyone already agreed on. Anything that differs from it is flagged." : "The session owner is agreeing the final outcome for each criterion in the Agreed outcome column on the right.") + '</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">' + (canManage ? "Pick the correct outcome for every criterion in the Agreed outcome column on the right, including ones everyone already agreed on. Anything that differs from it is flagged." : "A Manager/Admin is agreeing the final outcome for each criterion in the Agreed outcome column on the right.") + '</div>' +
           '</div></div>';
       }
       if (status === "calibrated") {
@@ -2424,15 +2468,15 @@
         '<div class="table-wrap"><table class="data"><thead><tr>' + table.head + '</tr></thead><tbody>' + table.rows + table.totalRows + '</tbody></table></div>';
       if (status === "ready-for-calibration") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--dark" id="calibration-start-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can start calibration\"") + '>Start calibration</button>' +
+          '<button type="button" class="btn btn--dark" id="calibration-start-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin can start calibration\"") + '>Start calibration</button>' +
           '<span class="muted small" style="margin-left:10px;">Opens the Agreed outcome column for editing.</span></div>';
       } else if (status === "calibration-started") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--dark" id="calibration-complete-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can complete calibration\"") + '>Calibration Complete</button>' +
+          '<button type="button" class="btn btn--dark" id="calibration-complete-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin can complete calibration\"") + '>Calibration Complete</button>' +
           '<span class="muted small" style="margin-left:10px;">Locks the Agreed outcome column above as this call\'s final calibrated score.</span></div>';
       } else if (status === "calibrated") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--ghost" id="calibration-reopen-btn"' + (session.ownerIsYou ? "" : " disabled title=\"Only the session owner can reopen this session\"") + '>Reopen session</button>' +
+          '<button type="button" class="btn btn--ghost" id="calibration-reopen-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin can reopen this session\"") + '>Reopen session</button>' +
           '<span class="muted small" style="margin-left:10px;">Puts the session back into Calibration started and reopens the Agreed outcome column for editing.</span></div>';
       }
       html += '</div>';
@@ -2513,9 +2557,9 @@
     var startBtn = document.getElementById("calibration-start-btn");
     if (startBtn) {
       startBtn.addEventListener("click", function () {
-        if (!session.ownerIsYou) return;
+        if (!calibrationCanManage()) return;
         session.calibrationStarted = true;
-        session.agreedOutcome = {}; // starts incomplete — the owner sets each criterion below
+        session.agreedOutcome = {}; // starts incomplete — the manager sets each criterion below
         updateCalibrationSession(session);
         renderCalibrationDetail(session);
       });
@@ -2523,7 +2567,7 @@
     var completeBtn = document.getElementById("calibration-complete-btn");
     if (completeBtn) {
       completeBtn.addEventListener("click", function () {
-        if (!session.ownerIsYou) return;
+        if (!calibrationCanManage()) return;
         session.calibrated = true;
         updateCalibrationSession(session);
         renderCalibrationDetail(session);
@@ -2532,7 +2576,7 @@
     var reopenBtn = document.getElementById("calibration-reopen-btn");
     if (reopenBtn) {
       reopenBtn.addEventListener("click", function () {
-        if (!session.ownerIsYou) return;
+        if (!calibrationCanManage()) return;
         session.calibrated = false;
         updateCalibrationSession(session);
         renderCalibrationDetail(session);
@@ -2554,8 +2598,11 @@
     if (newSessionBtn && modal) {
       newSessionBtn.addEventListener("click", function () {
         document.getElementById("cal-new-ref").value = "";
-        document.getElementById("cal-new-agent").value = "";
-        document.getElementById("cal-new-customer").value = "";
+        document.getElementById("cal-new-type").value = "";
+        document.getElementById("cal-new-duration-min").value = "";
+        document.getElementById("cal-new-duration-max").value = "";
+        var classificationPool = document.getElementById("cal-new-classifications");
+        if (classificationPool) classificationPool.innerHTML = calibrationClassificationPoolHtml();
         var skipReview = document.getElementById("cal-new-skip-review");
         if (skipReview) skipReview.checked = false;
         var pool = document.getElementById("cal-new-reviewers");
@@ -2567,9 +2614,6 @@
     if (createBtn) {
       createBtn.addEventListener("click", function () {
         var ref = document.getElementById("cal-new-ref").value.trim();
-        var agent = document.getElementById("cal-new-agent").value.trim();
-        var customer = document.getElementById("cal-new-customer").value.trim();
-        if (!agent || !customer) { alert("Enter an agent and customer for this session."); return; }
         var reviewers = Array.prototype.map.call(
           document.querySelectorAll("#cal-new-reviewers input:checked"),
           function (cb) { return cb.value; }
@@ -2577,10 +2621,24 @@
         var sessions = getCalibrationSessions();
         var nextNum = 1001 + sessions.length;
         var id = "CAL-" + nextNum;
+        // Criteria only steer which random interaction gets picked when no
+        // reference is given — an explicit ref is a specific known call,
+        // so the criteria boxes don't apply to it.
+        var criteria = ref ? null : {
+          interactionType: document.getElementById("cal-new-type").value || null,
+          minDuration: parseFloat(document.getElementById("cal-new-duration-min").value) || null,
+          maxDuration: parseFloat(document.getElementById("cal-new-duration-max").value) || null,
+          classifications: Array.prototype.map.call(
+            document.querySelectorAll("#cal-new-classifications input:checked"),
+            function (cb) { return cb.value; }
+          )
+        };
         if (!ref) ref = "INT-" + (10600 + sessions.length);
+        var found = calibrationGenInteraction(id, criteria);
         var creatorIsReviewer = !document.getElementById("cal-new-skip-review") || !document.getElementById("cal-new-skip-review").checked;
         var session = {
-          id: id, ref: ref, agent: agent, customer: customer, duration: "—",
+          id: id, ref: ref, agent: found.agent, customer: found.customer,
+          type: found.type, classification: found.classification, duration: found.duration,
           reviewers: reviewers, ownerIsYou: true,
           createdLabel: "Just now", createdAt: Date.now(),
           aiVerdicts: calibrationGenVerdicts(id + "-ai"),
