@@ -211,8 +211,9 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         <div>
           <strong>Trainer role and above.</strong> Every interaction is marked by auto-QA. A scorecard clears the
-          gate — and never appears here — only when its Operational score is <strong>85% or higher</strong> and
-          Compliance isn't a hard <strong>0/10</strong> fail; anything else lands on this queue as
+          gate — and never appears here — only when its Operational score (10 questions, P = full mark, PWD = half
+          mark, F = none, N/A excluded) is <strong>85% or higher</strong> and Compliance (10 questions, pass/fail —
+          a single F fails the whole section) is a <strong>Pass</strong>; anything else lands on this queue as
           <strong>Needs Review</strong>. From there a Manager/Admin decides whether to send it to
           <strong>Manual Review</strong> (a Trainer/Team lead marks the call blind, without seeing the AI's score,
           then the two scorecards are compared and any differences tagged "AI Correct"/"AI Incorrect") or straight to
@@ -300,7 +301,7 @@
       <div class="card">
         <div class="card__head">
           <h3>Flagged for review</h3>
-          <span class="tag">Sorted by lowest score</span>
+          <span class="tag">Sorted by lowest Operational Score</span>
         </div>
         <div class="table-wrap">
           <table class="data">
@@ -309,7 +310,8 @@
                 <th>Interaction</th>
                 <th>Agent</th>
                 <th>Date</th>
-                <th>Score</th>
+                <th>Compliance</th>
+                <th>Operational Score</th>
                 <th>Status</th>
                 <th>Assigned reviewer</th>
                 <th data-roles="admin,manager" title="Manager/Admin only — compares the AI's score against a human reviewer's blind scorecard, where one has been done">AI vs Human</th>
@@ -320,7 +322,7 @@
                 <td class="cell-mono">INT-10461</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
                 <td class="cell-mono">Today</td>
-                <td><span class="cell-strong" style="color:var(--danger);">52/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--danger);">52%</span></td>
                 <td data-status-cell="INT-10461"></td>
                 <td data-assign-cell="INT-10461"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10461">–</td>
@@ -329,7 +331,7 @@
                 <td class="cell-mono">INT-10454</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
                 <td class="cell-mono">Yesterday</td>
-                <td><span class="cell-strong" style="color:var(--danger);">55/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--danger);">55%</span></td>
                 <td data-status-cell="INT-10454"></td>
                 <td data-assign-cell="INT-10454"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10454">–</td>
@@ -338,7 +340,7 @@
                 <td class="cell-mono">INT-10448</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
                 <td class="cell-mono">Yesterday</td>
-                <td><span class="cell-strong" style="color:var(--danger);">58/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--danger);">58%</span></td>
                 <td data-status-cell="INT-10448"></td>
                 <td data-assign-cell="INT-10448"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10448">–</td>
@@ -347,7 +349,7 @@
                 <td class="cell-mono">INT-10477</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
                 <td class="cell-mono">Today</td>
-                <td><span class="cell-strong" style="color:var(--danger);">60/100</span></td>
+                <td><span class="pill pill--pass">Pass</span></td><td><span class="cell-strong" style="color:var(--danger);">60%</span></td>
                 <td data-status-cell="INT-10477"></td>
                 <td data-assign-cell="INT-10477"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10477">–</td>
@@ -356,7 +358,7 @@
                 <td class="cell-mono">INT-10442</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
                 <td class="cell-mono">Yesterday</td>
-                <td><span class="cell-strong" style="color:var(--danger);">61/100</span></td>
+                <td><span class="pill pill--pass">Pass</span></td><td><span class="cell-strong" style="color:var(--danger);">61%</span></td>
                 <td data-status-cell="INT-10442"></td>
                 <td data-assign-cell="INT-10442"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10442">–</td>
@@ -365,7 +367,7 @@
                 <td class="cell-mono">INT-10436</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
                 <td class="cell-mono">2 days ago</td>
-                <td><span class="cell-strong" style="color:var(--danger);">63/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--danger);">63%</span></td>
                 <td data-status-cell="INT-10436"></td>
                 <td data-assign-cell="INT-10436"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10436">–</td>
@@ -374,7 +376,7 @@
                 <td class="cell-mono">INT-10429</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
                 <td class="cell-mono">2 days ago</td>
-                <td><span class="cell-strong" style="color:var(--danger);">64/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--danger);">64%</span></td>
                 <td data-status-cell="INT-10429"></td>
                 <td data-assign-cell="INT-10429"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10429">–</td>
@@ -383,7 +385,7 @@
                 <td class="cell-mono">INT-10421</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
                 <td class="cell-mono">2 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">67/100</span></td>
+                <td><span class="pill pill--pass">Pass</span></td><td><span class="cell-strong" style="color:var(--danger);">67%</span></td>
                 <td data-status-cell="INT-10421"></td>
                 <td data-assign-cell="INT-10421"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10421">–</td>
@@ -392,7 +394,7 @@
                 <td class="cell-mono">INT-10415</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
                 <td class="cell-mono">3 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">69/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--danger);">69%</span></td>
                 <td data-status-cell="INT-10415"></td>
                 <td data-assign-cell="INT-10415"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10415">–</td>
@@ -401,7 +403,7 @@
                 <td class="cell-mono">INT-10408</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">HP</span>Hannah Price</span></td>
                 <td class="cell-mono">3 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">71/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--warning);">71%</span></td>
                 <td data-status-cell="INT-10408"></td>
                 <td data-assign-cell="INT-10408"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10408">–</td>
@@ -410,7 +412,7 @@
                 <td class="cell-mono">INT-10402</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">GT</span>Grace Thompson</span></td>
                 <td class="cell-mono">3 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">73/100</span></td>
+                <td><span class="pill pill--pass">Pass</span></td><td><span class="cell-strong" style="color:var(--warning);">73%</span></td>
                 <td data-status-cell="INT-10402"></td>
                 <td data-assign-cell="INT-10402"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10402">–</td>
@@ -419,7 +421,7 @@
                 <td class="cell-mono">INT-10396</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">CR</span>Charlotte Reid</span></td>
                 <td class="cell-mono">4 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">75/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--warning);">75%</span></td>
                 <td data-status-cell="INT-10396"></td>
                 <td data-assign-cell="INT-10396"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10396">–</td>
@@ -428,7 +430,7 @@
                 <td class="cell-mono">INT-10389</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">DO</span>Daniel Okafor</span></td>
                 <td class="cell-mono">4 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">77/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--warning);">77%</span></td>
                 <td data-status-cell="INT-10389"></td>
                 <td data-assign-cell="INT-10389"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10389">–</td>
@@ -437,7 +439,7 @@
                 <td class="cell-mono">INT-10381</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">JW</span>James Whitmore</span></td>
                 <td class="cell-mono">4 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">79/100</span></td>
+                <td><span class="pill pill--pass">Pass</span></td><td><span class="cell-strong" style="color:var(--warning);">79%</span></td>
                 <td data-status-cell="INT-10381"></td>
                 <td data-assign-cell="INT-10381"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10381">–</td>
@@ -446,7 +448,7 @@
                 <td class="cell-mono">INT-10374</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">OH</span>Olivia Hughes</span></td>
                 <td class="cell-mono">5 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">82/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--warning);">82%</span></td>
                 <td data-status-cell="INT-10374"></td>
                 <td data-assign-cell="INT-10374"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10374">–</td>
@@ -455,7 +457,7 @@
                 <td class="cell-mono">INT-10367</td>
                 <td><span class="cell-user"><span class="avatar avatar--sm">MB</span>Marcus Bennett</span></td>
                 <td class="cell-mono">5 days ago</td>
-                <td><span class="cell-strong" style="color:var(--warning);">84/100</span></td>
+                <td><span class="pill pill--fail">Fail</span></td><td><span class="cell-strong" style="color:var(--warning);">84%</span></td>
                 <td data-status-cell="INT-10367"></td>
                 <td data-assign-cell="INT-10367"></td>
                 <td data-roles="admin,manager" data-ai-diff="INT-10367">–</td>

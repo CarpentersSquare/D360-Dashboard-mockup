@@ -913,7 +913,7 @@
       if (!emptyRow) {
         emptyRow = document.createElement("tr");
         emptyRow.setAttribute("data-qa-queue-empty", "");
-        emptyRow.innerHTML = '<td colspan="7" class="muted" style="padding:16px;">No calls currently assigned to you for review.</td>';
+        emptyRow.innerHTML = '<td colspan="8" class="muted" style="padding:16px;">No calls currently assigned to you for review.</td>';
         tbody.appendChild(emptyRow);
       }
       emptyRow.style.display = "";
@@ -980,6 +980,22 @@
      them at the top of the queue, tagged "Colin". */
   var COLIN_KEY = "d360-colin-submissions";
 
+  /* Compliance is pass/fail, Operational is a %  — see qaComplianceResult/
+     qaOperationalPercent above. Shared markup for both the dynamic
+     Colin-submitted rows here and (mirrored by hand, since it's static
+     markup) the 16 seeded rows in qa.html. */
+  function qaOperationalColor(pct) {
+    if (pct === null || pct === undefined) return "var(--muted)";
+    return pct >= QA_GATE_OPERATIONAL_THRESHOLD ? "var(--success)" : pct >= 70 ? "var(--warning)" : "var(--danger)";
+  }
+  function qaComplianceOperationalCellsHtml(complianceResult, operationalScore) {
+    var compliancePill = complianceResult === "Fail" ? '<span class="pill pill--fail">Fail</span>' : '<span class="pill pill--pass">Pass</span>';
+    var opText = (operationalScore === null || operationalScore === undefined)
+      ? '<span class="muted">–</span>'
+      : '<span class="cell-strong" style="color:' + qaOperationalColor(operationalScore) + ';">' + operationalScore + '%</span>';
+    return '<td>' + compliancePill + '</td><td>' + opText + '</td>';
+  }
+
   function renderColinQueue() {
     var tbody = document.querySelector("[data-colin-queue]");
     if (!tbody) return;
@@ -990,17 +1006,16 @@
     // A submission that clears the auto-QA gate (see qaGatePass above)
     // never appears here at all — it's silently published to the agent.
     // Only ones that failed the gate need a manager to route them.
-    submissions.filter(function (r) { return !qaGatePass(r.score / 10, r.operationalScore / 10); })
+    submissions.filter(function (r) { return !qaGatePass(r.complianceResult, r.operationalScore); })
       .forEach(function (r) {
         var row = document.createElement("tr");
         row.className = "clickable";
         row.setAttribute("data-href", "scorecard.html?ref=" + encodeURIComponent(r.ref));
-        var scoreColor = r.score >= 70 ? "var(--success)" : r.score >= 50 ? "var(--warning)" : "var(--danger)";
         row.innerHTML =
           '<td class="cell-mono">' + r.ref + ' <span class="tag" title="Marked in QA Colin (SDL)">Colin</span></td>' +
           '<td><span class="cell-user">' + r.agentName + '</span></td>' +
           '<td class="cell-mono">' + fmtShortDate(r.submittedAt) + '</td>' +
-          '<td><span class="cell-strong" style="color:' + scoreColor + ';">' + r.score + '/100</span></td>' +
+          qaComplianceOperationalCellsHtml(r.complianceResult, r.operationalScore) +
           '<td data-status-cell="' + r.ref + '"></td>' +
           '<td data-assign-cell="' + r.ref + '"></td>' +
           '<td data-roles="admin,manager" data-ai-diff="' + r.ref + '">–</td>';
@@ -1345,8 +1360,9 @@
 
   /* ---- QA flow (per the QA_flow.pdf handoff) ----
      Every AI-marked scorecard is judged against a fixed gate: Operational
-     score must be >=85% AND Compliance must not be a hard 0/10 fail.
-     Pass is silent — auto-published read-only to the agent, never enters
+     score must be >=85% AND Compliance must not Fail (any single "F"
+     among its 10 criteria fails the whole section — see qaComplianceResult
+     above). Pass is silent — auto-published read-only to the agent, never enters
      the Flagged for review queue. Anything else is Needs Review and
      lands on qa.html for a manager to route: either straight to
      Requires Feedback (trusting the AI's mark as-is), or to Manual
@@ -1359,8 +1375,31 @@
      d360-qa-status-overrides, keyed by interaction ref, defaulting to
      "needs-review" for anything not yet touched. */
   var QA_GATE_OPERATIONAL_THRESHOLD = 85;
-  function qaGatePass(complianceScore10, operationalScore10) {
-    return (operationalScore10 * 10) >= QA_GATE_OPERATIONAL_THRESHOLD && complianceScore10 !== 0;
+
+  /* Shared Compliance/Operational scoring rules — the same rubric shape
+     (10 Compliance P/F/N-A + 10 Operational P/F/PWD/N-A) is marked in
+     three places (Colin, scorecard.html's blind form, calibration.html),
+     so the math lives here once and everyone reads it the same way:
+       - Compliance is pass/fail, not a score — a single "F" anywhere
+         fails the whole section; N-A/P otherwise pass.
+       - Operational is a %: P = a whole mark, PWD = half a mark, F =
+         no mark, and N-A criteria are excluded entirely (from both the
+         earned total and the number of questions it's scored out of). */
+  function qaComplianceResult(verdicts) {
+    return verdicts.some(function (v) { return v === "F"; }) ? "Fail" : "Pass";
+  }
+  function qaOperationalPercent(verdicts) {
+    var scored = 0, earned = 0;
+    verdicts.forEach(function (v) {
+      if (!v || v === "NA") return;
+      scored++;
+      if (v === "P") earned += 1;
+      else if (v === "PWD") earned += 0.5;
+    });
+    return scored ? Math.round((earned / scored) * 100) : null;
+  }
+  function qaGatePass(complianceResult, operationalPercent) {
+    return operationalPercent !== null && operationalPercent >= QA_GATE_OPERATIONAL_THRESHOLD && complianceResult !== "Fail";
   }
 
   var QA_STATUS = {
@@ -1617,7 +1656,7 @@
 
     if (status === QA_STATUS.NEEDS_REVIEW) {
       if (!qaPendingRoute) {
-        html = '<p class="small muted" style="margin:0 0 12px;">This call missed the auto-QA gate (Operational &lt; 85% or a 0 in Compliance). Route it for full manual marking, or trust the AI\'s mark and send straight to a feedback session.</p>' +
+        html = '<p class="small muted" style="margin:0 0 12px;">This call missed the auto-QA gate (Operational &lt; 85% or Compliance Failed). Route it for full manual marking, or trust the AI\'s mark and send straight to a feedback session.</p>' +
           '<button type="button" class="btn btn--primary" data-action="pick-route-manual" style="width:100%;justify-content:center;margin-bottom:8px;">Send to Manual Review</button>' +
           '<button type="button" class="btn btn--ghost" data-action="pick-route-feedback" style="width:100%;justify-content:center;">Submit for Feedback</button>';
       } else {
@@ -1875,22 +1914,22 @@
      built on newsfeed.html, which never loads qa.html's own DOM. */
   var QA_ASSIGNMENTS_KEY = "d360-qa-assignments";
   var QA_QUEUE = [
-    { ref: "INT-10477", customer: "Liam Foster", score: 60, reason: "Tone" },
-    { ref: "INT-10461", customer: "Tom Beresford", score: 52, reason: "DPA not completed" },
-    { ref: "INT-10454", customer: "Raj Sharma", score: 55, reason: "Compliance phrase missing" },
-    { ref: "INT-10448", customer: "Nadia Hussain", score: 58, reason: "DPA not completed" },
-    { ref: "INT-10442", customer: "George Hamilton", score: 61, reason: "Tone" },
-    { ref: "INT-10436", customer: "Sophie Clarke", score: 63, reason: "Compliance phrase missing" },
-    { ref: "INT-10429", customer: "Oliver Grant", score: 64, reason: "DPA not completed" },
-    { ref: "INT-10421", customer: "Beatrice Coleman", score: 67, reason: "Tone" },
-    { ref: "INT-10415", customer: "William Pearce", score: 69, reason: "Compliance phrase missing" },
-    { ref: "INT-10408", customer: "Chloe Sutton", score: 71, reason: "DPA not completed" },
-    { ref: "INT-10402", customer: "Yusuf Demir", score: 73, reason: "Tone" },
-    { ref: "INT-10396", customer: "Catherine Lowe", score: 75, reason: "Compliance phrase missing" },
-    { ref: "INT-10389", customer: "Dominic Reyes", score: 77, reason: "DPA not completed" },
-    { ref: "INT-10381", customer: "Eleanor Davies", score: 79, reason: "Tone" },
-    { ref: "INT-10374", customer: "Priscilla Adeyemi", score: 82, reason: "Compliance phrase missing" },
-    { ref: "INT-10367", customer: "Nathan Cole", score: 84, reason: "DPA not completed" }
+    { ref: "INT-10477", customer: "Liam Foster", complianceResult: "Pass", operationalScore: 60, reason: "Tone" },
+    { ref: "INT-10461", customer: "Tom Beresford", complianceResult: "Fail", operationalScore: 52, reason: "DPA not completed" },
+    { ref: "INT-10454", customer: "Raj Sharma", complianceResult: "Fail", operationalScore: 55, reason: "Compliance phrase missing" },
+    { ref: "INT-10448", customer: "Nadia Hussain", complianceResult: "Fail", operationalScore: 58, reason: "DPA not completed" },
+    { ref: "INT-10442", customer: "George Hamilton", complianceResult: "Pass", operationalScore: 61, reason: "Tone" },
+    { ref: "INT-10436", customer: "Sophie Clarke", complianceResult: "Fail", operationalScore: 63, reason: "Compliance phrase missing" },
+    { ref: "INT-10429", customer: "Oliver Grant", complianceResult: "Fail", operationalScore: 64, reason: "DPA not completed" },
+    { ref: "INT-10421", customer: "Beatrice Coleman", complianceResult: "Pass", operationalScore: 67, reason: "Tone" },
+    { ref: "INT-10415", customer: "William Pearce", complianceResult: "Fail", operationalScore: 69, reason: "Compliance phrase missing" },
+    { ref: "INT-10408", customer: "Chloe Sutton", complianceResult: "Fail", operationalScore: 71, reason: "DPA not completed" },
+    { ref: "INT-10402", customer: "Yusuf Demir", complianceResult: "Pass", operationalScore: 73, reason: "Tone" },
+    { ref: "INT-10396", customer: "Catherine Lowe", complianceResult: "Fail", operationalScore: 75, reason: "Compliance phrase missing" },
+    { ref: "INT-10389", customer: "Dominic Reyes", complianceResult: "Fail", operationalScore: 77, reason: "DPA not completed" },
+    { ref: "INT-10381", customer: "Eleanor Davies", complianceResult: "Pass", operationalScore: 79, reason: "Tone" },
+    { ref: "INT-10374", customer: "Priscilla Adeyemi", complianceResult: "Fail", operationalScore: 82, reason: "Compliance phrase missing" },
+    { ref: "INT-10367", customer: "Nathan Cole", complianceResult: "Fail", operationalScore: 84, reason: "DPA not completed" }
   ];
   var QA_ASSIGNMENT_DEFAULTS = {
     "INT-10461": "Priya Nair", "INT-10442": "Rob Ashton", "INT-10421": "Priya Nair",
@@ -1947,7 +1986,7 @@
     var colinSubmissions = [];
     try { colinSubmissions = JSON.parse(localStorage.getItem(COLIN_KEY)) || []; } catch (e) { colinSubmissions = []; }
     var colinEntries = colinSubmissions.map(function (r) {
-      return { ref: r.ref, customer: r.customerName, score: r.score, reason: r.topFailReason };
+      return { ref: r.ref, customer: r.customerName, complianceResult: r.complianceResult, operationalScore: r.operationalScore, reason: r.topFailReason };
     });
     var mine = QA_QUEUE.concat(colinEntries).filter(function (q) {
       return qaAssignedReviewer(q.ref) === CURRENT_AGENT_NAME;
@@ -1960,7 +1999,7 @@
     if (list) {
       list.innerHTML = mine.slice(0, 4).map(function (q) {
         return '<li><div class="checklist__main"><div class="checklist__title">' + q.ref + ' — ' + q.customer + '</div>' +
-          '<div class="checklist__desc">Flagged for ' + q.reason + ' · ' + q.score + '/100</div></div>' +
+          '<div class="checklist__desc">Flagged for ' + q.reason + ' · Compliance ' + q.complianceResult + ' · Operational ' + q.operationalScore + '%</div></div>' +
           '<a class="btn btn--sm" href="qa.html">Review</a></li>';
       }).join("");
     }
@@ -4579,6 +4618,8 @@
   window.D360.assignTraining = assignTraining;
   window.D360.wireVerdictToggles = wireVerdictToggles;
   window.D360.qaGatePass = qaGatePass;
+  window.D360.qaComplianceResult = qaComplianceResult;
+  window.D360.qaOperationalPercent = qaOperationalPercent;
   window.D360.setQaStatus = setQaStatus;
   window.D360.addQaShoutout = addQaShoutout;
   window.D360.renderQaShoutouts = renderQaShoutouts;

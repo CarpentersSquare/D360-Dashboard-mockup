@@ -400,15 +400,23 @@
     var it = state.interactions[state.interactionIdx];
     var agent = AGENTS[state.agentIdx];
     if (!it || !agent) return;
-    var score10 = passCount(it.verdicts);
-    var opScore10 = passCount(it.opVerdicts);
+    // Compliance is pass/fail (any "F" fails the section); Operational is
+    // a % (P = whole mark, PWD = half, F = none, N-A excluded) — see
+    // qaComplianceResult/qaOperationalPercent in app.js, the single
+    // source of truth this and scorecard.html/calibration.html all share.
+    var complianceResult = window.D360 && window.D360.qaComplianceResult
+      ? window.D360.qaComplianceResult(it.verdicts)
+      : (it.verdicts.indexOf("F") !== -1 ? "Fail" : "Pass");
+    var operationalScore = window.D360 && window.D360.qaOperationalPercent
+      ? window.D360.qaOperationalPercent(it.opVerdicts)
+      : Math.round((passCount(it.opVerdicts) / it.opVerdicts.length) * 100);
     var record = {
       id: "colin-" + it.ref + "-" + Date.now(),
       ref: it.ref,
       agentName: agent.name,
       customerName: it.knownCustomerName || it.customerName || "Unknown customer",
-      score: score10 * 10,
-      operationalScore: opScore10 * 10,
+      complianceResult: complianceResult,
+      operationalScore: operationalScore,
       topFailReason: topFailReason(it),
       submittedAt: new Date().toISOString()
     };
@@ -418,16 +426,15 @@
     all.unshift(record);
     localStorage.setItem(SUBMIT_KEY, JSON.stringify(all));
 
-    // Auto-QA gate: Operational >=85% and Compliance not a hard 0/10
-    // fail. A pass is silent — never enters the Flagged for review
-    // queue (renderColinQueue filters it out) — otherwise it starts at
-    // Needs Review for a manager to route. A perfect 10/10 on both
-    // posts a QA Shoutout to the newsfeed.
-    var gatePass = window.D360 && window.D360.qaGatePass ? window.D360.qaGatePass(score10, opScore10) : score10 * 10 >= 70;
+    // Auto-QA gate: Operational >=85% and Compliance not Fail. A pass is
+    // silent — never enters the Flagged for review queue (renderColinQueue
+    // filters it out) — otherwise it starts at Needs Review for a manager
+    // to route. A perfect Pass + 100% posts a QA Shoutout to the newsfeed.
+    var gatePass = window.D360 && window.D360.qaGatePass ? window.D360.qaGatePass(complianceResult, operationalScore) : complianceResult !== "Fail" && operationalScore >= 85;
     if (window.D360 && window.D360.setQaStatus && !gatePass) {
       window.D360.setQaStatus(it.ref, window.D360.QA_STATUS.NEEDS_REVIEW);
     }
-    if (gatePass && score10 === 10 && opScore10 === 10 && window.D360 && window.D360.addQaShoutout) {
+    if (gatePass && complianceResult === "Pass" && operationalScore === 100 && window.D360 && window.D360.addQaShoutout) {
       window.D360.addQaShoutout(agent.name, it.ref, "Perfect Compliance and Operational score — great work!");
       window.D360.renderQaShoutouts();
     }
@@ -444,7 +451,7 @@
       var outcomeNote = gatePass
         ? "This clears the auto-QA gate — published straight to " + agent.name + "'s portal, no manual review needed."
         : "This missed the auto-QA gate — sent to <a href=\"qa.html\">QA Review</a> as Needs Review.";
-      note.innerHTML = "Scorecard submitted — Compliance " + score10 + "/10, Operational " + opScore10 + "/10. " + outcomeNote + trainingNote;
+      note.innerHTML = "Scorecard submitted — Compliance " + complianceResult + ", Operational " + operationalScore + "%. " + outcomeNote + trainingNote;
     }
   }
 
