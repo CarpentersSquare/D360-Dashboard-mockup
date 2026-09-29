@@ -1432,26 +1432,36 @@
     saveQaStatusOverrides(overrides);
   }
 
-  /* Prototype-only: the 16 static "Flagged for review" rows would
+  /* Prototype-only: the 18 static "Flagged for review" rows would
      otherwise all start Needs Review (getQaStatus()'s default), which
      makes the queue look identical regardless of how far the flow has
-     actually progressed. Seed a representative spread across the
-     other statuses — once, and only if nothing's been saved yet, so it
-     never overwrites real interaction (clicking through the flow
-     always wins). INT-10477 (the one real worked example every row
-     links to) is deliberately left at the default so the main
-     walkthrough still starts fresh; scorecard.html's own "Preview
-     state" control covers seeing it at other stages. */
+     actually progressed. Seed exactly 3 rows in each of the 6 statuses
+     (18 = 3 * 6) for testing — once, and only if nothing's been saved
+     yet, so it never overwrites real interaction (clicking through the
+     flow always wins). INT-10477 (the one real worked example every
+     row links to) is deliberately left at the default (Needs Review,
+     alongside 2 others) so the main walkthrough still starts fresh;
+     scorecard.html's own "Preview state" control covers seeing it at
+     other stages. */
   function seedQaStatusOverrides() {
     if (localStorage.getItem(QA_STATUS_OVERRIDES_KEY)) return;
     saveQaStatusOverrides({
+      // INT-10477, INT-10461, INT-10454 stay at the default Needs Review.
       "INT-10448": QA_STATUS.MANUAL_REVIEW,
-      "INT-10436": QA_STATUS.REQUIRES_FEEDBACK,
-      "INT-10421": QA_STATUS.FEEDBACK_STARTED,
-      "INT-10408": QA_STATUS.DISPUTE_REVIEW,
-      "INT-10396": QA_STATUS.FEEDBACK_COMPLETE,
-      "INT-10381": QA_STATUS.MANUAL_REVIEW,
-      "INT-10367": QA_STATUS.REQUIRES_FEEDBACK
+      "INT-10442": QA_STATUS.MANUAL_REVIEW,
+      "INT-10436": QA_STATUS.MANUAL_REVIEW,
+      "INT-10429": QA_STATUS.REQUIRES_FEEDBACK,
+      "INT-10421": QA_STATUS.REQUIRES_FEEDBACK,
+      "INT-10415": QA_STATUS.REQUIRES_FEEDBACK,
+      "INT-10408": QA_STATUS.FEEDBACK_STARTED,
+      "INT-10402": QA_STATUS.FEEDBACK_STARTED,
+      "INT-10396": QA_STATUS.FEEDBACK_STARTED,
+      "INT-10389": QA_STATUS.DISPUTE_REVIEW,
+      "INT-10381": QA_STATUS.DISPUTE_REVIEW,
+      "INT-10374": QA_STATUS.DISPUTE_REVIEW,
+      "INT-10367": QA_STATUS.FEEDBACK_COMPLETE,
+      "INT-10360": QA_STATUS.FEEDBACK_COMPLETE,
+      "INT-10353": QA_STATUS.FEEDBACK_COMPLETE
     });
   }
 
@@ -1930,13 +1940,21 @@
     { ref: "INT-10389", customer: "Dominic Reyes", complianceResult: "Fail", operationalScore: 77, reason: "DPA not completed" },
     { ref: "INT-10381", customer: "Eleanor Davies", complianceResult: "Pass", operationalScore: 79, reason: "Tone" },
     { ref: "INT-10374", customer: "Priscilla Adeyemi", complianceResult: "Fail", operationalScore: 82, reason: "Compliance phrase missing" },
-    { ref: "INT-10367", customer: "Nathan Cole", complianceResult: "Fail", operationalScore: 84, reason: "DPA not completed" }
+    { ref: "INT-10367", customer: "Nathan Cole", complianceResult: "Fail", operationalScore: 84, reason: "DPA not completed" },
+    { ref: "INT-10360", customer: "Ellie Sanderson", complianceResult: "Pass", operationalScore: 62, reason: "Tone" },
+    { ref: "INT-10353", customer: "Marcus Feldman", complianceResult: "Pass", operationalScore: 68, reason: "Tone" }
   ];
+  // Every non-"Needs Review" row is assigned to a real reviewer (getting
+  // routed past Needs Review means someone was assigned); "Needs Review"
+  // rows are a mix of assigned/unassigned, matching what the "Assign to
+  // reviewer" picker on scorecard.html would produce before routing.
   var QA_ASSIGNMENT_DEFAULTS = {
-    "INT-10461": "Priya Nair", "INT-10442": "Rob Ashton", "INT-10421": "Priya Nair",
-    "INT-10408": "Rob Ashton", "INT-10396": "Priya Nair", "INT-10381": "Rob Ashton",
-    "INT-10374": "Priya Nair", "INT-10448": "Hannah Price", "INT-10436": "Hannah Price",
-    "INT-10367": "Priya Nair"
+    "INT-10461": "Priya Nair",
+    "INT-10448": "Hannah Price", "INT-10442": "Rob Ashton", "INT-10436": "Priya Nair",
+    "INT-10429": "Hannah Price", "INT-10421": "Rob Ashton", "INT-10415": "Priya Nair",
+    "INT-10408": "Hannah Price", "INT-10402": "Rob Ashton", "INT-10396": "Priya Nair",
+    "INT-10389": "Hannah Price", "INT-10381": "Rob Ashton", "INT-10374": "Priya Nair",
+    "INT-10367": "Hannah Price", "INT-10360": "Rob Ashton", "INT-10353": "Priya Nair"
   };
 
   function getQaAssignments() {
