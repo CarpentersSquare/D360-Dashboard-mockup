@@ -1443,8 +1443,20 @@
      alongside 2 others) so the main walkthrough still starts fresh;
      scorecard.html's own "Preview state" control covers seeing it at
      other stages. */
+  /* Bump this whenever the seeded status/assignment distribution below
+     changes shape (e.g. a new row, a different 3-per-status split) —
+     a returning browser that already seeded an older version re-seeds
+     to the new one instead of keeping stale demo data forever (the
+     plain "only seed if the key is missing" check below would
+     otherwise never re-apply a changed default set, since the key is
+     already present from the last version). This also clears
+     d360-qa-assignments, since a stale explicit "" (Unassigned)
+     picked during earlier testing would otherwise permanently outrank
+     the new QA_ASSIGNMENT_DEFAULTS for that ref. */
+  var QA_SEED_VERSION = "2026-09-29.3-per-status";
+  var QA_SEED_VERSION_KEY = "d360-qa-seed-version";
   function seedQaStatusOverrides() {
-    if (localStorage.getItem(QA_STATUS_OVERRIDES_KEY)) return;
+    if (localStorage.getItem(QA_SEED_VERSION_KEY) === QA_SEED_VERSION) return;
     saveQaStatusOverrides({
       // INT-10477, INT-10461, INT-10454 stay at the default Needs Review.
       "INT-10448": QA_STATUS.MANUAL_REVIEW,
@@ -1463,6 +1475,8 @@
       "INT-10360": QA_STATUS.FEEDBACK_COMPLETE,
       "INT-10353": QA_STATUS.FEEDBACK_COMPLETE
     });
+    saveQaAssignments({});
+    localStorage.setItem(QA_SEED_VERSION_KEY, QA_SEED_VERSION);
   }
 
   /* Redraws every [data-status-cell] on the QA Review queue with just
@@ -1471,7 +1485,12 @@
      all happens on scorecard.html's own Reviewer actions card. */
   function applyQaStatusOverrides() {
     document.querySelectorAll("[data-status-cell]").forEach(function (cell) {
-      var meta = QA_STATUS_META[getQaStatus(cell.getAttribute("data-status-cell"))];
+      // Falls back to the Needs Review pill instead of throwing on an
+      // unrecognised stored value (e.g. a stale override left over from
+      // an earlier version of the status list) — one bad cell must
+      // never abort this loop and leave every later cell (and whatever
+      // renders after this call) blank.
+      var meta = QA_STATUS_META[getQaStatus(cell.getAttribute("data-status-cell"))] || QA_STATUS_META[QA_STATUS.NEEDS_REVIEW];
       cell.innerHTML = '<span class="pill ' + meta.pill + '">' + meta.label + '</span>';
     });
   }
