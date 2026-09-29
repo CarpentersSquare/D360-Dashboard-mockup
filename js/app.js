@@ -2239,14 +2239,17 @@
   }
   function calibrationCreatorIsReviewer(session) { return session.creatorIsReviewer !== false; }
   /* Who can run a calibration session (Start/Complete/Reopen, and set the
-     Agreed outcome) — any Manager/Admin, not just whoever happens to have
-     created it. Calibration is a QA Manager's job across the whole team,
-     not a per-session ownership thing, and gating it to the creator alone
-     left most seeded demo sessions permanently locked to a Manager/Admin
-     viewer who didn't happen to create them. */
+     Agreed outcome) — Admin/Manager/Team lead, not just whoever happens to
+     have created it. Calibration is run by whoever owns QA for a team —
+     an Admin/Manager company-wide, or a Team lead for their own team — not
+     a per-session ownership thing, and gating it to the creator alone left
+     most seeded demo sessions permanently locked to a viewer who didn't
+     happen to create them. Trainer is excluded: that's the marker role
+     doing the blind scoring being calibrated, not the one running the
+     session. */
   function calibrationCanManage() {
     var role = localStorage.getItem(ROLE_KEY) || "admin";
-    return role === "admin" || role === "manager";
+    return role === "admin" || role === "manager" || role === "teamlead";
   }
   function calibrationCompleteCount(session) {
     return session.reviewers.length + (calibrationCreatorIsReviewer(session) && session.yourSubmitted ? 1 : 0);
@@ -2379,7 +2382,7 @@
       }).join("") +
       '<th style="text-align:center;">🤖 AI</th>' +
       '<th style="text-align:center;background:var(--info-bg);border-radius:8px 8px 0 0;">Agreed outcome' +
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-left:2px;" title="Only a Manager/Admin can set this"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-left:2px;" title="Only a Manager/Admin/Team lead can set this"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
       '</th>';
 
     function sectionRow(label) {
@@ -2478,7 +2481,7 @@
       if (status === "calibration-started") {
         html += '<div class="banner banner--warn mb-18"><span style="font-size:22px;">🧭</span><div>' +
           '<div style="font-size:14.5px;">Calibration in progress</div>' +
-          '<div class="small" style="font-weight:500;margin-top:2px;">' + (canManage ? "Pick the correct outcome for every criterion in the Agreed outcome column on the right, including ones everyone already agreed on. Anything that differs from it is flagged." : "A Manager/Admin is agreeing the final outcome for each criterion in the Agreed outcome column on the right.") + '</div>' +
+          '<div class="small" style="font-weight:500;margin-top:2px;">' + (canManage ? "Pick the correct outcome for every criterion in the Agreed outcome column on the right, including ones everyone already agreed on. Anything that differs from it is flagged." : "A Manager/Admin/Team lead is agreeing the final outcome for each criterion in the Agreed outcome column on the right.") + '</div>' +
           '</div></div>';
       }
       if (status === "calibrated") {
@@ -2492,15 +2495,15 @@
         '<div class="table-wrap"><table class="data"><thead><tr>' + table.head + '</tr></thead><tbody>' + table.rows + table.totalRows + '</tbody></table></div>';
       if (status === "ready-for-calibration") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--dark" id="calibration-start-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin can start calibration\"") + '>Start calibration</button>' +
+          '<button type="button" class="btn btn--dark" id="calibration-start-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin/Team lead can start calibration\"") + '>Start calibration</button>' +
           '<span class="muted small" style="margin-left:10px;">Opens the Agreed outcome column for editing.</span></div>';
       } else if (status === "calibration-started") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--dark" id="calibration-complete-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin can complete calibration\"") + '>Calibration Complete</button>' +
+          '<button type="button" class="btn btn--dark" id="calibration-complete-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin/Team lead can complete calibration\"") + '>Calibration Complete</button>' +
           '<span class="muted small" style="margin-left:10px;">Locks the Agreed outcome column above as this call\'s final calibrated score.</span></div>';
       } else if (status === "calibrated") {
         html += '<div class="card__body" style="border-top:1px solid var(--border-soft);">' +
-          '<button type="button" class="btn btn--ghost" id="calibration-reopen-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin can reopen this session\"") + '>Reopen session</button>' +
+          '<button type="button" class="btn btn--ghost" id="calibration-reopen-btn"' + (canManage ? "" : " disabled title=\"Only a Manager/Admin/Team lead can reopen this session\"") + '>Reopen session</button>' +
           '<span class="muted small" style="margin-left:10px;">Puts the session back into Calibration started and reopens the Agreed outcome column for editing.</span></div>';
       }
       html += '</div>';
