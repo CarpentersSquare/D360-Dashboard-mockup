@@ -47,7 +47,6 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `my-team-interaction-stats.html` | Team lead sub-page — interaction volume by channel and a per-agent breakdown with wrap-up time |
 | `my-team-qa.html` | Team lead sub-page ("QA Review") — team QA performance vs other teams |
 | `my-team-qa-reviews.html` | Team lead — every scored call for their team, filterable by agent, date range and outcome |
-| `my-qa.html` | An agent's own QA scores and coaching feedback (Agent role only) |
 | `my-training-development.html` | An agent's own assigned training — guide, expected action-by date, sign off (Agent role only) |
 | `scorecard.html` | Single QA scorecard detail, with a "Confirm feedback delivered" reviewer action that flips the status pill to "Feedback Delivered" |
 | `logs.html` | Logs — searchable Calls / Live Chats / Emails / SMSs tabs over the last 30 days, each with type-specific filters and pagination (Admin/Manager/Team lead) |
