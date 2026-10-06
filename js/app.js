@@ -692,6 +692,7 @@
     "my-performance": ["agent"],
     qa: ["admin", "manager", "trainer"],
     tasks: ["admin", "manager", "teamlead"],
+    "team-performance": ["teamlead", "manager"],
     "my-training-development": ["agent"],
     analytics: ["admin", "manager"],
     users: ["admin", "manager"],
@@ -709,6 +710,7 @@
     "scheduled-dialler": "Scheduled Dialler", "scheduled-dialler-upload": "Scheduled Dialler – Upload",
     logs: "Logs",
     "my-performance": "My Performance", qa: "QA Review", tasks: "Tasks",
+    "team-performance": "Team Performance",
     "my-training-development": "My Training & Development",
     analytics: "Analytics", users: "Users", templates: "Templates",
     simulations: "Customer Simulations", "new-simulations": "New Simulations", "colin-scorecard": "Colin Scorecard",
@@ -757,6 +759,7 @@
     renderBanner(role);
     renderMyTeamRoster();
     scopeTeamRowsToLead();
+    renderTeamPerformancePage();
     scopeQaQueueToReviewer();
     refreshBlindState();
     renderAiHumanDiff();
@@ -862,6 +865,253 @@
       if (row.closest("[data-team-roster]")) return; // already scoped by renderMyTeamRoster()
       row.style.display = names.indexOf(row.getAttribute("data-name")) !== -1 ? "" : "none";
     });
+  }
+
+  /* ---- Team Performance page (team-performance.html) ----
+     One shared page for Team Lead (their own team only) and Manager
+     (every team combined, drilling into one team at a time) — both
+     views are always rendered; which one is visible is handled purely
+     by the [data-roles] show/hide convention used everywhere else in
+     this prototype, same as every other role-gated page. */
+  var TEAM_LEAD_NAMES = ["Priya Nair", "Sofia Martinez", "Connor Hayes"];
+  var TEAM_PERF_CURRENT_MONTH = "September";
+
+  /* Per-person Operational Score (%) / Compliance pass rate (%) plus
+     flagged/total QA evaluation counts for the current month — the
+     same rubric QA Review scores against (qaOperationalPercent /
+     qaComplianceResult), pre-aggregated here since this page shows a
+     month of outcomes per person rather than one scorecard. */
+  var TEAM_PERF_STATS = {
+    "Priya Nair": { operationalScore: 91, complianceRate: 95, flagged: 1, total: 22 },
+    "Daniel Okafor": { operationalScore: 88, complianceRate: 90, flagged: 2, total: 25 },
+    "Grace Thompson": { operationalScore: 95, complianceRate: 100, flagged: 0, total: 20 },
+    "Marcus Bennett": { operationalScore: 79, complianceRate: 80, flagged: 3, total: 18 },
+    "Olivia Hughes": { operationalScore: 90, complianceRate: 95, flagged: 1, total: 21 },
+
+    "Sofia Martinez": { operationalScore: 85, complianceRate: 92, flagged: 1, total: 19 },
+    "Ethan Clarke": { operationalScore: 82, complianceRate: 88, flagged: 2, total: 23 },
+    "Zara Ahmed": { operationalScore: 90, complianceRate: 95, flagged: 0, total: 20 },
+    "Noah Patel": { operationalScore: 76, complianceRate: 78, flagged: 4, total: 17 },
+    "Isla Robertson": { operationalScore: 88, complianceRate: 90, flagged: 1, total: 21 },
+
+    "Connor Hayes": { operationalScore: 89, complianceRate: 93, flagged: 1, total: 20 },
+    "Freya Lawson": { operationalScore: 93, complianceRate: 97, flagged: 0, total: 19 },
+    "Leo Dubois": { operationalScore: 81, complianceRate: 85, flagged: 2, total: 22 },
+    "Amara Okonkwo": { operationalScore: 86, complianceRate: 90, flagged: 1, total: 18 },
+    "Jack Sullivan": { operationalScore: 84, complianceRate: 88, flagged: 2, total: 24 }
+  };
+
+  /* name -> { name, role, stats } for whichever members are currently
+     rendered (leader roster or manager's drilled-into team) — looked
+     up when a roster row is clicked to open the member modal. */
+  var TEAM_PERF_MEMBERS_BY_NAME = {};
+
+  function firstName(fullName) { return String(fullName).split(" ")[0]; }
+
+  /* teamLeadRosterNames()/getUsers() is the same dynamic roster
+     convention renderMyTeamRoster() already uses — deliberately not a
+     second hardcoded roster array (see TEAM_PRIYA_ROSTER elsewhere in
+     this file for the other, older convention). */
+  function teamPerfMembers(teamLeadName) {
+    var names = teamLeadRosterNames(teamLeadName);
+    var members = getUsers().filter(function (u) { return names.indexOf(u.name) !== -1; });
+    members.sort(function (a) { return a.name === teamLeadName ? -1 : 0; });
+    return members.map(function (u) {
+      return { name: u.name, role: u.role, stats: TEAM_PERF_STATS[u.name] || { operationalScore: null, complianceRate: null, flagged: 0, total: 0 } };
+    });
+  }
+
+  function teamPerfAggregate(members) {
+    var scored = members.filter(function (m) { return typeof m.stats.operationalScore === "number"; });
+    function avg(fn) {
+      if (!scored.length) return null;
+      return Math.round(scored.reduce(function (a, m) { return a + fn(m); }, 0) / scored.length);
+    }
+    return {
+      size: members.length,
+      operationalScore: avg(function (m) { return m.stats.operationalScore; }),
+      complianceRate: avg(function (m) { return m.stats.complianceRate; }),
+      flagged: members.reduce(function (a, m) { return a + (m.stats.flagged || 0); }, 0),
+      total: members.reduce(function (a, m) { return a + (m.stats.total || 0); }, 0)
+    };
+  }
+
+  function teamPerfKpiTilesHtml(agg, sizeLabel) {
+    var pct = function (v) { return v === null ? "–" : v + "%"; };
+    return (sizeLabel ? '<div class="kpi"><div class="kpi__label">' + sizeLabel + '</div><div class="kpi__value">' + agg.size + '</div></div>' : "") +
+      '<div class="kpi"><div class="kpi__label">Operational Score — ' + TEAM_PERF_CURRENT_MONTH + '</div><div class="kpi__value">' + pct(agg.operationalScore) + '</div></div>' +
+      '<div class="kpi"><div class="kpi__label">Compliance Pass Rate — ' + TEAM_PERF_CURRENT_MONTH + '</div><div class="kpi__value">' + pct(agg.complianceRate) + '</div></div>' +
+      '<div class="kpi"><div class="kpi__label">Flagged Evaluations — ' + TEAM_PERF_CURRENT_MONTH + '</div><div class="kpi__value" style="color:var(--warning);">' + agg.flagged + '</div></div>' +
+      '<div class="kpi"><div class="kpi__label">Total Evaluations — ' + TEAM_PERF_CURRENT_MONTH + '</div><div class="kpi__value">' + agg.total + '</div></div>';
+  }
+
+  function teamPerfRosterRowsHtml(members) {
+    return members.map(function (m) {
+      var s = m.stats;
+      var pct = function (v) { return v === null ? "–" : v + "%"; };
+      return '<tr class="clickable" data-tp-member="' + esc(m.name) + '">' +
+        '<td><span class="cell-user"><span class="avatar avatar--sm">' + userInitials(m.name) + '</span><span class="cell-strong">' + esc(m.name) + '</span></span></td>' +
+        '<td><span class="tag">' + (ROLE_LABELS[m.role] || m.role) + '</span></td>' +
+        '<td class="cell-mono">' + pct(s.operationalScore) + '</td>' +
+        '<td class="cell-mono">' + pct(s.complianceRate) + '</td>' +
+        '<td class="cell-mono" style="' + (s.flagged ? "color:var(--warning);font-weight:700;" : "") + '">' + s.flagged + '</td>' +
+        '<td class="cell-mono">' + s.total + '</td>' +
+        '</tr>';
+    }).join("");
+  }
+
+  function wireTeamPerfMemberRows(tbody) {
+    tbody.querySelectorAll("[data-tp-member]").forEach(function (row) {
+      row.addEventListener("click", function () {
+        var member = TEAM_PERF_MEMBERS_BY_NAME[row.getAttribute("data-tp-member")];
+        if (member) openTeamPerfMemberModal(member);
+      });
+    });
+  }
+
+  function renderTeamPerfRoster(selector, members) {
+    var tbody = document.querySelector(selector);
+    if (!tbody) return;
+    members.forEach(function (m) { TEAM_PERF_MEMBERS_BY_NAME[m.name] = m; });
+    if (!members.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted" style="padding:16px;">No team members assigned yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = teamPerfRosterRowsHtml(members);
+    wireTeamPerfMemberRows(tbody);
+  }
+
+  /* Synthetic "reviewed interactions" for one team member's drill-down
+     modal — deterministic from their own flagged/total counts (not
+     Math.random()) so the same member always shows the same rows.
+     Visual mockup only, matching every other filter bar/table in this
+     prototype (qa.html, my-team-qa-reviews.html): Outcome/date-range
+     filters and Apply/Clear don't actually filter the rows. */
+  var TEAM_PERF_DEMO_CUSTOMERS = ["Liam Foster", "Tom Beresford", "Raj Sharma", "Chloe Bennett", "Harriet Osei", "Max Delaney", "Priya Varma", "Oliver Kent"];
+  var TEAM_PERF_DEMO_DATES = ["Today", "Yesterday", "2 days ago", "3 days ago", "4 days ago", "6 days ago", "1 week ago", "9 days ago"];
+  var TEAM_PERF_DEMO_CHANNELS = [
+    { cls: "chan--call", label: "Call" },
+    { cls: "chan--chat", label: "Chat" },
+    { cls: "chan--email", label: "Email" }
+  ];
+
+  function teamPerfMemberInteractionRows(member) {
+    var stats = member.stats;
+    var count = Math.min(stats.total || 0, 8) || 5;
+    var flaggedCount = Math.min(stats.flagged || 0, count);
+    var baseScore = stats.operationalScore || 85;
+    var rows = [];
+    for (var i = 0; i < count; i++) {
+      var flagged = i < flaggedCount;
+      var score = flagged ? Math.max(40, baseScore - 25 - i * 2) : Math.min(100, baseScore + (i % 3) * 2);
+      rows.push({
+        ref: "INT-1" + (1000 + i * 7 + member.name.length * 3),
+        customer: TEAM_PERF_DEMO_CUSTOMERS[(i + member.name.length) % TEAM_PERF_DEMO_CUSTOMERS.length],
+        channel: TEAM_PERF_DEMO_CHANNELS[i % TEAM_PERF_DEMO_CHANNELS.length],
+        compliance: flagged && i % 2 === 0 ? "Fail" : "Pass",
+        score: score,
+        flagged: flagged,
+        date: TEAM_PERF_DEMO_DATES[i % TEAM_PERF_DEMO_DATES.length]
+      });
+    }
+    return rows;
+  }
+
+  function openTeamPerfMemberModal(member) {
+    var titleEl = document.querySelector("[data-tp-member-title]");
+    if (titleEl) titleEl.textContent = member.name + " — reviewed interactions";
+    var pct = function (v) { return v === null ? "–" : v + "%"; };
+    var kpisEl = document.querySelector("[data-tp-member-kpis]");
+    if (kpisEl) {
+      kpisEl.innerHTML =
+        '<div class="kpi"><div class="kpi__label">Operational Score — ' + TEAM_PERF_CURRENT_MONTH + '</div><div class="kpi__value">' + pct(member.stats.operationalScore) + '</div></div>' +
+        '<div class="kpi"><div class="kpi__label">Compliance Pass Rate — ' + TEAM_PERF_CURRENT_MONTH + '</div><div class="kpi__value">' + pct(member.stats.complianceRate) + '</div></div>' +
+        '<div class="kpi"><div class="kpi__label">Flagged</div><div class="kpi__value" style="color:var(--warning);">' + member.stats.flagged + '</div></div>' +
+        '<div class="kpi"><div class="kpi__label">Total Evaluations</div><div class="kpi__value">' + member.stats.total + '</div></div>';
+    }
+    var rowsEl = document.querySelector("[data-tp-member-interactions]");
+    if (rowsEl) {
+      rowsEl.innerHTML = teamPerfMemberInteractionRows(member).map(function (r) {
+        return '<tr>' +
+          '<td class="cell-mono">' + r.ref + '</td>' +
+          '<td>' + esc(r.customer) + '</td>' +
+          '<td><span class="chan ' + r.channel.cls + '">' + r.channel.label + '</span></td>' +
+          '<td><span class="pill ' + (r.compliance === "Pass" ? "pill--pass" : "pill--fail") + '">' + r.compliance + '</span></td>' +
+          '<td class="cell-mono"' + (r.flagged ? ' style="color:var(--danger);font-weight:700;"' : "") + '>' + r.score + '%</td>' +
+          '<td class="muted">' + r.date + '</td>' +
+          '</tr>';
+      }).join("");
+    }
+    var modal = document.getElementById("team-member-modal");
+    if (modal) modal.classList.add("open");
+  }
+
+  function teamPerfTeamsListRowsHtml(teams) {
+    var pct = function (v) { return v === null ? "–" : v + "%"; };
+    return teams.map(function (t) {
+      var agg = t.aggregate;
+      return '<tr class="clickable" data-tp-team-row="' + esc(t.leadName) + '">' +
+        '<td class="cell-strong">Team ' + esc(firstName(t.leadName)) + '</td>' +
+        '<td>' + esc(t.leadName) + '</td>' +
+        '<td class="cell-mono">' + agg.size + '</td>' +
+        '<td class="cell-mono">' + pct(agg.operationalScore) + '</td>' +
+        '<td class="cell-mono">' + pct(agg.complianceRate) + '</td>' +
+        '<td class="cell-mono" style="' + (agg.flagged ? "color:var(--warning);font-weight:700;" : "") + '">' + agg.flagged + '</td>' +
+        '<td class="cell-mono">' + agg.total + '</td>' +
+        '</tr>';
+    }).join("");
+  }
+
+  function showTeamPerfTeamDetail(leadName, teams) {
+    var team = teams.filter(function (t) { return t.leadName === leadName; })[0];
+    if (!team) return;
+    var titleEl = document.querySelector("[data-tp-detail-title]");
+    if (titleEl) titleEl.textContent = "Team " + firstName(leadName) + " — " + leadName;
+    renderTeamPerfRoster('[data-tp-roster="manager-detail"]', team.members);
+    var teamsPanel = document.querySelector("[data-tp-teams-panel]");
+    var detailPanel = document.querySelector("[data-tp-team-detail-panel]");
+    if (teamsPanel) teamsPanel.style.display = "none";
+    if (detailPanel) detailPanel.style.display = "";
+  }
+
+  function renderTeamPerformancePage() {
+    if (document.body.getAttribute("data-page") !== "team-performance") return;
+
+    // Team Lead view — their own team only.
+    var leadName = currentTeamLeadName();
+    var leaderMembers = teamPerfMembers(leadName);
+    var leaderTitleEl = document.querySelector("[data-tp-team-title]");
+    if (leaderTitleEl) leaderTitleEl.textContent = "Team " + firstName(leadName) + " — " + leadName;
+    var leaderKpisEl = document.querySelector('[data-tp-kpis="leader"]');
+    if (leaderKpisEl) leaderKpisEl.innerHTML = teamPerfKpiTilesHtml(teamPerfAggregate(leaderMembers), "Team Size");
+    renderTeamPerfRoster('[data-tp-roster="leader"]', leaderMembers);
+
+    // Manager view — every team combined, drilling into one at a time.
+    var teams = TEAM_LEAD_NAMES.map(function (name) {
+      var members = teamPerfMembers(name);
+      return { leadName: name, members: members, aggregate: teamPerfAggregate(members) };
+    });
+    var allMembers = [];
+    teams.forEach(function (t) { allMembers = allMembers.concat(t.members); });
+    var companyKpisEl = document.querySelector('[data-tp-kpis="company"]');
+    if (companyKpisEl) companyKpisEl.innerHTML = teamPerfKpiTilesHtml(teamPerfAggregate(allMembers), null);
+
+    var teamsListEl = document.querySelector("[data-tp-teams-list]");
+    if (teamsListEl) {
+      teamsListEl.innerHTML = teamPerfTeamsListRowsHtml(teams);
+      teamsListEl.querySelectorAll("[data-tp-team-row]").forEach(function (row) {
+        row.addEventListener("click", function () { showTeamPerfTeamDetail(row.getAttribute("data-tp-team-row"), teams); });
+      });
+    }
+    var backBtn = document.querySelector("[data-tp-back-to-teams]");
+    if (backBtn) {
+      backBtn.addEventListener("click", function () {
+        var teamsPanel = document.querySelector("[data-tp-teams-panel]");
+        var detailPanel = document.querySelector("[data-tp-team-detail-panel]");
+        if (detailPanel) detailPanel.style.display = "none";
+        if (teamsPanel) teamsPanel.style.display = "";
+      });
+    }
   }
 
   /* Same "which named identity is this role-switch view standing in
@@ -3510,8 +3760,15 @@
   }
   function saveUsers(list) { localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
 
+  /* Versioned so a browser that already seeded the original 9-user
+     roster still picks up Team B/Team C once the Team Performance
+     page needs more than one team lead to show a manager a real
+     multi-team breakdown — see QA_SEED_VERSION above for why "seed
+     once, never reseed" doesn't survive a demo-data redesign. */
+  var USERS_SEED_VERSION = "2026-10-06.3-teams";
+  var USERS_SEED_VERSION_KEY = "d360-users-seed-version";
   function seedUsers() {
-    if (localStorage.getItem(USERS_KEY)) return;
+    if (localStorage.getItem(USERS_SEED_VERSION_KEY) === USERS_SEED_VERSION) return;
     saveUsers([
       { id: "u1", name: "Rob Ashton", role: "admin", teamLead: null },
       { id: "u2", name: "Priya Nair", role: "teamlead", teamLead: null, birthday: "1990-07-02" },
@@ -3521,8 +3778,19 @@
       { id: "u6", name: "Olivia Hughes", role: "agent", teamLead: "Priya Nair", birthday: "1990-07-15" },
       { id: "u7", name: "Charlotte Reid", role: "agent", teamLead: null, birthday: "1990-07-22" },
       { id: "u8", name: "James Whitmore", role: "agent", teamLead: null },
-      { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null }
+      { id: "u9", name: "Hannah Price", role: "trainer", teamLead: null },
+      { id: "u10", name: "Sofia Martinez", role: "teamlead", teamLead: null },
+      { id: "u11", name: "Ethan Clarke", role: "agent", teamLead: "Sofia Martinez" },
+      { id: "u12", name: "Zara Ahmed", role: "agent", teamLead: "Sofia Martinez" },
+      { id: "u13", name: "Noah Patel", role: "agent", teamLead: "Sofia Martinez" },
+      { id: "u14", name: "Isla Robertson", role: "agent", teamLead: "Sofia Martinez" },
+      { id: "u15", name: "Connor Hayes", role: "teamlead", teamLead: null },
+      { id: "u16", name: "Freya Lawson", role: "agent", teamLead: "Connor Hayes" },
+      { id: "u17", name: "Leo Dubois", role: "agent", teamLead: "Connor Hayes" },
+      { id: "u18", name: "Amara Okonkwo", role: "agent", teamLead: "Connor Hayes" },
+      { id: "u19", name: "Jack Sullivan", role: "agent", teamLead: "Connor Hayes" }
     ]);
+    localStorage.setItem(USERS_SEED_VERSION_KEY, USERS_SEED_VERSION);
   }
 
   function userInitials(name) {
