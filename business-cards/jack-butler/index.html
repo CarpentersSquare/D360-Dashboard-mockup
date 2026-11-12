@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jack Butler | Dial360</title>
+<meta name="color-scheme" content="light">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one centred column. A business-card face on top, a large scannable QR panel under it, details to copy below. */
+:root {
+  --bg: #f1eff6;
+  --surface: #ffffff;
+  --fg: #1d1a2b;
+  --muted: #6b6680;
+  --line: #e3dfee;
+  --brand-a: #7b3fe4;
+  --brand-b: #e2479b;
+  --qr-ink: #1d1a2b;
+  --qr-paper: #ffffff;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 32px;
+}
+.wrap { max-width: 440px; margin: 0 auto; display: grid; gap: 12px; }
+
+.card {
+  border-radius: 18px; overflow: hidden; max-width: 100%;
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 14px 40px -22px rgba(90, 40, 160, .45);
+}
+.card-top { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { order: 2; flex: none; line-height: 0; display: block; border-radius: 6px; }
+.brand:focus-visible { outline: 3px solid var(--brand-a); outline-offset: 3px; }
+.brand img { height: 40px; width: auto; }
+.logo-on-light { display: var(--logo-light, block); }
+.logo-on-dark { display: var(--logo-dark, none); }
+.who { min-width: 0; }
+.who h1 { margin: 0; font-family: var(--display); font-size: clamp(20px, 6vw, 24px); line-height: 1.1; font-weight: 700; text-wrap: balance; }
+.who p { margin: 4px 0 0; font-size: 14px; color: var(--muted); font-weight: 500; }
+.tagline {
+  margin: 0; padding: 0 18px 12px; list-style: none; color: var(--fg); font-size: 12.5px; font-weight: 600; line-height: 1.3;
+
+  display: flex; flex-wrap: nowrap; justify-content: center; white-space: nowrap; overflow: hidden;
+}
+.tagline li + li::before { content: "|"; color: var(--brand-a); margin: 0 .6em; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px 20px; display: grid; gap: 10px; justify-items: center; text-align: center; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 600; margin: 0; }
+.panel h2 { margin: 0; font-family: var(--display); font-size: 20px; text-wrap: balance; }
+.qr { background: var(--qr-paper); padding: 12px; border-radius: 14px; width: min(230px, 100%); aspect-ratio: 1; max-width: 100%; }
+.qr svg { display: block; width: 100%; height: 100%; }
+.qr-fallback { color: #444; font-size: 13px; display: grid; place-items: center; height: 100%; }
+.btn {
+  display: inline-block; text-decoration: none; font-weight: 600; font-size: 15px; color: #fff;
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b)); padding: 12px 22px; border-radius: 999px;
+}
+.btn:focus-visible, .copy:focus-visible { outline: 3px solid var(--brand-a); outline-offset: 3px; }
+
+.details { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 6px 18px; }
+.row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row dt { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+.row dd { margin: 0; min-width: 0; overflow-wrap: anywhere; user-select: all; font-weight: 500; font-size: 14px; }
+.copy { border: 1px solid var(--line); background: transparent; color: var(--fg); font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.copy:hover { border-color: var(--brand-a); }
+.foot { text-align: center; color: var(--muted); font-size: 13px; margin: 0; }
+.foot a { color: inherit; }
+</style>
+
+<main class="wrap">
+  <section class="card" aria-label="Business card">
+    <div class="card-top">
+      <a class="brand" href="https://dial360.ai/" target="_blank" rel="noopener" aria-label="Dial360 website">
+        <img class="logo-on-light" src="https://dial360.ai/logo.png" alt="Dial360" width="1264" height="566">
+      </a>
+      <div class="who">
+        <h1 id="c-name">Jack Butler</h1>
+        <p id="c-title">Technical Sales</p>
+      </div>
+    </div>
+    <ul class="tagline" aria-label="What Dial360 does">
+      <li>Eliminate post call wrap up tasks</li><li>Automate QA</li><li>Enhance Agent Consistency</li>
+    </ul>
+  </section>
+
+  <section class="panel" aria-labelledby="scan-h">
+    <p class="eyebrow">Scan with your phone camera</p>
+    <h2 id="scan-h">Get in touch with me</h2>
+    <div class="qr" id="qr" role="img" aria-label="QR code that opens the contact form"><div class="qr-fallback">Loading QR code…</div></div>
+    <a class="btn" id="form-link" href="#" target="_blank" rel="noopener">Open the form</a>
+  </section>
+
+  <dl class="details" id="details"></dl>
+
+  <p class="foot"><a id="site-link" href="https://dial360.ai/" target="_blank" rel="noopener">dial360.ai</a></p>
+</main>
+<script>
+(function(){const el=document.querySelector(".tagline");if(!el)return;
+function fit(){let s=13;el.style.fontSize=s+"px";while(el.scrollWidth>el.clientWidth&&s>7){s-=.25;el.style.fontSize=s+"px";}}
+fit();addEventListener("resize",fit);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);})();
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+// Edit these to change what the card shows and where the QR code points.
+const CARD = {
+  name: "Jack Butler",
+  title: "Technical Sales",
+  email: "jack.butler@dial360.ai",
+  website: "https://dial360.ai/",
+  // Jack's HubSpot form (portal 148369146, form d93bd252-…): public, submissions land in HubSpot.
+  formUrl: "https://2gc2d6.share-eu1.hsforms.com/22TvSUmFzQH2exO2oQNQwig"
+};
+
+document.getElementById("c-name").textContent = CARD.name;
+document.getElementById("c-title").textContent = CARD.title;
+document.getElementById("form-link").href = CARD.formUrl;
+document.getElementById("site-link").href = CARD.website;
+
+const rows = [
+  ["Email", CARD.email],
+  ["Web", CARD.website.replace(/^https?:\/\//, "").replace(/\/$/, "")]
+];
+const dl = document.getElementById("details");
+rows.forEach(([label, value]) => {
+  const row = document.createElement("div"); row.className = "row";
+  const dt = document.createElement("dt"); dt.textContent = label;
+  const dd = document.createElement("dd"); dd.textContent = value;
+  const b = document.createElement("button"); b.className = "copy"; b.type = "button"; b.textContent = "Copy";
+  b.addEventListener("click", () => {
+    const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(dd); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected"; setTimeout(() => b.textContent = "Copy", 1500); };
+    try { navigator.clipboard.writeText(value).then(done, fallback); } catch (e) { fallback(); }
+  });
+  row.append(dt, dd, b); dl.append(row);
+});
+
+try {
+  const qr = qrcode(0, "M");
+  qr.addData(CARD.formUrl);
+  qr.make();
+  document.getElementById("qr").innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true });
+  const svg = document.querySelector("#qr svg");
+  svg.querySelectorAll("rect").forEach(r => r.setAttribute("fill", "#ffffff"));
+  svg.querySelectorAll("path").forEach(p => p.setAttribute("fill", "#1d1a2b"));
+} catch (e) {
+  document.getElementById("qr").innerHTML = '<div class="qr-fallback">QR code could not load. Use the button below.</div>';
+}
+</script>
+
+</body>
+</html>

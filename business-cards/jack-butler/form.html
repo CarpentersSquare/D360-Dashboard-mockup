@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Get in touch | Jack Butler, Dial360</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#f1eff6;--surface:#fff;--fg:#1d1a2b;--muted:#6b6680;--line:#e3dfee;--brand-a:#7b3fe4;--brand-b:#e2479b;
+--logo-light:block;--logo-dark:none;--display:"Space Grotesk","Segoe UI",system-ui,sans-serif;--body:"Inter","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
+padding:14px max(16px,env(safe-area-inset-right)) 32px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:520px;margin:0 auto;display:grid;gap:12px}
+.card {
+  border-radius: 18px; overflow: hidden; max-width: 100%;
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 14px 40px -22px rgba(90, 40, 160, .45);
+}
+.card-top { padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { order: 2; flex: none; line-height: 0; display: block; border-radius: 6px; }
+.brand:focus-visible { outline: 3px solid var(--brand-a); outline-offset: 3px; }
+.brand img { height: 40px; width: auto; }
+.logo-on-light { display: var(--logo-light, block); }
+.logo-on-dark { display: var(--logo-dark, none); }
+.who { min-width: 0; }
+.who h1 { margin: 0; font-family: var(--display); font-size: clamp(20px, 6vw, 24px); line-height: 1.1; font-weight: 700; text-wrap: balance; }
+.who p { margin: 4px 0 0; font-size: 14px; color: var(--muted); font-weight: 500; }
+.tagline {
+  margin: 0; padding: 0 18px 12px; list-style: none; color: var(--fg); font-size: 12.5px; font-weight: 600; line-height: 1.3;
+
+  display: flex; flex-wrap: nowrap; justify-content: center; white-space: nowrap; overflow: hidden;
+}
+.tagline li + li::before { content: "|"; color: var(--brand-a); margin: 0 .6em; }
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 18px 8px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;margin:0}
+.panel h2{margin:4px 0 2px;font-family:var(--display);font-size:20px}
+.panel .lede{margin:0 0 10px;color:var(--muted);font-size:14px}
+.hs-form-frame{min-height:420px}
+.fallback{font-size:13px;color:var(--muted);text-align:center;margin:8px 0}
+.fallback a{color:var(--brand-a)}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin:0}
+.foot a{color:inherit}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="card" aria-label="Business card">
+    <div class="card-top">
+      <a class="brand" href="https://dial360.ai/" target="_blank" rel="noopener" aria-label="Dial360 website">
+        <img class="logo-on-light" src="https://dial360.ai/logo.png" alt="Dial360" width="1264" height="566">
+      </a>
+      <div class="who">
+        <h1>Jack Butler</h1>
+        <p>Technical Sales</p>
+      </div>
+    </div>
+    <ul class="tagline" aria-label="What Dial360 does">
+      <li>Eliminate post call wrap up tasks</li><li>Automate QA</li><li>Enhance Agent Consistency</li>
+    </ul>
+  </section>
+  <section class="panel">
+    <p class="eyebrow">Nice to meet you</p>
+    <h2>Leave your details</h2>
+    <p class="lede">I'll be in touch about how Dial360 can help your team.</p>
+    <div class="hs-form-frame" data-region="eu1" data-form-id="d93bd252-6173-407d-9ec4-eda840d4308a" data-portal-id="148369146"></div>
+    <p class="fallback">Form not showing? <a href="https://2gc2d6.share-eu1.hsforms.com/22TvSUmFzQH2exO2oQNQwig">Open it here</a>.</p>
+  </section>
+  <p class="foot">jack.butler@dial360.ai &middot; <a href="https://dial360.ai/">dial360.ai</a></p>
+</main>
+<script>
+(function(){const el=document.querySelector(".tagline");if(!el)return;
+function fit(){let s=13;el.style.fontSize=s+"px";while(el.scrollWidth>el.clientWidth&&s>7){s-=.25;el.style.fontSize=s+"px";}}
+fit();addEventListener("resize",fit);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);})();
+</script>
+
+<script src="https://js-eu1.hsforms.net/forms/embed/148369146.js" defer></script>
+</body>
+</html>
