@@ -9,6 +9,6 @@ Dial360 digital business cards. Each person gets a folder with two pages:
 
 - Folder: `jack-butler/`
 - HubSpot form: portal 148369146 (EU), form `d93bd252-6173-407d-9ec4-eda840d4308a`
-- The QR code currently opens the HubSpot share link for that form. Once `form.html` is hosted at a public URL, change `formUrl` in the `CARD` settings at the bottom of `jack-butler/index.html` to that URL.
+- The QR code opens `form.html` on GitHub Pages: https://carpenterssquare.github.io/D360-Dashboard-mockup/business-cards/jack-butler/form.html (set by `formUrl` in the `CARD` settings at the bottom of `jack-butler/index.html`).
 
 To edit the card details, change the `CARD` object in `index.html`. The logo is loaded from https://dial360.ai/logo.png.
