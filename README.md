@@ -71,6 +71,8 @@ would open the live calling workstation (a separate app, deliberately not mocked
 | `agent-guides.html` | Step-by-step process guides in a clickable-card + modal flowchart format |
 | `billing.html` | Plan, usage & invoices |
 | `settings.html` | Account / integrations / numbers / branding / security / roles |
+| `business-cards/jack-butler/index.html` | Jack Butler's digital business card (standalone, no app shell): name, title, tagline, QR code to the contact form. See `business-cards/README.md` |
+| `business-cards/jack-butler/form.html` | Page the business card QR code opens: embedded HubSpot contact form (standalone, no app shell) |
 
 ## Structure
 
